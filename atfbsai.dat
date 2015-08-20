@@ -18,10 +18,14 @@
 19                  
 #(11) survy nselages_srv3 selectivity after nselages age set equal to selectivity at nselages age       
 19         
-#(51)for monotonically increasing fishery selectivties with smoother 0 off 1 on
+#(51) monot_sel for monotonically increasing fishery selectivties with smoother 0 off 1 on
   1         
 #(12) phase to do logistic selectivity              
-2                   
+2      
+#(53) weights for smooth selectivity likelihoods 1 fishery female, 2 survey female, 3 fishery male, 4 survey male
+  10. 120. 40. 1.  
+# weights for constraint on monotonicity 1 fishery female, 2 fishery male, 3 survey female, 4 survey male
+  200. 100. 20000. 1000.             
 #(13) number of length bins                
 25                   
 #(14) number of years of fishery length data              
@@ -365,11 +369,7 @@
 224705.5645 43644592.93 43770178.81 54486443.53 63190614.63 30593156.04 26932586.16 5079652.691 1718842.228 725702.1485 0 0 0 0 0 0 0 0 0 0 0
 
 #(52) phase for smooth selectivity curve fishery
-  4
-#(53) weights for smooth selectivity likelihoods 1 fishery female, 2 survey female, 3 fishery male, 4 survey male
-  10. 120. 40. 1.  
-# weights for constraint on monotonicity 1 fishery female, 2 fishery male, 3 survey female, 4 survey male
-  200. 100. 20000. 1000.   
+  4   
 #(54) years 1 with AI age data
   1
 #(55) years with AI age data
