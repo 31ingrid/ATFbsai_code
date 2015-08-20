@@ -19,6 +19,7 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   nselages_srv1.allocate("nselages_srv1");
   nselages_srv2.allocate("nselages_srv2");
   nselages_srv3.allocate("nselages_srv3");
+  monot_sel.allocate("monot_sel");
   phase_logistic_sel.allocate("phase_logistic_sel");
   nlen.allocate("nlen");
   nobs_fish.allocate("nobs_fish");
@@ -58,7 +59,6 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   yrs_srv1_age.allocate(1,nobs_srv1_age,"yrs_srv1_age");
   nsamples_srv1_age.allocate(1,2,1,nobs_srv1_age,"nsamples_srv1_age");
   obs_p_srv1_age.allocate(1,2,1,nobs_srv1_age,1,nages,"obs_p_srv1_age");
-  monot_sel.allocate("monot_sel");
   phase_selcoffs.allocate("phase_selcoffs");
   wt_like.allocate(1,8,"wt_like");
   nobs_srv3_age.allocate("nobs_srv3_age");

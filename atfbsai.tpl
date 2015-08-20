@@ -20,6 +20,7 @@ DATA_SECTION
   init_int nselages_srv1  //(9) slope survey (for asymptotic selectivity) 
   init_int nselages_srv2  //(10) shelf survey (for asymptotic selectivity)
   init_int nselages_srv3  //(11) Aleutian Islands survey (for asymptotic selectivity)
+  init_int monot_sel     //(51) selectivity smoothing function for fishery  
     init_int phase_logistic_sel //(12)
  //sample size for length comps for weighting likelihoods  
   init_int nlen             //(13) # of length bins
@@ -61,7 +62,6 @@ DATA_SECTION
   init_ivector yrs_srv1_age(1,nobs_srv1_age)  //(48) years of shelf survey with ages
   init_matrix nsamples_srv1_age(1,2,1,nobs_srv1_age)   //(49) sample size of ages read in each year, by sex
   init_3darray obs_p_srv1_age(1,2,1,nobs_srv1_age,1,nages)  //(50) shelf survey age comps by sex and year
-  init_int monot_sel     //(51) selectivity smoothing function for fishery 
   init_int phase_selcoffs      //(52) generally set to phase 4 phase for smooth selectivity curve fishery
   init_vector wt_like(1,8)    //(53)        
   init_int nobs_srv3_age        //(54) # of years with ai survey ages

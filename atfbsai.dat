@@ -17,7 +17,9 @@
 # (10) survey nselages_srv2- selectivity after nselages age set equal to selectivity at nselages age
 19                  
 #(11) survy nselages_srv3 selectivity after nselages age set equal to selectivity at nselages age       
-19                  
+19         
+#(51)for monotonically increasing fishery selectivties with smoother 0 off 1 on
+  1         
 #(12) phase to do logistic selectivity              
 2                   
 #(13) number of length bins                
@@ -362,8 +364,6 @@
 7648862.534 99536394.63 89108806.48 74178112.73 38915276.23 24423274.21 9119459.484 7084975.164 1457665.008 0 113372.9425 0 0 0 0 0 506979.1646 0 0 0 0
 224705.5645 43644592.93 43770178.81 54486443.53 63190614.63 30593156.04 26932586.16 5079652.691 1718842.228 725702.1485 0 0 0 0 0 0 0 0 0 0 0
 
-#(51)for monotonically increasing fishery selectivties with smoother 0 off 1 on
-  1
 #(52) phase for smooth selectivity curve fishery
   4
 #(53) weights for smooth selectivity likelihoods 1 fishery female, 2 survey female, 3 fishery male, 4 survey male
