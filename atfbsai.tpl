@@ -15,8 +15,6 @@ DATA_SECTION
   init_int phase_F40      //(5) phase F40 is estimated
   init_number median_rec  //(6) median recruit value to use for the last 3 years
   init_int nages          //(7) # of ages in the model      
-!! cout<<"nages"<<endl;
-!! cout<<  nages<<endl;
  //selectivity is set to the selectivity at nselages-1 after age nselages 
   init_int nselages       //(8) fishery (for asymptotic selectivity) set to 19
   init_int nselages_srv1  //(9) slope survey (for asymptotic selectivity) 
@@ -25,105 +23,51 @@ DATA_SECTION
     init_int phase_logistic_sel //(12)
  //sample size for length comps for weighting likelihoods  
   init_int nlen             //(13) # of length bins
-!! cout<<"nlen"<<endl;
-!! cout<<  nlen<<endl;
   init_int nobs_fish          //(14) # of years of fishery data
-!! cout<<"nobs_fish"<<endl;
-!! cout<<  nobs_fish<<endl;
   init_ivector yrs_fish(1,nobs_fish)   //(15) years with fishery data
-!! cout<<"yrs_fish"<<endl;
-!! cout<<  yrs_fish<<endl;
   init_matrix nsamples_fish(1,2,1,nobs_fish)  //(16) sample size (weights) for each sex and yr of fishery data
-!! cout<<"nsamples_fish"<<endl;
-!! cout<<  nsamples_fish<<endl;
   init_int nobs_srv1          //(17) # of years of shelf survey biomass data
-  !! cout<<"nobs_srv1"<<endl;
-  !! cout <<nobs_srv1<<endl;
   init_int nobs_srv2          //(18) # of years of slope survey data
   init_int nobs_srv3          //(19) # of years of Aleutian Islands data
   init_ivector yrs_srv1(1,nobs_srv1)   //(20) years with shelf survey biomass data
   init_ivector yrs_srv2(1,nobs_srv2)   //(21) years with slope survey biomass data
   init_ivector yrs_srv3(1,nobs_srv3)   //(22) years with Aleutian Islands survey bioamass data
   init_int nobs_srv1_length          //(23) # yrs with shelf survey length data
-  !! cout<<"nobs_srv1_length"<<endl;
-  !! cout <<nobs_srv1_length<<endl;
   init_int nobs_srv2_length          //(24) # yrs with slope survey length data
   init_int nobs_srv3_length          //(25) # yrs with Aleutian Islands survey length data
   init_ivector yrs_srv1_length(1,nobs_srv1_length)    //(26) yrs with shelf survey length data
-  !! cout<<"yrs_srv1_length"<<endl;
-  !! cout<<yrs_srv1_length<<endl;
   init_ivector yrs_srv2_length(1,nobs_srv2_length)    //(27) yrs with slope survey length data
   init_ivector yrs_srv3_length(1,nobs_srv3_length)    //(28) yrs with Aleutian Islands survey length data
-  !! cout<<"yrs_srv3_length"<<endl;
-  !! cout<<yrs_srv3_length<<endl;
   init_matrix nsamples_srv1_length(1,2,1,nobs_srv1_length)  // (29) sample size for each length comp by sex and year from shelf survey
   init_matrix nsamples_srv2_length(1,2,1,nobs_srv2_length)  // (30) sample size for each length comp by sex and year from slope survey
   init_matrix nsamples_srv3_length(1,2,1,nobs_srv3_length)  //(31) sample size for each length comp by sex and year from Aleutian I survey
-  !! cout<<"nsamples_srv3_length"<<endl;
-  !! cout<<nsamples_srv3_length<<endl;
   init_3darray obs_p_srv1_length(1,2,1,nobs_srv1_length,1,nlen) //(32) shelf survey length comps by bin, sex and yr
   init_3darray obs_p_srv2_length(1,2,1,nobs_srv2_length,1,nlen) //(33) slope survey length comps by bin, sex and yr
   init_3darray obs_p_srv3_length(1,2,1,nobs_srv3_length,1,nlen) //(34) Aleutian Islands survey length comps by bin, sex and yr
   init_3darray obs_p_fish(1,2,1,nobs_fish,1,nlen)  //(35) fishery length comps
   init_vector catch_bio(styr,endyr)    //(36) catch by year
-  !! cout<<"catch"<<endl;
-  !! cout<<  catch_bio        <<endl;
   init_vector obs_srv1(1,nobs_srv1)    //(37) shelf survey biomass by year
   init_vector obs_srv1_sd(1,nobs_srv1) //(38) shelf survey SE by year
   init_vector obs_srv2(1,nobs_srv2)    //(39) slope survey biomass by year
   init_vector obs_srv2_sd(1,nobs_srv2) //(40) slope survey SE by year
   init_vector obs_srv3(1,nobs_srv3)    //(41) Aleutian Islands survey biomass by year 
-  !! cout<<"obs_srv3(1,nobs_srv3)"<<endl; 
-  !! cout<<obs_srv3(1,nobs_srv3)<<endl;
   init_vector obs_srv3_sd(1,nobs_srv3) //(42) Aleutian Islands survey SE by year 
-  !! cout<<"obs_srv3_sd(1,nobs_srv3)"<<endl; 
-  !! cout<<obs_srv3_sd(1,nobs_srv3)<<endl;      
   init_matrix wt(1,2,1,nages)          //(43) weight-at-age by sex
-  !! cout<<"wt"<<endl; 
-  !! cout<<wt<<endl;
   init_vector maturity(1,nages)        //(44) female prop. mature-at-age
-  !! cout<<"maturity"<<endl; 
-  !! cout<<  maturity(1,nages) <<endl;
-  //!! cout<<  sel_srv2<<endl;
 //length age transition matrix
   init_3darray lenage(1,2,1,nages,1,nlen)  //(45) length-age transition matrix
-  !! cout<<"length-at-age"<<endl;
   init_vector bottom_temps(1,nobs_srv1)    //(46) shelf survey bottom temperatures
-  !! cout<<"bottom_temps"<<endl;
-  !! cout<<bottom_temps(1,nobs_srv1)<<endl;
   init_int nobs_srv1_age                   //(47) # of years with shelf survey ages
-  !! cout <<"nobs_srv1_age"<<endl;
-  !! cout <<nobs_srv1_age<<endl;
   init_ivector yrs_srv1_age(1,nobs_srv1_age)  //(48) years of shelf survey with ages
-  !! cout <<"yrs_srv1_age(1,nobs_srv1_age)"<<endl;
-  !! cout <<yrs_srv1_age<<endl;        
   init_matrix nsamples_srv1_age(1,2,1,nobs_srv1_age)   //(49) sample size of ages read in each year, by sex
-  !! cout <<"nsamples_srv1_age"<<endl;
-//  !! cout <<nsamples_srv1_age<<endl;
   init_3darray obs_p_srv1_age(1,2,1,nobs_srv1_age,1,nages)  //(50) shelf survey age comps by sex and year
-  !! cout <<"obs_p_srv1_age"<<endl; 
-//  !! cout <<obs_p_srv1_age<<endl;
   init_int monot_sel     //(51) selectivity smoothing function for fishery 
-  !! cout <<"monot_sel"<<endl; 
-  !! cout <<monot_sel<<endl;
   init_int phase_selcoffs      //(52) generally set to phase 4 phase for smooth selectivity curve fishery
-  !! cout <<"phase_selcoffs"<<endl; 
-  !! cout <<phase_selcoffs<<endl;
   init_vector wt_like(1,8)    //(53)        
-  !! cout <<"wt_like"<<endl; 
-  !! cout <<wt_like<<endl;     
   init_int nobs_srv3_age        //(54) # of years with ai survey ages
-  !! cout <<"nobs_srv3_age"<<endl;
-  !! cout <<nobs_srv3_age<<endl;
   init_ivector yrs_srv3_age(1,nobs_srv3_age)  //(55) years of ai survey with ages
-  !! cout <<"yrs_srv3_age"<<endl; 
-  !! cout <<yrs_srv3_age<<endl; 
   init_matrix nsamples_srv3_age(1,2,1,nobs_srv3_age)   //(56) sample size of ages read in each year, by sex
-  !! cout <<"nsamples_srv3_age"<<endl;  
-  !! cout <<nsamples_srv3_age<<endl; 
   init_3darray obs_p_srv3_age(1,2,1,nobs_srv3_age,1,nages)  //(57) AI survey age comps by sex and year
-  !! cout <<"obs_p_srv3_age"<<endl;
-  !! cout <<obs_p_srv3_age<<endl;
 
  //LOCAL_CALCS
  //  cout<<nages<<endl;
@@ -982,7 +926,6 @@ FUNCTION evaluate_the_objective_function
     obj_fun+=1.*square(avgsel_fish(2));
 
   } //end if active(log_selcoffs_fish)
-//  cout<<" f after catch = "<<f<<endl;
   // Phases less than 3, penalize High F's
     if (current_phase()<2)
     {
@@ -1013,14 +956,6 @@ FUNCTION evaluate_the_objective_function
   obj_fun += 300*catch_like;        // large emphasis to fit observed catch
   obj_fun += fpen;
   obj_fun += sprpen;
-
-//bayesian part normal proirs for M and q1 
-//   mlike=mfexp(norm2(M(1)-mfavg)/(2.*(mfcv*mfavg)^2.0))+mfexp(norm2(M(2)-mmavg)/(2.*(mmcv*mmavg)^2.0));
-//   qlike=mfexp(norm2(q1-q1avg)/(2.*(q1cv*q1avg)^2.0));
-
-//   flike=f;
-//   f=f*mlike*qlike;
-
 
 REPORT_SECTION
   report << "Estimated numbers of female fish at age " << endl;
