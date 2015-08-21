@@ -63,12 +63,21 @@
 1980 1983 1986 1991 1994 1997 2000 2002 2004 2006 2012 2014   
 
 #(47) number of years with shelf survey ages                  
-4                         
+4  
+#(54) years 1 with AI age data
+  1                       
 #(48) years with shelf survey ages                    
-1996 1998 2004 2010                       
+1996 1998 2004 2010   
+#(55) years with AI age data
+ 2010
+                    
 #(49) sample sizes for years with "ages," by sex female then male                
 200 200 200 301                        
-200 200 200 169                        
+200 200 200 169   
+#(56) sample sizes for years with ages by sex female then male
+ 294
+ 183 
+                     
 #(50) shelf survey age comps for females "1996," 1998, 2004, 2010                  
 1962158 16739661 55199675 53974112 52090568 43252987 35272660 52770276 59906049 51120603 24097325 7477384 3702153 0 0 0 0 0 0 0 0     
 2747847 28735880 68095761 73053157 55931360 28078628 36727459 26856188 22033248 14114432 8694619 6617343 387194 0 0 0 0 0 0 0 0
@@ -81,13 +90,6 @@
 7648862.534 99536394.63 89108806.48 74178112.73 38915276.23 24423274.21 9119459.484 7084975.164 1457665.008 0 113372.9425 0 0 0 0 0 506979.1646 0 0 0 0
 224705.5645 43644592.93 43770178.81 54486443.53 63190614.63 30593156.04 26932586.16 5079652.691 1718842.228 725702.1485 0 0 0 0 0 0 0 0 0 0 0
 
-#(54) years 1 with AI age data
-  1
-#(55) years with AI age data
- 2010
-#(56) sample sizes for years with ages by sex female then male
- 294
- 183 
 #(57) AI survey age comps for females 2010
  0 12 19 27 39 17 22 21 19 13 17 12 7 11 12 5 5 11 6 7 12
 #AI survey age comps for males 2010

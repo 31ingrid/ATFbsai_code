@@ -40,12 +40,12 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   yrs_srv2_length.allocate(1,nobs_srv2_length,"yrs_srv2_length");
   yrs_srv3_length.allocate(1,nobs_srv3_length,"yrs_srv3_length");
   nobs_srv1_age.allocate("nobs_srv1_age");
-  yrs_srv1_age.allocate(1,nobs_srv1_age,"yrs_srv1_age");
-  nsamples_srv1_age.allocate(1,2,1,nobs_srv1_age,"nsamples_srv1_age");
-  obs_p_srv1_age.allocate(1,2,1,nobs_srv1_age,1,nages,"obs_p_srv1_age");
   nobs_srv3_age.allocate("nobs_srv3_age");
+  yrs_srv1_age.allocate(1,nobs_srv1_age,"yrs_srv1_age");
   yrs_srv3_age.allocate(1,nobs_srv3_age,"yrs_srv3_age");
+  nsamples_srv1_age.allocate(1,2,1,nobs_srv1_age,"nsamples_srv1_age");
   nsamples_srv3_age.allocate(1,2,1,nobs_srv3_age,"nsamples_srv3_age");
+  obs_p_srv1_age.allocate(1,2,1,nobs_srv1_age,1,nages,"obs_p_srv1_age");
   obs_p_srv3_age.allocate(1,2,1,nobs_srv3_age,1,nages,"obs_p_srv3_age");
   nsamples_srv1_length.allocate(1,2,1,nobs_srv1_length,"nsamples_srv1_length");
   nsamples_srv2_length.allocate(1,2,1,nobs_srv2_length,"nsamples_srv2_length");

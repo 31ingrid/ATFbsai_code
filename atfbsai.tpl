@@ -44,12 +44,15 @@ DATA_SECTION
   init_ivector yrs_srv3_length(1,nobs_srv3_length)    //(28) yrs with Aleutian Islands survey length data
 
   init_int nobs_srv1_age                   //(47) # of years with shelf survey ages
-  init_ivector yrs_srv1_age(1,nobs_srv1_age)  //(48) years of shelf survey with ages
-  init_matrix nsamples_srv1_age(1,2,1,nobs_srv1_age)   //(49) sample size of ages read in each year, by sex
-  init_3darray obs_p_srv1_age(1,2,1,nobs_srv1_age,1,nages)  //(50) shelf survey age comps by sex and year
   init_int nobs_srv3_age        //(54) # of years with ai survey ages
+
+  init_ivector yrs_srv1_age(1,nobs_srv1_age)  //(48) years of shelf survey with ages
   init_ivector yrs_srv3_age(1,nobs_srv3_age)  //(55) years of ai survey with ages
+
+  init_matrix nsamples_srv1_age(1,2,1,nobs_srv1_age)   //(49) sample size of ages read in each year, by sex
   init_matrix nsamples_srv3_age(1,2,1,nobs_srv3_age)   //(56) sample size of ages read in each year, by sex
+
+  init_3darray obs_p_srv1_age(1,2,1,nobs_srv1_age,1,nages)  //(50) shelf survey age comps by sex and year
   init_3darray obs_p_srv3_age(1,2,1,nobs_srv3_age,1,nages)  //(57) AI survey age comps by sex and year
 
 
