@@ -21,6 +21,7 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   nselages_srv3.allocate("nselages_srv3");
   monot_sel.allocate("monot_sel");
   phase_logistic_sel.allocate("phase_logistic_sel");
+  phase_selcoffs.allocate("phase_selcoffs");
   wt_like.allocate(1,8,"wt_like");
   nlen.allocate("nlen");
   nobs_fish.allocate("nobs_fish");
@@ -38,6 +39,14 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   yrs_srv1_length.allocate(1,nobs_srv1_length,"yrs_srv1_length");
   yrs_srv2_length.allocate(1,nobs_srv2_length,"yrs_srv2_length");
   yrs_srv3_length.allocate(1,nobs_srv3_length,"yrs_srv3_length");
+  nobs_srv1_age.allocate("nobs_srv1_age");
+  yrs_srv1_age.allocate(1,nobs_srv1_age,"yrs_srv1_age");
+  nsamples_srv1_age.allocate(1,2,1,nobs_srv1_age,"nsamples_srv1_age");
+  obs_p_srv1_age.allocate(1,2,1,nobs_srv1_age,1,nages,"obs_p_srv1_age");
+  nobs_srv3_age.allocate("nobs_srv3_age");
+  yrs_srv3_age.allocate(1,nobs_srv3_age,"yrs_srv3_age");
+  nsamples_srv3_age.allocate(1,2,1,nobs_srv3_age,"nsamples_srv3_age");
+  obs_p_srv3_age.allocate(1,2,1,nobs_srv3_age,1,nages,"obs_p_srv3_age");
   nsamples_srv1_length.allocate(1,2,1,nobs_srv1_length,"nsamples_srv1_length");
   nsamples_srv2_length.allocate(1,2,1,nobs_srv2_length,"nsamples_srv2_length");
   nsamples_srv3_length.allocate(1,2,1,nobs_srv3_length,"nsamples_srv3_length");
@@ -56,15 +65,6 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   maturity.allocate(1,nages,"maturity");
   lenage.allocate(1,2,1,nages,1,nlen,"lenage");
   bottom_temps.allocate(1,nobs_srv1,"bottom_temps");
-  nobs_srv1_age.allocate("nobs_srv1_age");
-  yrs_srv1_age.allocate(1,nobs_srv1_age,"yrs_srv1_age");
-  nsamples_srv1_age.allocate(1,2,1,nobs_srv1_age,"nsamples_srv1_age");
-  obs_p_srv1_age.allocate(1,2,1,nobs_srv1_age,1,nages,"obs_p_srv1_age");
-  phase_selcoffs.allocate("phase_selcoffs");
-  nobs_srv3_age.allocate("nobs_srv3_age");
-  yrs_srv3_age.allocate(1,nobs_srv3_age,"yrs_srv3_age");
-  nsamples_srv3_age.allocate(1,2,1,nobs_srv3_age,"nsamples_srv3_age");
-  obs_p_srv3_age.allocate(1,2,1,nobs_srv3_age,1,nages,"obs_p_srv3_age");
   cv_srv1.allocate(1,nobs_srv1);
   cv_srv2.allocate(1,nobs_srv2);
   cv_srv3.allocate(1,nobs_srv3);

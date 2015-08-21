@@ -21,7 +21,9 @@ DATA_SECTION
   init_int nselages_srv2  //(10) shelf survey (for asymptotic selectivity)
   init_int nselages_srv3  //(11) Aleutian Islands survey (for asymptotic selectivity)
   init_int monot_sel     //(51) selectivity smoothing function for fishery  
-    init_int phase_logistic_sel //(12)
+  init_int phase_logistic_sel //(12)
+  init_int phase_selcoffs      //(52) generally set to phase 4 phase for smooth selectivity curve fishery       
+
  //sample size for length comps for weighting likelihoods  
   init_vector wt_like(1,8)    //(53) 
   init_int nlen             //(13) # of length bins
@@ -40,6 +42,17 @@ DATA_SECTION
   init_ivector yrs_srv1_length(1,nobs_srv1_length)    //(26) yrs with shelf survey length data
   init_ivector yrs_srv2_length(1,nobs_srv2_length)    //(27) yrs with slope survey length data
   init_ivector yrs_srv3_length(1,nobs_srv3_length)    //(28) yrs with Aleutian Islands survey length data
+
+  init_int nobs_srv1_age                   //(47) # of years with shelf survey ages
+  init_ivector yrs_srv1_age(1,nobs_srv1_age)  //(48) years of shelf survey with ages
+  init_matrix nsamples_srv1_age(1,2,1,nobs_srv1_age)   //(49) sample size of ages read in each year, by sex
+  init_3darray obs_p_srv1_age(1,2,1,nobs_srv1_age,1,nages)  //(50) shelf survey age comps by sex and year
+  init_int nobs_srv3_age        //(54) # of years with ai survey ages
+  init_ivector yrs_srv3_age(1,nobs_srv3_age)  //(55) years of ai survey with ages
+  init_matrix nsamples_srv3_age(1,2,1,nobs_srv3_age)   //(56) sample size of ages read in each year, by sex
+  init_3darray obs_p_srv3_age(1,2,1,nobs_srv3_age,1,nages)  //(57) AI survey age comps by sex and year
+
+
   init_matrix nsamples_srv1_length(1,2,1,nobs_srv1_length)  // (29) sample size for each length comp by sex and year from shelf survey
   init_matrix nsamples_srv2_length(1,2,1,nobs_srv2_length)  // (30) sample size for each length comp by sex and year from slope survey
   init_matrix nsamples_srv3_length(1,2,1,nobs_srv3_length)  //(31) sample size for each length comp by sex and year from Aleutian I survey
@@ -59,15 +72,6 @@ DATA_SECTION
 //length age transition matrix
   init_3darray lenage(1,2,1,nages,1,nlen)  //(45) length-age transition matrix
   init_vector bottom_temps(1,nobs_srv1)    //(46) shelf survey bottom temperatures
-  init_int nobs_srv1_age                   //(47) # of years with shelf survey ages
-  init_ivector yrs_srv1_age(1,nobs_srv1_age)  //(48) years of shelf survey with ages
-  init_matrix nsamples_srv1_age(1,2,1,nobs_srv1_age)   //(49) sample size of ages read in each year, by sex
-  init_3darray obs_p_srv1_age(1,2,1,nobs_srv1_age,1,nages)  //(50) shelf survey age comps by sex and year
-  init_int phase_selcoffs      //(52) generally set to phase 4 phase for smooth selectivity curve fishery       
-  init_int nobs_srv3_age        //(54) # of years with ai survey ages
-  init_ivector yrs_srv3_age(1,nobs_srv3_age)  //(55) years of ai survey with ages
-  init_matrix nsamples_srv3_age(1,2,1,nobs_srv3_age)   //(56) sample size of ages read in each year, by sex
-  init_3darray obs_p_srv3_age(1,2,1,nobs_srv3_age,1,nages)  //(57) AI survey age comps by sex and year
 
  //LOCAL_CALCS
  //  cout<<nages<<endl;
