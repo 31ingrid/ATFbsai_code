@@ -3,7 +3,7 @@
 //           modified version of the GOA model with domed shaped selectivity for the shelf survey males,
 //           this run tries to estimate the temperature
 //           effect on shelf survey catchability  
-//			1 is female, 2 is male  in model (not in survey data)   
+//			1 is female, 2 is male in model (not in survey data)   
 			//this is how to change the name of the data file
 // when you run it add 			./atfbsai_is2014_6 -ind atfbsai_is2014_4.dat
 DATA_SECTION
@@ -42,24 +42,18 @@ DATA_SECTION
   init_ivector yrs_srv1_length(1,nobs_srv1_length)    //(26) yrs with shelf survey length data
   init_ivector yrs_srv2_length(1,nobs_srv2_length)    //(27) yrs with slope survey length data
   init_ivector yrs_srv3_length(1,nobs_srv3_length)    //(28) yrs with Aleutian Islands survey length data
-
   init_int nobs_srv1_age                   //(47) # of years with shelf survey ages
   init_int nobs_srv3_age        //(54) # of years with ai survey ages
-
   init_ivector yrs_srv1_age(1,nobs_srv1_age)  //(48) years of shelf survey with ages
   init_ivector yrs_srv3_age(1,nobs_srv3_age)  //(55) years of ai survey with ages
-
   init_matrix nsamples_srv1_age(1,2,1,nobs_srv1_age)   //(49) sample size of ages read in each year, by sex
   init_matrix nsamples_srv3_age(1,2,1,nobs_srv3_age)   //(56) sample size of ages read in each year, by sex
-
   init_3darray obs_p_srv1_age(1,2,1,nobs_srv1_age,1,nages)  //(50) shelf survey age comps by sex and year
   init_3darray obs_p_srv3_age(1,2,1,nobs_srv3_age,1,nages)  //(57) AI survey age comps by sex and year
-
-
   init_matrix nsamples_srv1_length(1,2,1,nobs_srv1_length)  // (29) sample size for each length comp by sex and year from shelf survey
   init_matrix nsamples_srv2_length(1,2,1,nobs_srv2_length)  // (30) sample size for each length comp by sex and year from slope survey
   init_matrix nsamples_srv3_length(1,2,1,nobs_srv3_length)  //(31) sample size for each length comp by sex and year from Aleutian I survey
-  init_3darray obs_p_srv1_length(1,2,1,nobs_srv1_length,1,nlen) //(32) shelf survey length comps by bin, sex and yr
+  init_3darray obs_p_srv1_length(1,2,1,nobs_srv1_length,1,nlen) //(32) shelf survey length comps by bin, sex and yr 
   init_3darray obs_p_srv2_length(1,2,1,nobs_srv2_length,1,nlen) //(33) slope survey length comps by bin, sex and yr
   init_3darray obs_p_srv3_length(1,2,1,nobs_srv3_length,1,nlen) //(34) Aleutian Islands survey length comps by bin, sex and yr
   init_3darray obs_p_fish(1,2,1,nobs_fish,1,nlen)  //(35) fishery length comps
@@ -72,17 +66,12 @@ DATA_SECTION
   init_vector obs_srv3_sd(1,nobs_srv3) //(42) Aleutian Islands survey SE by year 
   init_matrix wt(1,2,1,nages)          //(43) weight-at-age by sex
   init_vector maturity(1,nages)        //(44) female prop. mature-at-age
-//length age transition matrix
   init_3darray lenage(1,2,1,nages,1,nlen)  //(45) length-age transition matrix
   init_vector bottom_temps(1,nobs_srv1)    //(46) shelf survey bottom temperatures
-
- //LOCAL_CALCS
- //  cout<<nages<<endl;
- //END_CALCS
-   int styr_rec; 
-   vector cv_srv1(1,nobs_srv1);      //shelf survey CV
-   vector cv_srv2(1,nobs_srv2);      //slope survey CV
-   vector cv_srv3(1,nobs_srv3);      //Aleutian Islands survey CV 
+  int styr_rec; 
+  vector cv_srv1(1,nobs_srv1);      //shelf survey CV
+  vector cv_srv2(1,nobs_srv2);      //slope survey CV
+  vector cv_srv3(1,nobs_srv3);      //Aleutian Islands survey CV 
  //year
   int i
 //age
@@ -92,7 +81,6 @@ DATA_SECTION
 //
   int ii
   int m
- 
 
  LOCAL_CALCS
    styr_rec=styr-nages+1;
@@ -105,7 +93,6 @@ DATA_SECTION
     cv_srv3=elem_div(obs_srv3_sd,obs_srv3);   //Aleutian Island survey CV
    //change weights to tons
    wt=wt*.001;
-
  END_CALCS
 
   vector obs_sexr(1,nobs_fish)  // prop. females in fishery length data
@@ -115,7 +102,12 @@ DATA_SECTION
   number obs_mean_sexr    //average proportion of males in shelf survey population estimates
   number obs_SD_sexr      //standard deviation from male prop. in shelf survey population estimates
   vector pred_sexr(styr,endyr)   //proportion of males in num at age matrix to be calculated
-  
+  4darray test(1,3,1,2,1,4,1,5)
+  !! cout <<"test"<<endl; 
+  !! cout <<test<<endl; 
+  matrix testmat(4,5);    
+  !! cout <<testmat<<endl;
+
 INITIALIZATION_SECTION
   //can have different mortality for males and females
   F40 .20
@@ -198,7 +190,6 @@ PARAMETER_SECTION
   init_bounded_number srv3_sel50_f(1.,10.,phase_logistic_sel)
   init_bounded_number srv3_slope_m(.01,.5,phase_logistic_sel)
   init_bounded_number srv3_sel50_m(1.,12.,phase_logistic_sel)
-
   init_bounded_number sexr_param_fish(1.0,1.0,-5)  //this was hitting bound of 1.0 so fixed it - should free up to check
 
 // Parameters for computing SPR rates 
@@ -287,20 +278,28 @@ PARAMETER_SECTION
   number flike
   vector qtime(styr,endyr)
 
-PRELIMINARY_CALCS_SECTION
+PRELIMINARY_CALCS_SECTION  
+  test(1,1,2)=6;
+  test(1,2)=5;
+  test(2,1)=3;
+
+  cout <<"test"<<endl; 
+  cout <<test<<endl;
   obs_mean_sexr=0.34;  //initial value for avg proportion of male population estimated from shelf surveys; calculated below
   obs_SD_sexr=0.0485;  //initial value for standard deviation of mean male population proportion: calculated below
-//compute sex ratio in  catch
+//compute sex ratio in catch: proportion of females?
   for(i=1; i<=nobs_fish;i++)
   {
     obs_sexr(i) = sum(obs_p_fish(1,i))/sum(obs_p_fish(1,i) + obs_p_fish(2,i)); 
   }
 
-//length obs sex ratio in surveys    proportion of males
+//length obs sex ratio in surveys: proportion of males
   for(i=1; i<=nobs_srv1_length;i++)
     obs_sexr_srv1_2(i) = (sum(obs_p_srv1_length(2,i)))/
                          (sum(obs_p_srv1_length(1,i)) + sum(obs_p_srv1_length(2,i)));
-    obs_mean_sexr=mean(obs_sexr_srv1_2);
+    obs_mean_sexr=mean(obs_sexr_srv1_2);  
+  cout <<"obs_mean_sexr"<<endl; 
+  cout <<obs_mean_sexr<<endl;
     obs_SD_sexr=std_dev(obs_sexr_srv1_2);
 
   for(i=1; i<=nobs_srv2_length;i++)
@@ -311,7 +310,6 @@ PRELIMINARY_CALCS_SECTION
     obs_sexr_srv3_2(i) = (sum(obs_p_srv3_length(2,i)))/
                          (sum(obs_p_srv3_length(1,i)) + sum(obs_p_srv3_length(2,i))); 
 
- // cout<< " thru sex ratio "<<endl;
  //Compute offset for multinomial and length bin proportions
  // offset is a constant nplog(p) is added to the likelihood     
  // magnitude depends on nsamples(sample size) and p's_
@@ -369,7 +367,8 @@ PRELIMINARY_CALCS_SECTION
     for(k=1; k<=2;k++)
       offset(5) -= nsamples_srv1_age(k,i)*obs_p_srv1_age(k,i) * log(obs_p_srv1_age(k,i)+.0001);
   }   
-
+  cout<<"obs_p_srv3_age"<<endl;
+  cout<<obs_p_srv3_age<<endl;
 //AI survey age offset 
   for (i=1; i <= nobs_srv3_age; i++)
   {
@@ -380,7 +379,12 @@ PRELIMINARY_CALCS_SECTION
     for(k=1; k<=2;k++)
       offset(6) -= nsamples_srv3_age(k,i)*obs_p_srv3_age(k,i) * log(obs_p_srv3_age(k,i)+.0001);
   }
- 
+  cout<<"obs_p_srv3_age"<<endl;
+  cout<<obs_p_srv3_age<<endl;  
+  cout<<"offset"<<endl;
+  cout<<offset<<endl;  
+  cout<<"offset(6)"<<endl;
+  cout<<offset(6)<<endl;
   M(1)=0.20;
   M(2)=0.35;
 
@@ -908,7 +912,7 @@ FUNCTION evaluate_the_objective_function
 
     catch_like=norm2(log(catch_bio+.000001)-log(pred_catch+.000001));
 
-   // sex ratio likelihood
+   // sex ratio likelihood   note only calculated based on survey 1
      sexr_like=0.5*norm2((obs_mean_sexr-pred_sexr)/obs_SD_sexr); 
  //selectivity likelihood is penalty on how smooth selectivities are   
  //here are taking the sum of squares of the second differences 

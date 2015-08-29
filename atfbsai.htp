@@ -76,6 +76,8 @@ class model_data : public ad_comm{
   double obs_mean_sexr;
   double obs_SD_sexr;
   dvector pred_sexr;
+  d4_array test;
+  dmatrix testmat;
   ~model_data();
   model_data(int argc,char * argv[]);
   friend class model_parameters;

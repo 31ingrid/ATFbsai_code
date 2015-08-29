@@ -83,6 +83,11 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   obs_sexr_srv2_2.allocate(1,nobs_srv2_length);
   obs_sexr_srv3_2.allocate(1,nobs_srv3_length);
   pred_sexr.allocate(styr,endyr);
+  test.allocate(1,3,1,2,1,4,1,5);
+ cout <<"test"<<endl; 
+ cout <<test<<endl; 
+  testmat.allocate(4,5);
+ cout <<testmat<<endl;
 }
 
 void model_parameters::initializationfunction(void)
@@ -461,11 +466,16 @@ void model_parameters::preliminary_calculations(void)
 {
 
   admaster_slave_variable_interface(*this);
+  test(1,1,2)=6;
+  test(1,2)=5;
+  test(2,1)=3;
+  cout <<"test"<<endl; 
+  cout <<test<<endl;
   obs_mean_sexr=0.34;  //initial value for avg proportion of male population estimated from shelf surveys; calculated below
   obs_SD_sexr=0.0485;  //initial value for standard deviation of mean male population proportion: calculated below
   for(i=1; i<=nobs_fish;i++)
   {
-    obs_sexr(i) = sum(obs_p_fish(1,i))/sum(obs_p_fish(1,i) + obs_p_fish(2,i)); 
+    obs_sexr(i) = sum(obs_p_fish(2,i))/sum(obs_p_fish(1,i) + obs_p_fish(2,i)); 
   }
   for(i=1; i<=nobs_srv1_length;i++)
     obs_sexr_srv1_2(i) = (sum(obs_p_srv1_length(2,i)))/
@@ -478,7 +488,6 @@ void model_parameters::preliminary_calculations(void)
   for(i=1; i<=nobs_srv3_length;i++)
     obs_sexr_srv3_2(i) = (sum(obs_p_srv3_length(2,i)))/
                          (sum(obs_p_srv3_length(1,i)) + sum(obs_p_srv3_length(2,i))); 
- // cout<< " thru sex ratio "<<endl;
  //Compute offset for multinomial and length bin proportions
  // offset is a constant nplog(p) is added to the likelihood     
  // magnitude depends on nsamples(sample size) and p's_
@@ -530,6 +539,8 @@ void model_parameters::preliminary_calculations(void)
     for(k=1; k<=2;k++)
       offset(5) -= nsamples_srv1_age(k,i)*obs_p_srv1_age(k,i) * log(obs_p_srv1_age(k,i)+.0001);
   }   
+  cout<<"obs_p_srv3_age"<<endl;
+  cout<<obs_p_srv3_age<<endl;
   for (i=1; i <= nobs_srv3_age; i++)
   {
     double sumtot ;
@@ -539,7 +550,12 @@ void model_parameters::preliminary_calculations(void)
     for(k=1; k<=2;k++)
       offset(6) -= nsamples_srv3_age(k,i)*obs_p_srv3_age(k,i) * log(obs_p_srv3_age(k,i)+.0001);
   }
- 
+  cout<<"obs_p_srv3_age"<<endl;
+  cout<<obs_p_srv3_age<<endl;  
+  cout<<"offset"<<endl;
+  cout<<offset<<endl;  
+  cout<<"offset(6)"<<endl;
+  cout<<offset(6)<<endl;
   M(1)=0.20;
   M(2)=0.35;
 }
