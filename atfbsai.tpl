@@ -17,6 +17,8 @@ DATA_SECTION
   init_int nages          //(7) # of ages in the model      
  //selectivity is set to the selectivity at nselages-1 after age nselages 
   init_int nselages       //(8) fishery (for asymptotic selectivity) set to 19
+  init_int nsurv     //number of surveys
+  init_vector nselages_srv(1,nsurv) //vector or values to calculate selectivity for each survey
   init_int nselages_srv1  //(9) slope survey (for asymptotic selectivity) 
   init_int nselages_srv2  //(10) shelf survey (for asymptotic selectivity)
   init_int nselages_srv3  //(11) Aleutian Islands survey (for asymptotic selectivity)
@@ -86,7 +88,11 @@ DATA_SECTION
    styr_rec=styr-nages+1;
    if(nselages>nages) nselages=nages;
    if(nselages_srv1>nages) nselages_srv1=nages;  
-   if(nselages_srv2>nages) nselages_srv2=nages;
+  if(nselages_srv2>nages) nselages_srv2=nages; 
+  for (i=0;i<3;i++)
+  {if (nselages_srv(i)>=nages)
+  nselages_srv(i)=nages;
+  }
    //calculate cv for surveys
     cv_srv1=elem_div(obs_srv1_sd,obs_srv1);   //shelf survey CV
     cv_srv2=elem_div(obs_srv2_sd,obs_srv2);   //slope survey CV
@@ -248,7 +254,6 @@ PARAMETER_SECTION
   objective_function_value obj_fun
   number tmp
   vector pred_sexr(styr,endyr)
-  vector preds_sexr(styr,endyr)
  // Stuff for SPR and yield projections
   number sigmar
   number ftmp
@@ -298,8 +303,8 @@ PRELIMINARY_CALCS_SECTION
     obs_sexr_srv1_2(i) = (sum(obs_p_srv1_length(2,i)))/
                          (sum(obs_p_srv1_length(1,i)) + sum(obs_p_srv1_length(2,i)));
     obs_mean_sexr=mean(obs_sexr_srv1_2);  
-  cout <<"obs_mean_sexr"<<endl; 
-  cout <<obs_mean_sexr<<endl;
+  cout <<"obs_sexr_srv1_2"<<endl; 
+  cout <<obs_sexr_srv1_2<<endl;
     obs_SD_sexr=std_dev(obs_sexr_srv1_2);
 
   for(i=1; i<=nobs_srv2_length;i++)
@@ -616,7 +621,8 @@ FUNCTION get_numbers_at_age
       totn_srv1(k,i)=q1*(natage(k,i)*sel_srv1(k)); // not used in further calculations
       totn_srv2(k,i)=q2*(natage(k,i)*sel_srv2(k)); // not used in further calculations        
     }
-  }
+  }   
+
   //predicted survey values
   fspbio.initialize(); 
   qtime=q1;

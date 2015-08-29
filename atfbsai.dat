@@ -11,7 +11,11 @@
 # nages for number of ages in the model  (7)   
 21            
 # (8) fishery nselages- selectivity after nselages age set equal to selectivity at nselages age
-19            
+19     
+#nsurv number of surveys
+3
+#nselages_srv
+19 19 19       
 # (9) survey nselages_srv1- selectivity after nselages age set equal to selectivity at nselages age
 19            
 # (10) survey nselages_srv2- selectivity after nselages age set equal to selectivity at nselages age

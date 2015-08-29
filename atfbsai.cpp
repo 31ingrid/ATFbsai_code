@@ -16,6 +16,8 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   median_rec.allocate("median_rec");
   nages.allocate("nages");
   nselages.allocate("nselages");
+  nsurv.allocate("nsurv");
+  nselages_srv.allocate(1,nsurv,"nselages_srv");
   nselages_srv1.allocate("nselages_srv1");
   nselages_srv2.allocate("nselages_srv2");
   nselages_srv3.allocate("nselages_srv3");
@@ -71,7 +73,11 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
    styr_rec=styr-nages+1;
    if(nselages>nages) nselages=nages;
    if(nselages_srv1>nages) nselages_srv1=nages;  
-   if(nselages_srv2>nages) nselages_srv2=nages;
+  if(nselages_srv2>nages) nselages_srv2=nages; 
+  for (i=0;i<3;i++)
+  {if (nselages_srv(i)>=nages)
+  nselages_srv(i)=nages;
+  }
    //calculate cv for surveys
     cv_srv1=elem_div(obs_srv1_sd,obs_srv1);   //shelf survey CV
     cv_srv2=elem_div(obs_srv2_sd,obs_srv2);   //slope survey CV
@@ -357,10 +363,6 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   #ifndef NO_AD_INITIALIZE
     pred_sexr.initialize();
   #endif
-  preds_sexr.allocate(styr,endyr,"preds_sexr");
-  #ifndef NO_AD_INITIALIZE
-    preds_sexr.initialize();
-  #endif
   sigmar.allocate("sigmar");
   #ifndef NO_AD_INITIALIZE
   sigmar.initialize();
@@ -475,12 +477,14 @@ void model_parameters::preliminary_calculations(void)
   obs_SD_sexr=0.0485;  //initial value for standard deviation of mean male population proportion: calculated below
   for(i=1; i<=nobs_fish;i++)
   {
-    obs_sexr(i) = sum(obs_p_fish(2,i))/sum(obs_p_fish(1,i) + obs_p_fish(2,i)); 
+    obs_sexr(i) = sum(obs_p_fish(1,i))/sum(obs_p_fish(1,i) + obs_p_fish(2,i)); 
   }
   for(i=1; i<=nobs_srv1_length;i++)
     obs_sexr_srv1_2(i) = (sum(obs_p_srv1_length(2,i)))/
                          (sum(obs_p_srv1_length(1,i)) + sum(obs_p_srv1_length(2,i)));
-    obs_mean_sexr=mean(obs_sexr_srv1_2);
+    obs_mean_sexr=mean(obs_sexr_srv1_2);  
+  cout <<"obs_sexr_srv1_2"<<endl; 
+  cout <<obs_sexr_srv1_2<<endl;
     obs_SD_sexr=std_dev(obs_sexr_srv1_2);
   for(i=1; i<=nobs_srv2_length;i++)
     obs_sexr_srv2_2(i) = (sum(obs_p_srv2_length(2,i)))/
@@ -781,7 +785,7 @@ void model_parameters::get_numbers_at_age(void)
       totn_srv1(k,i)=q1*(natage(k,i)*sel_srv1(k)); // not used in further calculations
       totn_srv2(k,i)=q2*(natage(k,i)*sel_srv2(k)); // not used in further calculations        
     }
-  }
+  }   
   //predicted survey values
   fspbio.initialize(); 
   qtime=q1;
@@ -1071,7 +1075,7 @@ void model_parameters::evaluate_the_objective_function(void)
    double var_tmp; for (i=1;i<=nobs_srv3;i++) { var_tmp = 2.*square(log(obs_srv3(i))*cv_srv3(i)); surv3_like += square(log(obs_srv3(i)+.01)-log(pred_srv3(yrs_srv3(i))+.01))/var_tmp; }
    // surv_like = norm2(log(obs_srv1+.01)-log(pred_srv1(yrs_srv1)+.01));
     catch_like=norm2(log(catch_bio+.000001)-log(pred_catch+.000001));
-   // sex ratio likelihood
+   // sex ratio likelihood   note only calculated based on survey 1
      sexr_like=0.5*norm2((obs_mean_sexr-pred_sexr)/obs_SD_sexr); 
  //selectivity likelihood is penalty on how smooth selectivities are   
  //here are taking the sum of squares of the second differences 
