@@ -39,10 +39,14 @@ class model_data : public ad_comm{
   data_ivector yrs_srv1_length;
   data_ivector yrs_srv2_length;
   data_ivector yrs_srv3_length;
+  data_int nsurv_aged;
+  data_ivector nobs_srv_age;
   data_int nobs_srv1_age;
   data_int nobs_srv3_age;
+  data_imatrix yrs_srv_age;
   data_ivector yrs_srv1_age;
   data_ivector yrs_srv3_age;
+  data_3array nsamples_srv_age;
   data_matrix nsamples_srv1_age;
   data_matrix nsamples_srv3_age;
   data_3array obs_p_srv1_age;

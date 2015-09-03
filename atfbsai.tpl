@@ -49,10 +49,14 @@ DATA_SECTION
   init_ivector yrs_srv1_length(1,nobs_srv1_length)    //(26) yrs with shelf survey length data
   init_ivector yrs_srv2_length(1,nobs_srv2_length)    //(27) yrs with slope survey length data
   init_ivector yrs_srv3_length(1,nobs_srv3_length)    //(28) yrs with Aleutian Islands survey length data
-  init_int nobs_srv1_age                   //(47) # of years with shelf survey ages
-  init_int nobs_srv3_age        //(54) # of years with ai survey ages
+  init_int nsurv_aged //28.4 this indicates the number of surveys that have age data
+  init_ivector nobs_srv_age(1,nsurv_aged) //28.5
+  init_int nobs_srv1_age                   //(47) number of years with shelf survey ages
+  init_int nobs_srv3_age        //(54) number of years with ai survey ages
+  init_imatrix yrs_srv_age(1,nsurv_aged,1,nobs_srv_age) //54.5 matrix for years aged by survey
   init_ivector yrs_srv1_age(1,nobs_srv1_age)  //(48) years of shelf survey with ages
   init_ivector yrs_srv3_age(1,nobs_srv3_age)  //(55) years of ai survey with ages
+  init_3darray nsamples_srv_age(1,nsurv_aged,1,2,1,nobs_srv_age) //55.5 sample size of ages read in each year by sex and survey
   init_matrix nsamples_srv1_age(1,2,1,nobs_srv1_age)   //(49) sample size of ages read in each year, by sex
   init_matrix nsamples_srv3_age(1,2,1,nobs_srv3_age)   //(56) sample size of ages read in each year, by sex
   init_3darray obs_p_srv1_age(1,2,1,nobs_srv1_age,1,nages)  //(50) shelf survey age comps by sex and year
