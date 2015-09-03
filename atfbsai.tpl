@@ -35,12 +35,17 @@ DATA_SECTION
   init_int nobs_srv1          //(17) # of years of shelf survey biomass data
   init_int nobs_srv2          //(18) # of years of slope survey data
   init_int nobs_srv3          //(19) # of years of Aleutian Islands data
+  init_ivector nobs_srv(1,nsurv)  //19.5 # of years shelf, slope, AI survey data
   init_ivector yrs_srv1(1,nobs_srv1)   //(20) years with shelf survey biomass data
   init_ivector yrs_srv2(1,nobs_srv2)   //(21) years with slope survey biomass data
   init_ivector yrs_srv3(1,nobs_srv3)   //(22) years with Aleutian Islands survey bioamass data
+  init_imatrix yrs_srv(1,nsurv,1,nobs_srv) //22.5
+!!cout<<"yrs_srv"<<std::endl;
+!!cout<<yrs_srv<<std::endl;
   init_int nobs_srv1_length          //(23) # yrs with shelf survey length data
   init_int nobs_srv2_length          //(24) # yrs with slope survey length data
   init_int nobs_srv3_length          //(25) # yrs with Aleutian Islands survey length data
+  init_ivector nobs_srv_length(1,nsurv)  //25.5
   init_ivector yrs_srv1_length(1,nobs_srv1_length)    //(26) yrs with shelf survey length data
   init_ivector yrs_srv2_length(1,nobs_srv2_length)    //(27) yrs with slope survey length data
   init_ivector yrs_srv3_length(1,nobs_srv3_length)    //(28) yrs with Aleutian Islands survey length data
@@ -88,12 +93,13 @@ DATA_SECTION
    styr_rec=styr-nages+1;
    if(nselages>nages) nselages=nages;
    if(nselages_srv1>nages) nselages_srv1=nages;  
-  if(nselages_srv2>nages) nselages_srv2=nages; 
+  if(nselages_srv2>nages) nselages_srv2=nages;   
+//NEW HERE 
   for (i=0;i<3;i++)
   {if (nselages_srv(i)>=nages)
   nselages_srv(i)=nages;
   }
-   //calculate cv for surveys
+   //calculate cv for surveys   
     cv_srv1=elem_div(obs_srv1_sd,obs_srv1);   //shelf survey CV
     cv_srv2=elem_div(obs_srv2_sd,obs_srv2);   //slope survey CV
     cv_srv3=elem_div(obs_srv3_sd,obs_srv3);   //Aleutian Island survey CV

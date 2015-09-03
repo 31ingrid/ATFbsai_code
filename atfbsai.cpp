@@ -32,12 +32,17 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   nobs_srv1.allocate("nobs_srv1");
   nobs_srv2.allocate("nobs_srv2");
   nobs_srv3.allocate("nobs_srv3");
+  nobs_srv.allocate(1,nsurv,"nobs_srv");
   yrs_srv1.allocate(1,nobs_srv1,"yrs_srv1");
   yrs_srv2.allocate(1,nobs_srv2,"yrs_srv2");
   yrs_srv3.allocate(1,nobs_srv3,"yrs_srv3");
+  yrs_srv.allocate(1,nsurv,1,nobs_srv,"yrs_srv");
+cout<<"yrs_srv"<<std::endl;
+cout<<yrs_srv<<std::endl;
   nobs_srv1_length.allocate("nobs_srv1_length");
   nobs_srv2_length.allocate("nobs_srv2_length");
   nobs_srv3_length.allocate("nobs_srv3_length");
+  nobs_srv_length.allocate(1,nsurv,"nobs_srv_length");
   yrs_srv1_length.allocate(1,nobs_srv1_length,"yrs_srv1_length");
   yrs_srv2_length.allocate(1,nobs_srv2_length,"yrs_srv2_length");
   yrs_srv3_length.allocate(1,nobs_srv3_length,"yrs_srv3_length");
@@ -73,12 +78,12 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
    styr_rec=styr-nages+1;
    if(nselages>nages) nselages=nages;
    if(nselages_srv1>nages) nselages_srv1=nages;  
-  if(nselages_srv2>nages) nselages_srv2=nages; 
+  if(nselages_srv2>nages) nselages_srv2=nages;   
   for (i=0;i<3;i++)
   {if (nselages_srv(i)>=nages)
   nselages_srv(i)=nages;
   }
-   //calculate cv for surveys
+   //calculate cv for surveys   
     cv_srv1=elem_div(obs_srv1_sd,obs_srv1);   //shelf survey CV
     cv_srv2=elem_div(obs_srv2_sd,obs_srv2);   //slope survey CV
     cv_srv3=elem_div(obs_srv3_sd,obs_srv3);   //Aleutian Island survey CV
