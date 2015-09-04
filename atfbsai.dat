@@ -9,7 +9,10 @@
 #median recruits to use for the last year (end year) (6)   mean(recruits[1:34,2]) until 5 yrs before present
 409222235#25200000        
 # nages for number of ages in the model  (7)   
-21            
+21  
+# nsurv - number of surveys (7.3)
+3
+# nsurv_aged - number of surveys with age data   (7.4)       
 # (8) fishery nselages- selectivity after nselages age set equal to selectivity at nselages age
 19            
 # (9) survey nselages_srv1- selectivity after nselages age set equal to selectivity at nselages age

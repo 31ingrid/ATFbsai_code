@@ -16,7 +16,9 @@ DATA_SECTION
   init_number median_rec  //(6) median recruit value to use for the last 3 years
   init_int nages          //(7) # of ages in the model      
 !! cout<<"nages"<<endl;
-!! cout<<  nages<<endl;
+!! cout<<  nages<<endl;   
+  init_int nsurv; //(7.3)
+  init_int nsurv_aged; //(7.4)
  //selectivity is set to the selectivity at nselages-1 after age nselages 
   init_int nselages       //(8) fishery (for asymptotic selectivity) set to 19
   init_int nselages_srv1  //(9) slope survey (for asymptotic selectivity) 
