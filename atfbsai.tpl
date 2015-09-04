@@ -17,13 +17,14 @@ DATA_SECTION
   init_int nages          //(7) # of ages in the model      
 !! cout<<"nages"<<endl;
 !! cout<<  nages<<endl;   
-  init_int nsurv; //(7.3)
-  init_int nsurv_aged; //(7.4)
+  init_int nsurv //(7.3)
+  init_int nsurv_aged //(7.4)
  //selectivity is set to the selectivity at nselages-1 after age nselages 
   init_int nselages       //(8) fishery (for asymptotic selectivity) set to 19
   init_int nselages_srv1  //(9) slope survey (for asymptotic selectivity) 
   init_int nselages_srv2  //(10) shelf survey (for asymptotic selectivity)
   init_int nselages_srv3  //(11) Aleutian Islands survey (for asymptotic selectivity)
+  init_ivector nselages_srv(1,nsurv) // (11.5)
     init_int phase_logistic_sel //(12)
  //sample size for length comps for weighting likelihoods  
   init_int nlen             //(13) # of length bins
@@ -43,9 +44,11 @@ DATA_SECTION
   !! cout <<nobs_srv1<<endl;
   init_int nobs_srv2          //(18) # of years of slope survey data
   init_int nobs_srv3          //(19) # of years of Aleutian Islands data
+  init_ivector nobs_srv(1,nsurv) //(19.5) # yrs of shelf, slope, AI data
   init_ivector yrs_srv1(1,nobs_srv1)   //(20) years with shelf survey biomass data
   init_ivector yrs_srv2(1,nobs_srv2)   //(21) years with slope survey biomass data
   init_ivector yrs_srv3(1,nobs_srv3)   //(22) years with Aleutian Islands survey bioamass data
+  init_imatrix yrs_srv(1,nsurv,1,nobs_srv) //(22.5) yrs with shelf, slope, AI survey data
   init_int nobs_srv1_length          //(23) # yrs with shelf survey length data
   !! cout<<"nobs_srv1_length"<<endl;
   !! cout <<nobs_srv1_length<<endl;

@@ -16,11 +16,14 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   median_rec.allocate("median_rec");
   nages.allocate("nages");
  cout<<"nages"<<endl;
- cout<<  nages<<endl;
+ cout<<  nages<<endl;   
+  nsurv.allocate("nsurv");
+  nsurv_aged.allocate("nsurv_aged");
   nselages.allocate("nselages");
   nselages_srv1.allocate("nselages_srv1");
   nselages_srv2.allocate("nselages_srv2");
   nselages_srv3.allocate("nselages_srv3");
+  nselages_srv.allocate(1,nsurv,"nselages_srv");
   phase_logistic_sel.allocate("phase_logistic_sel");
   nlen.allocate("nlen");
  cout<<"nlen"<<endl;
@@ -39,9 +42,11 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
  cout <<nobs_srv1<<endl;
   nobs_srv2.allocate("nobs_srv2");
   nobs_srv3.allocate("nobs_srv3");
+  nobs_srv.allocate(1,nsurv,"nobs_srv");
   yrs_srv1.allocate(1,nobs_srv1,"yrs_srv1");
   yrs_srv2.allocate(1,nobs_srv2,"yrs_srv2");
   yrs_srv3.allocate(1,nobs_srv3,"yrs_srv3");
+  yrs_srv.allocate(1,nsurv,1,nobs_srv,"yrs_srv");
   nobs_srv1_length.allocate("nobs_srv1_length");
  cout<<"nobs_srv1_length"<<endl;
  cout <<nobs_srv1_length<<endl;
