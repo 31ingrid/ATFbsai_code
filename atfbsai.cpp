@@ -255,6 +255,10 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   #ifndef NO_AD_INITIALIZE
     fspbio.initialize();
   #endif
+  pred_srv.allocate(1,nsurv,styr,endyr,"pred_srv");
+  #ifndef NO_AD_INITIALIZE
+    pred_srv.initialize();
+  #endif
   pred_srv1.allocate(styr,endyr,"pred_srv1");
   #ifndef NO_AD_INITIALIZE
     pred_srv1.initialize();
@@ -290,6 +294,22 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   pred_p_srv3_len.allocate(1,2,1,nobs_srv3_length,1,nlen,"pred_p_srv3_len");
   #ifndef NO_AD_INITIALIZE
     pred_p_srv3_len.initialize();
+  #endif
+  pred_p_srv_age_fem.allocate(1,nsurv_aged,1,nobs_srv_age,1,nages,"pred_p_srv_age_fem");
+  #ifndef NO_AD_INITIALIZE
+    pred_p_srv_age_fem.initialize();
+  #endif
+  pred_p_srv_age_mal.allocate(1,nsurv_aged,1,nobs_srv_age,1,nages,"pred_p_srv_age_mal");
+  #ifndef NO_AD_INITIALIZE
+    pred_p_srv_age_mal.initialize();
+  #endif
+  pred_p_srv_len_fem.allocate(1,nsurv,1,nobs_srv_length,1,nlen,"pred_p_srv_len_fem");
+  #ifndef NO_AD_INITIALIZE
+    pred_p_srv_len_fem.initialize();
+  #endif
+  pred_p_srv_len_mal.allocate(1,nsurv,1,nobs_srv_length,1,nlen,"pred_p_srv_len_mal");
+  #ifndef NO_AD_INITIALIZE
+    pred_p_srv_len_mal.initialize();
   #endif
   pred_catch.allocate(styr,endyr,"pred_catch");
   #ifndef NO_AD_INITIALIZE
@@ -359,6 +379,10 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   fpen.allocate("fpen");
   #ifndef NO_AD_INITIALIZE
   fpen.initialize();
+  #endif
+  surv_like.allocate(1,nsurv,"surv_like");
+  #ifndef NO_AD_INITIALIZE
+    surv_like.initialize();
   #endif
   surv1_like.allocate("surv1_like");
   #ifndef NO_AD_INITIALIZE

@@ -183,6 +183,7 @@ private:
   param_vector explbiom;
   param_vector pred_bio;
   param_vector fspbio;
+  param_matrix pred_srv;
   param_vector pred_srv1;
   param_vector pred_srv2;
   param_vector pred_srv3;
@@ -192,6 +193,10 @@ private:
   param_3array pred_p_srv1_len;
   param_3array pred_p_srv2_len;
   param_3array pred_p_srv3_len;
+  param_3array pred_p_srv_age_fem;
+  param_3array pred_p_srv_age_mal;
+  param_3array pred_p_srv_len_fem;
+  param_3array pred_p_srv_len_mal;
   param_vector pred_catch;
   param_3array natage;
   param_stddev_vector totalbiomass;
@@ -210,6 +215,7 @@ private:
   param_vector length_like;
   param_vector sel_like;
   param_number fpen;
+  param_vector surv_like;
   param_number surv1_like;
   param_number surv2_like;
   param_number surv3_like;

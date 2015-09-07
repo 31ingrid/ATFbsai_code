@@ -241,7 +241,8 @@ PARAMETER_SECTION
   vector temp2(1,nages)
   vector explbiom(styr,endyr)
   vector pred_bio(styr,endyr)
-  vector fspbio(styr,endyr)
+  vector fspbio(styr,endyr) 
+  matrix pred_srv(1,nsurv,styr,endyr) //matrix combine pred_srv into 3 surveys
   vector pred_srv1(styr,endyr)
   vector pred_srv2(styr,endyr)
   vector pred_srv3(styr,endyr)
@@ -250,7 +251,11 @@ PARAMETER_SECTION
   3darray pred_p_srv3_age(1,2,1,nobs_srv3_age,1,nages) 
   3darray pred_p_srv1_len(1,2,1,nobs_srv1_length,1,nlen)
   3darray pred_p_srv2_len(1,2,1,nobs_srv2_length,1,nlen)
-  3darray pred_p_srv3_len(1,2,1,nobs_srv3_length,1,nlen)
+  3darray pred_p_srv3_len(1,2,1,nobs_srv3_length,1,nlen)  
+  3darray pred_p_srv_age_fem(1,nsurv_aged,1,nobs_srv_age,1,nages)//pred_p_srv_age for males and females for each survey
+  3darray pred_p_srv_age_mal(1,nsurv_aged,1,nobs_srv_age,1,nages)//same but males
+  3darray pred_p_srv_len_fem(1,nsurv,1,nobs_srv_length,1,nlen)//pred_p_srv_length for males and females for each survey 
+  3darray pred_p_srv_len_mal(1,nsurv,1,nobs_srv_length,1,nlen)  //same but males
   vector pred_catch(styr,endyr)
   3darray natage(1,2,styr,endyr,1,nages) 
   sdreport_vector totalbiomass(styr,endyr)
@@ -268,7 +273,8 @@ PARAMETER_SECTION
   vector age_like(1,4) //really only need shelf and AI but may need other elements later
   vector length_like(1,4) 
   vector sel_like(1,4)
-  number fpen    
+  number fpen  
+  vector surv_like(1,nsurv) //survey likelihood for each survey  
   number surv1_like
   number surv2_like
   number surv3_like
