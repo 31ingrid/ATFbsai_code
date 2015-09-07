@@ -417,7 +417,7 @@
 #(41) Aleutian Islands survey biomass "tons," "1980," "83," "86," "91," "94," "97," "2000," "2002," "2004," 2006, 2010  2012  2014       
 16500 24465 110476 21897 58191 73893 65028 88750 94998 183836 80060 60371 75958  
 
-#41.5
+#41.5 obs_surv
 # shelf survey biomass tons 1982-2014 new data from Dan Nichols in September 2012 for BSAI plus NW stations. 
 69990 110643 160396 163637 229865 294710 310933 374317 435211 336457 421985 542827 570835 475339 552269 482684 369118 258809 336163 409306 356665 543569 549338 772988 670132 547496 588342 456371 586954 568200 445736 405509 465616
 
@@ -578,4 +578,6 @@
 #(53) weights for smooth selectivity likelihoods 1 fishery female, 2 survey female, 3 fishery male, 4 survey male
   10. 120. 40. 1.  
 # weights for constraint on monotonicity 1 fishery female, 2 fishery male, 3 survey female, 4 survey male
-  200. 100. 20000. 1000.   
+  200. 100. 20000. 1000.
+#(54)   female then male natural mortality
+0.2 0.35   

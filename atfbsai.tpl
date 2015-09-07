@@ -85,12 +85,14 @@ DATA_SECTION
   init_3darray obs_p_srv_age_mal(1,nsurv_aged,1,nobs_srv_age,1,nages) //(57.6) survey age comps by sex and year males  
   init_int monot_sel     //(51) selectivity smoothing function for fishery 
   init_int phase_selcoffs      //(52) generally set to phase 4 phase for smooth selectivity curve fishery
-  init_vector wt_like(1,8)    //(53)             
+  init_vector wt_like(1,8)    //(53) 
+  init_vector M(1,2) //(54) female then male natural mortality            
 
    int styr_rec; 
    vector cv_srv1(1,nobs_srv1);      //shelf survey CV
    vector cv_srv2(1,nobs_srv2);      //slope survey CV
-   vector cv_srv3(1,nobs_srv3);      //Aleutian Islands survey CV 
+   vector cv_srv3(1,nobs_srv3);      //Aleutian Islands survey CV
+   matrix cv_srv(1,nsurv,1,nobs_srv)  //matrix to hold CVs for surveys
  //year
   int i
 //age
@@ -100,8 +102,7 @@ DATA_SECTION
 //
   int ii
   int m 
- !! cout<<"nselages_srv"<<std::endl;
- !! cout<<nselages_srv(3)<<std::endl;
+
  LOCAL_CALCS
    styr_rec=styr-nages+1;
    if(nselages>nages) nselages=nages;
@@ -111,9 +112,14 @@ DATA_SECTION
    if(nselages_srv(i)>nages) nselages_srv(i)=nages;
    }
    //calculate cv for surveys
-    cv_srv1=elem_div(obs_srv1_sd,obs_srv1);   //shelf survey CV
-    cv_srv2=elem_div(obs_srv2_sd,obs_srv2);   //slope survey CV
-    cv_srv3=elem_div(obs_srv3_sd,obs_srv3);   //Aleutian Island survey CV
+   cv_srv1=elem_div(obs_srv1_sd,obs_srv1);   //shelf survey CV
+   cv_srv2=elem_div(obs_srv2_sd,obs_srv2);   //slope survey CV
+   cv_srv3=elem_div(obs_srv3_sd,obs_srv3);   //Aleutian Island survey CV
+
+   for (int j=1;j<=nsurv;j++){
+   for (i=1;i<=nobs_srv(3);i++){ 
+   cv_srv(j,i)=obs_srv_sd(j,i)/(double)obs_srv(j,i); }}
+
    //change weights to tons
    wt=wt*.001;
 
@@ -167,9 +173,9 @@ PARAMETER_SECTION
  //phase of 8 is greater than last phase so does q1 in last phase  
   // init_bounded_number q1(.5,2,8)
  //fix q1 to be 1 otherwise it went to lower bound of .5
-  init_bounded_number q1(0.5,2.0,-4)
-  init_bounded_number q2(0.05,1.5,-4)
-  init_bounded_number q3(0.05,1.5,-4)
+  init_bounded_number q1(0.5,2.0,-4)      //catchability shelf
+  init_bounded_number q2(0.05,1.5,-4)     //catchability slope
+  init_bounded_number q3(0.05,1.5,-4)     //catchability AI
   init_number alpha(4)       // used to estimate temperature effect on shelf survey catchability
   init_number beta(4)  // used to estimate temperature effect on shelf survey catchability
  //phase of -1 means M is fixed   
@@ -189,25 +195,27 @@ PARAMETER_SECTION
   init_bounded_number fish_slope_f(.1,5.,phase_logistic_sel)
   init_bounded_number fish_sel50_f(1.,15.,phase_logistic_sel)
   init_bounded_number fish_slope_m(.05,.8,phase_logistic_sel)
-  init_bounded_number fish_sel50_m(1.,25.,phase_logistic_sel)
+  init_bounded_number fish_sel50_m(1.,25.,phase_logistic_sel)  
+
   init_bounded_number srv1_slope_f1(.1,5.,phase_logistic_sel)
   init_bounded_number srv1_sel50_f1(1.,10.,phase_logistic_sel)
   init_bounded_number srv1_slope_f2(.1,5.,phase_logistic_sel)
   init_bounded_number srv1_sel50_f2(1.,10.,phase_logistic_sel)
-
   init_bounded_number srv1_slope_m1(.01,.5,phase_logistic_sel)
   init_bounded_number srv1_sel50_m1(1.,12.,phase_logistic_sel)
   init_bounded_number srv1_slope_m2(.01,.5,phase_logistic_sel)
   init_bounded_number srv1_sel50_m2(1.,12.,phase_logistic_sel)
 
-  init_bounded_number srv2_slope_f(.1,5.,phase_logistic_sel)
-  init_bounded_number srv2_sel50_f(1.,10.,phase_logistic_sel)
-  init_bounded_number srv2_slope_m(.01,.5,phase_logistic_sel)
-  init_bounded_number srv2_sel50_m(1.,12.,phase_logistic_sel)
+  init_bounded_number srv2_slope_f(.1,5.,phase_logistic_sel)  
+  init_bounded_number srv3_slope_f(.1,5.,phase_logistic_sel)  
 
-  init_bounded_number srv3_slope_f(.1,5.,phase_logistic_sel)
-  init_bounded_number srv3_sel50_f(1.,10.,phase_logistic_sel)
-  init_bounded_number srv3_slope_m(.01,.5,phase_logistic_sel)
+  init_bounded_number srv2_sel50_f(1.,10.,phase_logistic_sel) 
+  init_bounded_number srv3_sel50_f(1.,10.,phase_logistic_sel) 
+
+  init_bounded_number srv2_slope_m(.01,.5,phase_logistic_sel)  
+  init_bounded_number srv3_slope_m(.01,.5,phase_logistic_sel) 
+
+  init_bounded_number srv2_sel50_m(1.,12.,phase_logistic_sel)
   init_bounded_number srv3_sel50_m(1.,12.,phase_logistic_sel)
 
   init_bounded_number sexr_param_fish(1.0,1.0,-5)  //this was hitting bound of 1.0 so fixed it - should free up to check
@@ -219,15 +227,16 @@ PARAMETER_SECTION
 
   matrix log_sel_fish(1,2,1,nages)
   matrix sel(1,2,1,nages) //fishery selectivity
+  3darray sel_srv(1,nsurv,1,2,1,nages) //new matrix to combine selectivity for 3 surveys
   matrix sel_srv1(1,2,1,nages)
   matrix sel_srv2(1,2,1,nages)
   matrix sel_srv3(1,2,1,nages)
   vector avgsel_fish(1,2)
-  matrix popn(1,2,styr,endyr)
+  matrix popn(1,2,styr,endyr)    
+  3darray totn_srv(1,nsurv,1,2,styr,endyr)  //new matrix combine total numbers over 3 surveys
   matrix totn_srv1(1,2,styr,endyr)
   matrix totn_srv2(1,2,styr,endyr)
   matrix totn_srv3(1,2,styr,endyr)
-  vector M(1,2)
   vector temp1(1,nages)
   vector temp2(1,nages)
   vector explbiom(styr,endyr)
@@ -302,6 +311,11 @@ PRELIMINARY_CALCS_SECTION
   obs_mean_sexr=0.34;  //initial value for avg proportion of male population estimated from shelf surveys; calculated below
   obs_SD_sexr=0.0485;  //initial value for standard deviation of mean male population proportion: calculated below
 //compute sex ratio in  catch
+  cout<<"obs_p_fish(1,1)"<<std::endl;
+  cout<<obs_p_fish(1,1)<<std::endl;  
+  cout<<"obs_p_fish(2,2,8)"<<std::endl;
+  cout<<obs_p_fish(2,2,8)<<std::endl;
+
   for(i=1; i<=nobs_fish;i++)
   {
     obs_sexr(i) = sum(obs_p_fish(1,i))/sum(obs_p_fish(1,i) + obs_p_fish(2,i)); 
@@ -391,9 +405,7 @@ PRELIMINARY_CALCS_SECTION
     for(k=1; k<=2;k++)
       offset(6) -= nsamples_srv3_age(k,i)*obs_p_srv3_age(k,i) * log(obs_p_srv3_age(k,i)+.0001);
   }
- 
-  M(1)=0.20;
-  M(2)=0.35;
+
 
 PROCEDURE_SECTION
 //this is for bootstraping where qrun is a vector of q's from bootstrap irun is the 
@@ -462,7 +474,7 @@ FUNCTION get_selectivity
  //vector=vector-scalar same as  vector-=scalar  
  //scaling selectivities by subracting the mean so exp(mean(s))=1.   
  //selectivities can be greater than 1 but mean is 1.
- //cout<<"calc log_sel_fish"<<endl;
+
   for(k=1;k<=2;k++)
     {
       log_sel_fish(k)-=log(mean(mfexp(log_sel_fish(k))));
@@ -471,7 +483,6 @@ FUNCTION get_selectivity
        {
          sel(k)=sel(k)*sexr_param_fish; //fixed at 1 in GOA model not BSAI model
        }
-      //cout<<"sel survey"<<sel_srv1<<endl;
     } 
     for (j=1;j<=nages;j++)  //this is selectivity for the surveys
     { 

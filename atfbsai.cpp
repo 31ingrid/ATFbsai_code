@@ -84,11 +84,11 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   monot_sel.allocate("monot_sel");
   phase_selcoffs.allocate("phase_selcoffs");
   wt_like.allocate(1,8,"wt_like");
+  M.allocate(1,2,"M");
   cv_srv1.allocate(1,nobs_srv1);
   cv_srv2.allocate(1,nobs_srv2);
   cv_srv3.allocate(1,nobs_srv3);
- cout<<"nselages_srv"<<std::endl;
- cout<<nselages_srv(3)<<std::endl;
+  cv_srv.allocate(1,nsurv,1,nobs_srv);
    styr_rec=styr-nages+1;
    if(nselages>nages) nselages=nages;
    if(nselages_srv1>nages) nselages_srv1=nages;  
@@ -97,9 +97,12 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
    if(nselages_srv(i)>nages) nselages_srv(i)=nages;
    }
    //calculate cv for surveys
-    cv_srv1=elem_div(obs_srv1_sd,obs_srv1);   //shelf survey CV
-    cv_srv2=elem_div(obs_srv2_sd,obs_srv2);   //slope survey CV
-    cv_srv3=elem_div(obs_srv3_sd,obs_srv3);   //Aleutian Island survey CV
+   cv_srv1=elem_div(obs_srv1_sd,obs_srv1);   //shelf survey CV
+   cv_srv2=elem_div(obs_srv2_sd,obs_srv2);   //slope survey CV
+   cv_srv3=elem_div(obs_srv3_sd,obs_srv3);   //Aleutian Island survey CV
+   for (int j=1;j<=nsurv;j++){
+   for (i=1;i<=nobs_srv(3);i++){ 
+   cv_srv(j,i)=obs_srv_sd(j,i)/(double)obs_srv(j,i); }}
    //change weights to tons
    wt=wt*.001;
   obs_sexr.allocate(1,nobs_fish);
@@ -173,12 +176,12 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   srv1_slope_m2.allocate(.01,.5,phase_logistic_sel,"srv1_slope_m2");
   srv1_sel50_m2.allocate(1.,12.,phase_logistic_sel,"srv1_sel50_m2");
   srv2_slope_f.allocate(.1,5.,phase_logistic_sel,"srv2_slope_f");
-  srv2_sel50_f.allocate(1.,10.,phase_logistic_sel,"srv2_sel50_f");
-  srv2_slope_m.allocate(.01,.5,phase_logistic_sel,"srv2_slope_m");
-  srv2_sel50_m.allocate(1.,12.,phase_logistic_sel,"srv2_sel50_m");
   srv3_slope_f.allocate(.1,5.,phase_logistic_sel,"srv3_slope_f");
+  srv2_sel50_f.allocate(1.,10.,phase_logistic_sel,"srv2_sel50_f");
   srv3_sel50_f.allocate(1.,10.,phase_logistic_sel,"srv3_sel50_f");
+  srv2_slope_m.allocate(.01,.5,phase_logistic_sel,"srv2_slope_m");
   srv3_slope_m.allocate(.01,.5,phase_logistic_sel,"srv3_slope_m");
+  srv2_sel50_m.allocate(1.,12.,phase_logistic_sel,"srv2_sel50_m");
   srv3_sel50_m.allocate(1.,12.,phase_logistic_sel,"srv3_sel50_m");
   sexr_param_fish.allocate(1.0,1.0,-5,"sexr_param_fish");
   F40.allocate(0.01,1.,phase_F40,"F40");
@@ -191,6 +194,10 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   sel.allocate(1,2,1,nages,"sel");
   #ifndef NO_AD_INITIALIZE
     sel.initialize();
+  #endif
+  sel_srv.allocate(1,nsurv,1,2,1,nages,"sel_srv");
+  #ifndef NO_AD_INITIALIZE
+    sel_srv.initialize();
   #endif
   sel_srv1.allocate(1,2,1,nages,"sel_srv1");
   #ifndef NO_AD_INITIALIZE
@@ -212,6 +219,10 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   #ifndef NO_AD_INITIALIZE
     popn.initialize();
   #endif
+  totn_srv.allocate(1,nsurv,1,2,styr,endyr,"totn_srv");
+  #ifndef NO_AD_INITIALIZE
+    totn_srv.initialize();
+  #endif
   totn_srv1.allocate(1,2,styr,endyr,"totn_srv1");
   #ifndef NO_AD_INITIALIZE
     totn_srv1.initialize();
@@ -223,10 +234,6 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   totn_srv3.allocate(1,2,styr,endyr,"totn_srv3");
   #ifndef NO_AD_INITIALIZE
     totn_srv3.initialize();
-  #endif
-  M.allocate(1,2,"M");
-  #ifndef NO_AD_INITIALIZE
-    M.initialize();
   #endif
   temp1.allocate(1,nages,"temp1");
   #ifndef NO_AD_INITIALIZE
@@ -487,6 +494,10 @@ void model_parameters::preliminary_calculations(void)
   admaster_slave_variable_interface(*this);
   obs_mean_sexr=0.34;  //initial value for avg proportion of male population estimated from shelf surveys; calculated below
   obs_SD_sexr=0.0485;  //initial value for standard deviation of mean male population proportion: calculated below
+  cout<<"obs_p_fish(1,1)"<<std::endl;
+  cout<<obs_p_fish(1,1)<<std::endl;  
+  cout<<"obs_p_fish(2,2,8)"<<std::endl;
+  cout<<obs_p_fish(2,2,8)<<std::endl;
   for(i=1; i<=nobs_fish;i++)
   {
     obs_sexr(i) = sum(obs_p_fish(1,i))/sum(obs_p_fish(1,i) + obs_p_fish(2,i)); 
@@ -563,9 +574,6 @@ void model_parameters::preliminary_calculations(void)
     for(k=1; k<=2;k++)
       offset(6) -= nsamples_srv3_age(k,i)*obs_p_srv3_age(k,i) * log(obs_p_srv3_age(k,i)+.0001);
   }
- 
-  M(1)=0.20;
-  M(2)=0.35;
 }
 
 void model_parameters::userfunction(void)
@@ -631,7 +639,6 @@ void model_parameters::get_selectivity(void)
  //vector=vector-scalar same as  vector-=scalar  
  //scaling selectivities by subracting the mean so exp(mean(s))=1.   
  //selectivities can be greater than 1 but mean is 1.
- //cout<<"calc log_sel_fish"<<endl;
   for(k=1;k<=2;k++)
     {
       log_sel_fish(k)-=log(mean(mfexp(log_sel_fish(k))));
@@ -640,7 +647,6 @@ void model_parameters::get_selectivity(void)
        {
          sel(k)=sel(k)*sexr_param_fish; //fixed at 1 in GOA model not BSAI model
        }
-      //cout<<"sel survey"<<sel_srv1<<endl;
     } 
     for (j=1;j<=nages;j++)  //this is selectivity for the surveys
     { 
