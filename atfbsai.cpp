@@ -46,7 +46,8 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   nsamples_srv1_length.allocate(1,2,1,nobs_srv1_length,"nsamples_srv1_length");
   nsamples_srv2_length.allocate(1,2,1,nobs_srv2_length,"nsamples_srv2_length");
   nsamples_srv3_length.allocate(1,2,1,nobs_srv3_length,"nsamples_srv3_length");
-  nsamples_srv_length.allocate(1,nsurv,1,2,1,nobs_srv_length,"nsamples_srv_length");
+  nsamples_srv_length_fem.allocate(1,nsurv,1,nobs_srv_length,"nsamples_srv_length_fem");
+  nsamples_srv_length_mal.allocate(1,nsurv,1,nobs_srv_length,"nsamples_srv_length_mal");
   obs_p_srv1_length.allocate(1,2,1,nobs_srv1_length,1,nlen,"obs_p_srv1_length");
   obs_p_srv2_length.allocate(1,2,1,nobs_srv2_length,1,nlen,"obs_p_srv2_length");
   obs_p_srv3_length.allocate(1,2,1,nobs_srv3_length,1,nlen,"obs_p_srv3_length");
@@ -85,6 +86,7 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   phase_selcoffs.allocate("phase_selcoffs");
   wt_like.allocate(1,8,"wt_like");
   M.allocate(1,2,"M");
+  offset_const.allocate("offset_const");
   cv_srv1.allocate(1,nobs_srv1);
   cv_srv2.allocate(1,nobs_srv2);
   cv_srv3.allocate(1,nobs_srv3);
@@ -106,6 +108,7 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
    //change weights to tons
    wt=wt*.001;
   obs_sexr.allocate(1,nobs_fish);
+  obs_sexr_srv_2.allocate(1,nsurv,1,nobs_srv_length);
   obs_sexr_srv1_2.allocate(1,nobs_srv1_length);
   obs_sexr_srv2_2.allocate(1,nobs_srv2_length);
   obs_sexr_srv3_2.allocate(1,nobs_srv3_length);
@@ -482,6 +485,10 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   #ifndef NO_AD_INITIALIZE
   maxsel_fish.initialize();
   #endif
+  maxsel_srv.allocate(1,nsurv,"maxsel_srv");
+  #ifndef NO_AD_INITIALIZE
+    maxsel_srv.initialize();
+  #endif
   maxsel_srv1.allocate("maxsel_srv1");
   #ifndef NO_AD_INITIALIZE
   maxsel_srv1.initialize();
@@ -518,13 +525,15 @@ void model_parameters::preliminary_calculations(void)
   admaster_slave_variable_interface(*this);
   obs_mean_sexr=0.34;  //initial value for avg proportion of male population estimated from shelf surveys; calculated below
   obs_SD_sexr=0.0485;  //initial value for standard deviation of mean male population proportion: calculated below
-  cout<<"obs_p_fish(1,1)"<<std::endl;
-  cout<<obs_p_fish(1,1)<<std::endl;  
-  cout<<"obs_p_fish(2,2,8)"<<std::endl;
-  cout<<obs_p_fish(2,2,8)<<std::endl;
   for(i=1; i<=nobs_fish;i++)
   {
     obs_sexr(i) = sum(obs_p_fish(1,i))/sum(obs_p_fish(1,i) + obs_p_fish(2,i)); 
+  }
+  for(i=1;i<=nsurv;i++){
+	for (j=1;j<=nobs_srv_length(i);j++){
+		obs_sexr_srv_2(i,j)=sum(obs_p_srv_length_mal(i,j)/
+		      (sum(obs_p_srv_length_mal(i,j))+sum(obs_p_srv_length_fem(i,j))));
+	}
   }
   for(i=1; i<=nobs_srv1_length;i++)
     obs_sexr_srv1_2(i) = (sum(obs_p_srv1_length(2,i)))/
@@ -537,12 +546,12 @@ void model_parameters::preliminary_calculations(void)
   for(i=1; i<=nobs_srv3_length;i++)
     obs_sexr_srv3_2(i) = (sum(obs_p_srv3_length(2,i)))/
                          (sum(obs_p_srv3_length(1,i)) + sum(obs_p_srv3_length(2,i))); 
- // cout<< " thru sex ratio "<<endl;
+ // cout<< " thru sex ratio "<<endl;  
  //Compute offset for multinomial and length bin proportions
  // offset is a constant nplog(p) is added to the likelihood     
  // magnitude depends on nsamples(sample size) and p's_
   //k is sex loop
-  offset.initialize(); 
+  offset.initialize();  
   for (i=1; i <= nobs_fish; i++)
   {
     double sumtot ;
@@ -551,7 +560,27 @@ void model_parameters::preliminary_calculations(void)
     obs_p_fish(2,i) = obs_p_fish(2,i) / sumtot; 
     for(k=1; k<=2;k++)
       offset(1) -= nsamples_fish(k,i)*obs_p_fish(k,i) * log(obs_p_fish(k,i)+.0001);
-  }
+  }    
+  cout<<"nsamples_fish(1,1)"<<std::endl;
+  cout<<nsamples_fish(1,1)<<std::endl;
+  cout<<"obs_p_fish(1,1)"<<std::endl;   
+  cout<<obs_p_fish(1,1)<<std::endl;
+  cout<<"nsamples_fish(1,1)*obs_p_fish(1,1) * log(obs_p_fish(1,1)+.0001)"<<std::endl;
+  cout<<nsamples_fish(1,1)*obs_p_fish(1,1) * log(obs_p_fish(1,1)+.0001)<<std::endl;   
+  //this loops over all surveys and makes sure all proportions sum to 1.
+  for(i=1;i<=nsurv;i++){
+	for(j=1;j<=nobs_srv_length(i);j++){    
+		double sumtot;
+		sumtot=sum(obs_p_srv_length_fem(i,j)+obs_p_srv_length_mal(i,j));
+        obs_p_srv_length_mal(i,j)=obs_p_srv_length_mal(i,j)/sumtot;  //changing these to proportions rather than numbers
+        obs_p_srv_length_fem(i,j)=obs_p_srv_length_fem(i,j)/sumtot;
+        offset(i+1)-= nsamples_srv_length_fem(i,j)*obs_p_srv_length_fem(i,j)*log(obs_p_srv_length_fem(i,j)+offset_const)
+                   +nsamples_srv_length_mal(i,j)*obs_p_srv_length_mal(i,j)*log(obs_p_srv_length_mal(i,j)+offset_const); 
+	}
+  } 
+  cout<<"offset1"<<std::endl;
+  cout<<offset<<std::endl;
+ 
  //shelf survey length offset and bin proportions
   for (i=1; i <= nobs_srv1_length; i++)
   {
@@ -561,7 +590,7 @@ void model_parameters::preliminary_calculations(void)
     obs_p_srv1_length(2,i) = obs_p_srv1_length(2,i) / sumtot; 
     for(k=1; k<=2;k++)
       offset(2) -= nsamples_srv1_length(k,i)*obs_p_srv1_length(k,i) * log(obs_p_srv1_length(k,i)+.0001);
-  }
+  }  
   for (i=1; i <= nobs_srv2_length; i++)
   {
     double sumtot ;
@@ -580,6 +609,10 @@ void model_parameters::preliminary_calculations(void)
     for(k=1; k<=2;k++)
       offset(4) -= nsamples_srv3_length(k,i)*obs_p_srv3_length(k,i) * log(obs_p_srv3_length(k,i)+.0001);
   }
+  cout<<"obs_p_srv1_length(1)"<<std::endl;     //this was replaced with
+  cout<<obs_p_srv1_length(1)<<std::endl; 
+  cout<<"obs_p_srv_length_fem(1)"<<std::endl;  //this here
+  cout<<obs_p_srv_length_fem(1)<<std::endl;
   for (i=1; i <= nobs_srv1_age; i++)
   {
     double sumtot ;
@@ -760,7 +793,7 @@ void model_parameters::get_numbers_at_age(void)
   if(maxsel_srv3<max(sel_srv3(2)))
     maxsel_srv3=max(sel_srv3(2)); 
   int itmp;
- //calc initial population  
+ //calc initial population    
   for (j=1;j<nages;j++)
     {
       itmp=styr+1-j;
@@ -1383,8 +1416,11 @@ void model_parameters::report()
 		      report << yrs_srv3_age(i) << obs_p_srv3_age(1,i) << endl;
 		  report <<" Predicted female Aleutians survey age composition " << endl;
 		    for (i=1; i<=nobs_srv3_age; i++)
-		      report << yrs_srv3_age(i)  << pred_p_srv3_age(1,i) << endl;
-	
+		      report << yrs_srv3_age(i)  << pred_p_srv3_age(1,i) << endl; 
+		
+				  report <<" S " << endl;
+				  report <<S << endl; 
+					
   report << " Go drink coffee " << endl; 
   report << "SARA form for Angie Grieg" << endl;
   report << "ATF        # stock  " << endl;

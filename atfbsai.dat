@@ -80,13 +80,14 @@
 # (31) sample size for each length comp by sex from the Aleutian Islands survey            
 200 200 200 200 200 200 200 200 200 200 200 200              
 200 200 200 200 200 200 200 200 200 200 200 200 
-#(31.5) sample sizes for each length comp by sex and year for shelf, slope, AI survey
+#(31.5) sample sizes females for each length comp by sex and year for shelf, slope, AI survey
 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200
-200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200
-200 200 200 200 200 200 200 200 200 200                 
 200 200 200 200 200 200 200 200 200 200
-200 200 200 200 200 200 200 200 200 200 200 200              
-200 200 200 200 200 200 200 200 200 200 200 200              
+200 200 200 200 200 200 200 200 200 200 200 200  
+#(31.6) same for males
+200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200
+200 200 200 200 200 200 200 200 200 200
+200 200 200 200 200 200 200 200 200 200 200 200            
 # length bins - 25 bins 26 numbers to define                
 #10 16 18 20 22 24 26 28 30 32 34 36 38 40 43 46 49 52 55 58 61 64 67 70 75 95
 # (32) size composition for shelf survey females "1981-2010," except 1996 and 1998, 2004, 2010 where there is age data          
@@ -580,4 +581,6 @@
 # weights for constraint on monotonicity 1 fishery female, 2 fishery male, 3 survey female, 4 survey male
   200. 100. 20000. 1000.
 #(54)   female then male natural mortality
-0.2 0.35   
+0.2 0.35
+#(55) offset constant
+0.0001   
