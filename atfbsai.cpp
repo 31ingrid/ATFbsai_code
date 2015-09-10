@@ -140,17 +140,25 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   cv_srv1.allocate(1,nobs_srv1);
   cv_srv2.allocate(1,nobs_srv2);
   cv_srv3.allocate(1,nobs_srv3);
+  cv_srv.allocate(1,nsurv,1,nobs_srv);
    styr_rec=styr-nages+1;
    if(nselages>nages) nselages=nages;
    if(nselages_srv1>nages) nselages_srv1=nages;  
-   if(nselages_srv2>nages) nselages_srv2=nages;
+   if(nselages_srv2>nages) nselages_srv2=nages;  
+   for (i=1; i<= nsurv; i++){
+   if(nselages_srv(i)>nages) nselages_srv(i)=nages;
+   }
    //calculate cv for surveys
     cv_srv1=elem_div(obs_srv1_sd,obs_srv1);   //shelf survey CV
     cv_srv2=elem_div(obs_srv2_sd,obs_srv2);   //slope survey CV
     cv_srv3=elem_div(obs_srv3_sd,obs_srv3);   //Aleutian Island survey CV
+   for (int j=1;j<=nsurv;j++){
+   for (i=1;i<=nobs_srv(j);i++){ 
+   cv_srv(j,i)=obs_srv_sd(j,i)/(double)obs_srv(j,i); }}
    //change weights to tons
    wt=wt*.001;
   obs_sexr.allocate(1,nobs_fish);
+  obs_sexr_srv_2.allocate(1,nsurv,1,nobs_srv_length);
   obs_sexr_srv1_2.allocate(1,nobs_srv1_length);
   obs_sexr_srv2_2.allocate(1,nobs_srv2_length);
   obs_sexr_srv3_2.allocate(1,nobs_srv3_length);
@@ -175,9 +183,9 @@ void model_parameters::initializationfunction(void)
   srv1_slope_f1.set_initial_value(.8);
   srv1_slope_f2.set_initial_value(.8);
   srv1_slope_m1.set_initial_value(.4);
+  srv1_slope_m2.set_initial_value(.4);
   srv1_sel50_f1.set_initial_value(4.);
   srv1_sel50_f2.set_initial_value(4.);
-  srv1_slope_m2.set_initial_value(.4);
   srv1_sel50_m1.set_initial_value(8.);
   srv1_sel50_m2.set_initial_value(8.);
   srv2_slope_f.set_initial_value(.4);
@@ -240,6 +248,10 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   #ifndef NO_AD_INITIALIZE
     sel.initialize();
   #endif
+  sel_srv.allocate(1,nsurv,1,2,1,nages,"sel_srv");
+  #ifndef NO_AD_INITIALIZE
+    sel_srv.initialize();
+  #endif
   sel_srv1.allocate(1,2,1,nages,"sel_srv1");
   #ifndef NO_AD_INITIALIZE
     sel_srv1.initialize();
@@ -260,6 +272,10 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   #ifndef NO_AD_INITIALIZE
     popn.initialize();
   #endif
+  totn_srv.allocate(1,nsurv,1,2,styr,endyr,"totn_srv");
+  #ifndef NO_AD_INITIALIZE
+    totn_srv.initialize();
+  #endif
   totn_srv1.allocate(1,2,styr,endyr,"totn_srv1");
   #ifndef NO_AD_INITIALIZE
     totn_srv1.initialize();
@@ -271,10 +287,6 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   totn_srv3.allocate(1,2,styr,endyr,"totn_srv3");
   #ifndef NO_AD_INITIALIZE
     totn_srv3.initialize();
-  #endif
-  M.allocate(1,2,"M");
-  #ifndef NO_AD_INITIALIZE
-    M.initialize();
   #endif
   temp1.allocate(1,nages,"temp1");
   #ifndef NO_AD_INITIALIZE
@@ -295,6 +307,10 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   fspbio.allocate(styr,endyr,"fspbio");
   #ifndef NO_AD_INITIALIZE
     fspbio.initialize();
+  #endif
+  pred_srv.allocate(1,nsurv,styr,endyr,"pred_srv");
+  #ifndef NO_AD_INITIALIZE
+    pred_srv.initialize();
   #endif
   pred_srv1.allocate(styr,endyr,"pred_srv1");
   #ifndef NO_AD_INITIALIZE
@@ -331,6 +347,22 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   pred_p_srv3_len.allocate(1,2,1,nobs_srv3_length,1,nlen,"pred_p_srv3_len");
   #ifndef NO_AD_INITIALIZE
     pred_p_srv3_len.initialize();
+  #endif
+  pred_p_srv_age_fem.allocate(1,nsurv_aged,1,nobs_srv_age,1,nages,"pred_p_srv_age_fem");
+  #ifndef NO_AD_INITIALIZE
+    pred_p_srv_age_fem.initialize();
+  #endif
+  pred_p_srv_age_mal.allocate(1,nsurv_aged,1,nobs_srv_age,1,nages,"pred_p_srv_age_mal");
+  #ifndef NO_AD_INITIALIZE
+    pred_p_srv_age_mal.initialize();
+  #endif
+  pred_p_srv_len_fem.allocate(1,nsurv,1,nobs_srv_length,1,nlen,"pred_p_srv_len_fem");
+  #ifndef NO_AD_INITIALIZE
+    pred_p_srv_len_fem.initialize();
+  #endif
+  pred_p_srv_len_mal.allocate(1,nsurv,1,nobs_srv_length,1,nlen,"pred_p_srv_len_mal");
+  #ifndef NO_AD_INITIALIZE
+    pred_p_srv_len_mal.initialize();
   #endif
   pred_catch.allocate(styr,endyr,"pred_catch");
   #ifndef NO_AD_INITIALIZE
@@ -400,6 +432,10 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   fpen.allocate("fpen");
   #ifndef NO_AD_INITIALIZE
   fpen.initialize();
+  #endif
+  surv_like.allocate(1,nsurv,"surv_like");
+  #ifndef NO_AD_INITIALIZE
+    surv_like.initialize();
   #endif
   surv1_like.allocate("surv1_like");
   #ifndef NO_AD_INITIALIZE
@@ -539,6 +575,12 @@ void model_parameters::preliminary_calculations(void)
   {
     obs_sexr(i) = sum(obs_p_fish(1,i))/sum(obs_p_fish(1,i) + obs_p_fish(2,i)); 
   }
+  for(i=1;i<=nsurv;i++){
+	for (j=1;j<=nobs_srv_length(i);j++){
+		obs_sexr_srv_2(i,j)=sum(obs_p_srv_length_mal(i,j)/
+		      (sum(obs_p_srv_length_mal(i,j))+sum(obs_p_srv_length_fem(i,j))));
+	}
+  }
   for(i=1; i<=nobs_srv1_length;i++)
     obs_sexr_srv1_2(i) = (sum(obs_p_srv1_length(2,i)))/
                          (sum(obs_p_srv1_length(1,i)) + sum(obs_p_srv1_length(2,i)));
@@ -550,7 +592,7 @@ void model_parameters::preliminary_calculations(void)
   for(i=1; i<=nobs_srv3_length;i++)
     obs_sexr_srv3_2(i) = (sum(obs_p_srv3_length(2,i)))/
                          (sum(obs_p_srv3_length(1,i)) + sum(obs_p_srv3_length(2,i))); 
- // cout<< " thru sex ratio "<<endl;
+ // cout<< " thru sex ratio "<<endl;  
  //Compute offset for multinomial and length bin proportions
  // offset is a constant nplog(p) is added to the likelihood     
  // magnitude depends on nsamples(sample size) and p's_
@@ -565,6 +607,17 @@ void model_parameters::preliminary_calculations(void)
     for(k=1; k<=2;k++)
       offset(1) -= nsamples_fish(k,i)*obs_p_fish(k,i) * log(obs_p_fish(k,i)+.0001);
   }
+  //this loops over all surveys and makes sure all proportions sum to 1.
+  for(i=1;i<=nsurv;i++){
+	for(j=1;j<=nobs_srv_length(i);j++){    
+		double sumtot;
+		sumtot=sum(obs_p_srv_length_fem(i,j)+obs_p_srv_length_mal(i,j));
+        obs_p_srv_length_mal(i,j)=obs_p_srv_length_mal(i,j)/sumtot;  //changing these to proportions rather than numbers
+        obs_p_srv_length_fem(i,j)=obs_p_srv_length_fem(i,j)/sumtot;
+        offset(i+1)-= nsamples_srv_length_fem(i,j)*obs_p_srv_length_fem(i,j)*log(obs_p_srv_length_fem(i,j)+offset_const)
+                   +nsamples_srv_length_mal(i,j)*obs_p_srv_length_mal(i,j)*log(obs_p_srv_length_mal(i,j)+offset_const); 
+	}
+  } 
  //shelf survey length offset and bin proportions
   for (i=1; i <= nobs_srv1_length; i++)
   {
@@ -611,9 +664,6 @@ void model_parameters::preliminary_calculations(void)
     for(k=1; k<=2;k++)
       offset(6) -= nsamples_srv3_age(k,i)*obs_p_srv3_age(k,i) * log(obs_p_srv3_age(k,i)+.0001);
   }
- 
-  M(1)=0.20;
-  M(2)=0.35;
 }
 
 void model_parameters::userfunction(void)
