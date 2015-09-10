@@ -87,6 +87,7 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   wt_like.allocate(1,8,"wt_like");
   M.allocate(1,2,"M");
   offset_const.allocate("offset_const");
+  survey.allocate("survey");
   cv_srv1.allocate(1,nobs_srv1);
   cv_srv2.allocate(1,nobs_srv2);
   cv_srv3.allocate(1,nobs_srv3);
@@ -705,7 +706,9 @@ void model_parameters::get_selectivity(void)
          sel(k)=sel(k)*sexr_param_fish; //fixed at 1 in GOA model not BSAI model
        }
     } 
-    for (j=1;j<=nages;j++)  //this is selectivity for the surveys
+   //   sel_srv2(1) = get_sel(srv2_slope_f1,srv2_sel50_f1);
+   //   sel_srv2(2) = get_sel(srv2_slope_m1,srv2_sel50_m1);
+   for (j=1;j<=nages;j++)  //this is selectivity for the surveys
     { 
       
       //ascending limb of curve for shelf survey
@@ -716,8 +719,8 @@ void model_parameters::get_selectivity(void)
 		temp2=1./(1.+mfexp(srv1_slope_m2*(double(j)-srv1_sel50_m2)));
 		sel_srv1(1,j)=sel_srv1(1,j)*temp1(j);
 		sel_srv1(2,j)=sel_srv1(2,j)*temp2(j);
-		//slope surveys
-		sel_srv2(1,j)=1./(1.+mfexp(-1.*srv2_slope_f*(double(j)-srv2_sel50_f)));
+		//slope surveys     
+    	sel_srv2(1,j)=1./(1.+mfexp(-1.*srv2_slope_f*(double(j)-srv2_sel50_f)));
 		sel_srv2(2,j)=1./(1.+mfexp(-1.*srv2_slope_m*(double(j)-srv2_sel50_m)));
 		//Aleutian Islands surveys
 		sel_srv3(1,j) = 1./(1.+mfexp(-1.*srv3_slope_f*(double(j)-srv3_sel50_f)));
@@ -755,7 +758,35 @@ void model_parameters::get_selectivity(void)
 			sel_srv3(2,j) = 1./(1.+mfexp(-1.*srv3_slope_m*(double(j)-srv3_sel50_m)));							
           } 
      }
- 
+            cout<<sel_srv2(1)<< " old"<<endl;  
+		  	sel_srv2(1) = get_sel(srv2_slope_f,srv2_sel50_f);  
+		    cout<<sel_srv1(1)<< " new"<<endl;
+			exit(1);
+}
+
+dvar_vector model_parameters::get_sel(const dvariable& slp, const dvariable& a50)
+{
+  ofstream& evalout= *pad_evalout;
+   {
+	dvar_vector sel_tmp(1,nages);
+   for (j=1;j<=nages;j++)  //this is selectivity for the surveys
+ 		sel_tmp(j)=1./(1.+mfexp(-slp*(double(j)-a50)));           
+   return(sel_tmp);
+   }
+}
+
+dvar_vector model_parameters::get_sel(const dvariable& slp, const dvariable& a50, const dvariable& dslp, const dvariable& d50)
+{
+  ofstream& evalout= *pad_evalout;
+   {
+	dvar_vector sel_tmp(1,nages);
+   for (j=1;j<=nages;j++)  //this is selectivity for the surveys         
+   {
+	  sel_tmp(j) = 1./(1.+mfexp(-slp*(double(j)-a50)));           
+      sel_tmp(j) *= 1./(1.+mfexp(dslp*(double(j)-d50)));
+   }
+ 	return(sel_tmp);
+  }          
 }
 
 void model_parameters::get_mortality(void)

@@ -583,4 +583,5 @@
 #(54)   female then male natural mortality
 0.2 0.35
 #(55) offset constant
-0.0001   
+0.0001
+#(56) "survey" 1 if EBS assessment, 2 if GOA assessment   

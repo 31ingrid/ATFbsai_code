@@ -89,7 +89,7 @@ DATA_SECTION
   init_vector wt_like(1,8)    //(53) 
   init_vector M(1,2) //(54) female then male natural mortality            
   init_number offset_const //(55) a constant to offset zero values
-
+  init_int survey //(56) 1 if BSAI assessment, 2 if GOA
    int styr_rec; 
    vector cv_srv1(1,nobs_srv1);      //shelf survey CV
    vector cv_srv2(1,nobs_srv2);      //slope survey CV
@@ -150,7 +150,8 @@ INITIALIZATION_SECTION
   fish_slope_f .4
   fish_sel50_f  5.
   fish_slope_m  .1
-  fish_sel50_m  8
+  fish_sel50_m  8  
+//can initialize thins I dont use
   srv1_slope_f1  .8
   srv1_slope_f2  .8
   srv1_slope_m1  .4
@@ -166,7 +167,7 @@ INITIALIZATION_SECTION
   srv3_slope_f  .4
   srv3_sel50_f  8.
   srv3_slope_m  .4
-  srv3_sel50_m  8.
+  srv3_sel50_m  8.  
   alpha 1.
   beta 0.
 
@@ -534,7 +535,12 @@ FUNCTION get_selectivity
          sel(k)=sel(k)*sexr_param_fish; //fixed at 1 in GOA model not BSAI model
        }
     } 
-    for (j=1;j<=nages;j++)  //this is selectivity for the surveys
+
+   //   sel_srv2(1) = get_sel(srv2_slope_f1,srv2_sel50_f1);
+   //   sel_srv2(2) = get_sel(srv2_slope_m1,srv2_sel50_m1);
+
+
+   for (j=1;j<=nages;j++)  //this is selectivity for the surveys
     { 
       
       //ascending limb of curve for shelf survey
@@ -545,8 +551,8 @@ FUNCTION get_selectivity
 		temp2=1./(1.+mfexp(srv1_slope_m2*(double(j)-srv1_sel50_m2)));
 		sel_srv1(1,j)=sel_srv1(1,j)*temp1(j);
 		sel_srv1(2,j)=sel_srv1(2,j)*temp2(j);
-		//slope surveys
-		sel_srv2(1,j)=1./(1.+mfexp(-1.*srv2_slope_f*(double(j)-srv2_sel50_f)));
+		//slope surveys     
+    	sel_srv2(1,j)=1./(1.+mfexp(-1.*srv2_slope_f*(double(j)-srv2_sel50_f)));
 		sel_srv2(2,j)=1./(1.+mfexp(-1.*srv2_slope_m*(double(j)-srv2_sel50_m)));
 		//Aleutian Islands surveys
 		sel_srv3(1,j) = 1./(1.+mfexp(-1.*srv3_slope_f*(double(j)-srv3_sel50_f)));
@@ -585,9 +591,31 @@ FUNCTION get_selectivity
           } 
      }
 //  cout<<"end new sel here"<<endl; 
+            cout<<sel_srv2(1)<< " old"<<endl;  
+
+		  	sel_srv2(1) = get_sel(srv2_slope_f,srv2_sel50_f);  
+		    cout<<sel_srv1(1)<< " new"<<endl;
+			exit(1);
 
 //     logistic selectivity curves, asymptotic for fishery, slope survey and the Aleutian Islands but domed shape for shelf survey  
- 
+FUNCTION dvar_vector get_sel(const dvariable& slp, const dvariable& a50)
+   {
+	dvar_vector sel_tmp(1,nages);
+   for (j=1;j<=nages;j++)  //this is selectivity for the surveys
+ 		sel_tmp(j)=1./(1.+mfexp(-slp*(double(j)-a50)));           
+   return(sel_tmp);
+   }
+FUNCTION dvar_vector get_sel(const dvariable& slp, const dvariable& a50, const dvariable& dslp, const dvariable& d50)
+   {
+	dvar_vector sel_tmp(1,nages);
+   for (j=1;j<=nages;j++)  //this is selectivity for the surveys         
+   {
+	  sel_tmp(j) = 1./(1.+mfexp(-slp*(double(j)-a50)));           
+      sel_tmp(j) *= 1./(1.+mfexp(dslp*(double(j)-d50)));
+   }
+ 	return(sel_tmp);
+  }          
+
 FUNCTION get_mortality 
   maxsel_fish=max(sel(1));     //1 is females
   if(maxsel_fish<max(sel(2)))  //if highest female selectivity is > male selectivity, make maxsel_fish=male high selectivity

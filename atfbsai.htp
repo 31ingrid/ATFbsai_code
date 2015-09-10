@@ -80,6 +80,7 @@ class model_data : public ad_comm{
   data_vector wt_like;
   data_vector M;
   data_number offset_const;
+  data_int survey;
   int styr_rec;
   dvector cv_srv1;
   dvector cv_srv2;
@@ -263,6 +264,8 @@ public:
   model_parameters(int sz,int argc, char * argv[]);
   virtual void initializationfunction(void);
   void get_selectivity(void);
+ dvar_vector get_sel(const dvariable& slp, const dvariable& a50);
+ dvar_vector get_sel(const dvariable& slp, const dvariable& a50, const dvariable& dslp, const dvariable& d50);
   void get_mortality(void);
   void get_numbers_at_age(void);
   void get_catch_at_age(void);
