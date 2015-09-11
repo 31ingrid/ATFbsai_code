@@ -709,7 +709,7 @@ void model_parameters::get_selectivity(void)
  {
     for(k=1;k<=2;k++)
     {
-      for (j=1;j<=nselages;j++)
+     for (j=1;j<=nselages;j++)
       {
         log_sel_fish(k,j)=log_selcoffs_fish(k,j);
       }
@@ -725,11 +725,10 @@ void model_parameters::get_selectivity(void)
  for(k=1;k<=2;k++)
    {
      avgsel_fish(k)=log(mean(mfexp(log_selcoffs_fish(k))));
-    }
+   }
  //vector=vector-scalar same as  vector-=scalar  
  //scaling selectivities by subracting the mean so exp(mean(s))=1.   
  //selectivities can be greater than 1 but mean is 1.
- //cout<<"calc log_sel_fish"<<endl;
   for(k=1;k<=2;k++)
     {
       log_sel_fish(k)-=log(mean(mfexp(log_sel_fish(k))));
@@ -740,24 +739,6 @@ void model_parameters::get_selectivity(void)
        }
       //cout<<"sel survey"<<sel_srv1<<endl;
     } 
-    for (j=1;j<=nages;j++)  //this is selectivity for the surveys
-    { 
-      
-      //ascending limb of curve for shelf survey
-		sel_srv1(1,j)=1./(1.+mfexp(-1.*srv1_slope_f1*(double(j)-srv1_sel50_f1)));
-		sel_srv1(2,j)=1./(1.+mfexp(-1.*srv1_slope_m1*(double(j)-srv1_sel50_m1)));
-		//decending limb of curve for shelf survey 
-		temp1=1./(1.+mfexp(srv1_slope_f2*(double(j)-srv1_sel50_f2)));
-		temp2=1./(1.+mfexp(srv1_slope_m2*(double(j)-srv1_sel50_m2)));
-		sel_srv1(1,j)=sel_srv1(1,j)*temp1(j);
-		sel_srv1(2,j)=sel_srv1(2,j)*temp2(j);
-		//slope surveys
-		sel_srv2(1,j)=1./(1.+mfexp(-1.*srv2_slope_f*(double(j)-srv2_sel50_f)));
-		sel_srv2(2,j)=1./(1.+mfexp(-1.*srv2_slope_m*(double(j)-srv2_sel50_m)));
-		//Aleutian Islands surveys
-		sel_srv3(1,j) = 1./(1.+mfexp(-1.*srv3_slope_f*(double(j)-srv3_sel50_f)));
-		sel_srv3(2,j) = 1./(1.+mfexp(-1.*srv3_slope_m*(double(j)-srv3_sel50_m)));							
-    }
  }//  end if(active(log_selcoffs_fish))
   else
     {
@@ -774,22 +755,42 @@ void model_parameters::get_selectivity(void)
              sel(1,j)=sel(1,j-1);
              sel(2,j)=sel(2,j-1);
             }
-            //ascending limb of curve for shelf survey
-			sel_srv1(1,j)=1./(1.+mfexp(-1.*srv1_slope_f1*(double(j)-srv1_sel50_f1)));
-			sel_srv1(2,j)=1./(1.+mfexp(-1.*srv1_slope_m1*(double(j)-srv1_sel50_m1)));
-			//decending limb of curve for shelf survey 
-			temp1=1./(1.+mfexp(srv1_slope_f2*(double(j)-srv1_sel50_f2)));
-			temp2=1./(1.+mfexp(srv1_slope_m2*(double(j)-srv1_sel50_m2)));
-			sel_srv1(1,j)=sel_srv1(1,j)*temp1(j);
-			sel_srv1(2,j)=sel_srv1(2,j)*temp2(j);
-			//slope surveys
-			sel_srv2(1,j)=1./(1.+mfexp(-1.*srv2_slope_f*(double(j)-srv2_sel50_f)));
-			sel_srv2(2,j)=1./(1.+mfexp(-1.*srv2_slope_m*(double(j)-srv2_sel50_m)));
-			//Aleutian Islands surveys
-			sel_srv3(1,j) = 1./(1.+mfexp(-1.*srv3_slope_f*(double(j)-srv3_sel50_f)));
-			sel_srv3(2,j) = 1./(1.+mfexp(-1.*srv3_slope_m*(double(j)-srv3_sel50_m)));							
+ //   		sel_srv1(1,j)=sel_srv1(1,j)*temp1(j);
+ //   		sel_srv1(2,j)=sel_srv1(2,j)*temp2(j);
           } 
      }
+    sel_srv(1,1)=get_sel(srv1_slope_f1,srv1_sel50_f1,srv1_slope_f2,srv1_sel50_f2);  
+    sel_srv(1,2)=get_sel(srv1_slope_m1,srv1_sel50_m1,srv1_slope_m2,srv1_sel50_m2);
+    sel_srv(2,1)=get_sel(srv2_slope_f,srv2_sel50_f); 
+    sel_srv(2,2)=get_sel(srv2_slope_m,srv2_sel50_m); 
+    sel_srv(3,1)=get_sel(srv3_slope_f,srv3_sel50_f); 
+    sel_srv(3,2)=get_sel(srv3_slope_m,srv3_sel50_m); 
+  cout<<"sel_srv"<<sel_srv<<std::endl;
+}
+
+dvar_vector model_parameters::get_sel(const dvariable& slp, const dvariable& a50)
+{
+  ofstream& evalout= *pad_evalout;
+   {
+	dvar_vector sel_tmp(1,nages);
+   for (j=1;j<=nages;j++)  //this is selectivity for the surveys
+ 		sel_tmp(j)=1./(1.+mfexp(-slp*(double(j)-a50)));           
+   return(sel_tmp);
+   }
+}
+
+dvar_vector model_parameters::get_sel(const dvariable& slp, const dvariable& a50, const dvariable& dslp, const dvariable& d50)
+{
+  ofstream& evalout= *pad_evalout;
+   {
+	dvar_vector sel_tmp(1,nages);
+   for (j=1;j<=nages;j++)  //this is selectivity for the surveys         
+   {
+	  sel_tmp(j) = 1./(1.+mfexp(-slp*(double(j)-a50)));           
+      sel_tmp(j) *= 1./(1.+mfexp(dslp*(double(j)-d50)));
+   }
+ 	return(sel_tmp);
+  }          
  
 }
 
