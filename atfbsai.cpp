@@ -136,11 +136,15 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   obs_p_srv_age_mal.allocate(1,nsurv_aged,1,nobs_srv_age,1,nages,"obs_p_srv_age_mal");
   M.allocate(1,2,"M");
   offset_const.allocate("offset_const");
-  survey.allocate("survey");
+  Lower_bound.allocate(1,nsurv,"Lower_bound");
+  Upper_bound.allocate(1,nsurv,"Upper_bound");
+  Phase.allocate(1,nsurv,"Phase");
+  assess.allocate("assess");
   cv_srv1.allocate(1,nobs_srv1);
   cv_srv2.allocate(1,nobs_srv2);
   cv_srv3.allocate(1,nobs_srv3);
   cv_srv.allocate(1,nsurv,1,nobs_srv);
+  test.allocate(1,4);
    styr_rec=styr-nages+1;
    if(nselages>nages) nselages=nages;
    if(nselages_srv1>nages) nselages_srv1=nages;  
@@ -163,6 +167,7 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   obs_sexr_srv2_2.allocate(1,nobs_srv2_length);
   obs_sexr_srv3_2.allocate(1,nobs_srv3_length);
   pred_sexr.allocate(styr,endyr);
+  q.allocate(1,nsurv);
 }
 
 void model_parameters::initializationfunction(void)
@@ -204,6 +209,17 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
  model_data(argc,argv) , function_minimizer(sz)
 {
   initializationfunction();
+  dvector lower_bound(1,nsurv);
+  dvector upper_bound(1,nsurv);
+  ivector phase(1,nsurv);
+  for (i=1;i<=nsurv;i++)
+  {
+	  lower_bound(i)=Lower_bound(i); 
+	  upper_bound(i)=Upper_bound(i);
+	  phase(i)=Phase(i); 
+  }  
+  q_surv.allocate(1,nsurv,lower_bound,upper_bound,phase,"q_surv");
+cout<<"q_surv"<<q_surv<<std::endl;
   q1.allocate(0.5,2.0,-4,"q1");
   q2.allocate(0.05,1.5,-4,"q2");
   q3.allocate(0.05,1.5,-4,"q3");
@@ -248,9 +264,17 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   #ifndef NO_AD_INITIALIZE
     sel.initialize();
   #endif
-  sel_srv.allocate(1,nsurv,1,2,1,nages,"sel_srv");
+  sel_srv.allocate(1,2,1,nsurv,1,nages,"sel_srv");
   #ifndef NO_AD_INITIALIZE
     sel_srv.initialize();
+  #endif
+  sel_srv_fem.allocate(1,nsurv,1,nages,"sel_srv_fem");
+  #ifndef NO_AD_INITIALIZE
+    sel_srv_fem.initialize();
+  #endif
+  sel_srv_mal.allocate(1,nsurv,1,nages,"sel_srv_mal");
+  #ifndef NO_AD_INITIALIZE
+    sel_srv_mal.initialize();
   #endif
   sel_srv1.allocate(1,2,1,nages,"sel_srv1");
   #ifndef NO_AD_INITIALIZE
@@ -547,6 +571,10 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   #ifndef NO_AD_INITIALIZE
   maxsel_srv3.initialize();
   #endif
+  maxsel_srv.allocate(1,nsurv,"maxsel_srv");
+  #ifndef NO_AD_INITIALIZE
+    maxsel_srv.initialize();
+  #endif
   mlike.allocate("mlike");
   #ifndef NO_AD_INITIALIZE
   mlike.initialize();
@@ -759,13 +787,19 @@ void model_parameters::get_selectivity(void)
  //   		sel_srv1(2,j)=sel_srv1(2,j)*temp2(j);
           } 
      }
+    sel_srv1(1) = get_sel(srv1_slope_f1,srv1_sel50_f1,srv1_slope_f2,srv1_sel50_f2);    
+    sel_srv1(2) = get_sel(srv1_slope_m1,srv1_sel50_m1,srv1_slope_m2,srv1_sel50_m2); 
+    sel_srv2(1) = get_sel(srv2_slope_f,srv2_sel50_f);
+    sel_srv2(2) = get_sel(srv2_slope_m,srv2_sel50_m); 
+    sel_srv3(1) = get_sel(srv3_slope_f,srv3_sel50_f);
+    sel_srv3(2) = get_sel(srv3_slope_m,srv3_sel50_m);
     sel_srv(1,1)=get_sel(srv1_slope_f1,srv1_sel50_f1,srv1_slope_f2,srv1_sel50_f2);  
-    sel_srv(1,2)=get_sel(srv1_slope_m1,srv1_sel50_m1,srv1_slope_m2,srv1_sel50_m2);
-    sel_srv(2,1)=get_sel(srv2_slope_f,srv2_sel50_f); 
+    sel_srv(1,2)=get_sel(srv2_slope_f,srv2_sel50_f);
+    sel_srv(1,3)=get_sel(srv3_slope_f,srv3_sel50_f); 
+    sel_srv(2,1)=get_sel(srv1_slope_m1,srv1_sel50_m1,srv1_slope_m2,srv1_sel50_m2);
     sel_srv(2,2)=get_sel(srv2_slope_m,srv2_sel50_m); 
-    sel_srv(3,1)=get_sel(srv3_slope_f,srv3_sel50_f); 
-    sel_srv(3,2)=get_sel(srv3_slope_m,srv3_sel50_m); 
-  cout<<"sel_srv"<<sel_srv<<std::endl;
+    sel_srv(2,3)=get_sel(srv3_slope_m,srv3_sel50_m); 
+ // exit(1);
 }
 
 dvar_vector model_parameters::get_sel(const dvariable& slp, const dvariable& a50)
@@ -800,7 +834,7 @@ void model_parameters::get_mortality(void)
   maxsel_fish=max(sel(1));     //1 is females
   if(maxsel_fish<max(sel(2)))  //if highest female selectivity is > male selectivity, make maxsel_fish=male high selectivity
       maxsel_fish=max(sel(2));
-  fmort = mfexp( log_avg_fmort+fmort_dev); 
+  fmort = mfexp(log_avg_fmort+fmort_dev); 
   for(k=1;k<=2;k++)
   {
     for (i=styr;i<=endyr;i++)
@@ -818,6 +852,12 @@ void model_parameters::get_numbers_at_age(void)
   maxsel_fish=max(sel(1));   
   if(maxsel_fish<max(sel(2)))//if females greater than males, then set the max to the females.
     maxsel_fish=max(sel(2)); //set max to whichever sex is larger
+  for(i=1;i<=nsurv;i++)
+ {
+   maxsel_srv(i)=max(sel_srv_fem(i));
+   if(maxsel_srv(i)<max(sel_srv_mal(i)))
+   maxsel_srv(i)=max(sel_srv_mal(i)); 
+ }
   maxsel_srv1=max(sel_srv1(1));
   if(maxsel_srv1<max(sel_srv1(2)))
     maxsel_srv1=max(sel_srv1(2)); 
@@ -860,34 +900,14 @@ void model_parameters::get_numbers_at_age(void)
   {
     for (i=styr;i< endyr;i++)
     {
-      //subvector - avoids writing a j loop  =++ increments the right side 
-      //(1,nages-1) to 1+1 to nages-1+1 then does the assignment x(i)(1,n) 
-      //takes the ith row of x the columns 1 to n
-      //      natage(k,i+1)(2,nages)=++elem_prod(natage(k,i)(1,nages-1),S(k,i)(1,nages-1));
       for(j=1;j<nages;j++)
       {
         natage(k,i+1,j+1)=natage(k,i,j)*S(k,i,j); 
       }
-      //accumulates oldest ages
-      // cout<<"done with j loop"<<endl;
       natage(k,i+1,nages)+=natage(k,i,nages)*S(k,i,nages);
-      // cout<<"done with natage nages"<<endl;
-      //popn is exploitable numbers
       popn(k,i)= natage(k,i)*sel(k);
-      // cout<<"popn "<<endl;
-      // cout<<popn(k,i)<<endl;
     }
-    // cout<<"to popn"<<endl; 
     popn(k,endyr)=natage(k,endyr)*sel(k);
-  }
-  for (i=styr;i<=endyr;i++)
-  {
-      pred_sexr(i)=sum(natage(2,i))/(sum((natage(1,i)+natage(2,i))));  //calculation of prop. of males in pred. population 
-    for(k=1;k<=2;k++)
-    {
-      totn_srv1(k,i)=q1*(natage(k,i)*sel_srv1(k)); // not used in further calculations
-      totn_srv2(k,i)=q2*(natage(k,i)*sel_srv2(k)); // not used in further calculations        
-    }
   }
   //predicted survey values
   fspbio.initialize(); 
@@ -896,29 +916,32 @@ void model_parameters::get_numbers_at_age(void)
   {
     fspbio(i) = natage(1,i)*elem_prod(wt(1),maturity);
     explbiom(i)=0.;
-    pred_bio(i)=0.;
+    pred_bio(i)=0.; 
     pred_srv1(i)=0.;
     pred_srv2(i)=0.;
     pred_srv3(i)=0.; //JNI
-    // if (i>=1982 )      //catchability calculation for survey years
-    if (i>=1982 && i-1981 <= nobs_srv1)      //JNI catchability calculation for survey years
-    
+    //catchability calculation for survey years
+    if (i>=1982 && i-1981 <= nobs_srv1 && assess==1)      //JNI catchability calculation for survey years    
     qtime(i)=q1*mfexp(-alpha+beta*bottom_temps(i-1981));
-    
     for(k=1;k<=2;k++)
     {
       
       pred_srv1(i) += qtime(i)*(natage(k,i)*elem_prod(sel_srv1(k),wt(k)))/maxsel_srv1;   //shelf survey, dividing by the maxsel constrains female selectivity to be 1.0
       //pred_srv1(i) += q1*(natage(k,i)*elem_prod(sel_srv1(k),wt(k)))/maxsel_srv1;   //shelf survey, without temperature q modeling
-      pred_srv2(i) += q2*(natage(k,i)*elem_prod(sel_srv2(k),wt(k))); // /maxsel_srv2;         //slope survey JNI
-      pred_srv3(i) += q3*(natage(k,i)*elem_prod(sel_srv3(k),wt(k))); // /maxsel_srv3;         //Aleutian Islands survey JNI
+      pred_srv2(i) += q2*(natage(k,i)*elem_prod(sel_srv2(k),wt(k)))/maxsel_srv2;         //slope survey JNI  division not necessary because logistic
+      pred_srv3(i) += q3*(natage(k,i)*elem_prod(sel_srv3(k),wt(k)))/maxsel_srv3;         //Aleutian Islands survey JNI
       //next line used to fix q1 to 1.0 - problem is if you start from a bin file, even if the bounds
       // are set different in the tpl file the program will take to value from the bin file and use that 
       //   pred_srv1(i)=1.0*(natage(i)*elem_prod(sel_srv1,wt));
       explbiom(i)+=natage(k,i)*elem_prod(sel(k),wt(k))/maxsel_fish;
       pred_bio(i)+=natage(k,i)*wt(k);
     }
-  }
+  }    
+  //catchability calculation for survey years
+       //Aleutian Islands survey JNI
+    //next line used to fix q1 to 1.0 - problem is if you start from a bin file, even if the bounds
+    // are set different in the tpl file the program will take to value from the bin file and use that 
+    //   pred_srv1(i)=1.0*(natage(i)*elem_prod(sel_srv1,wt));
       // cout <<q3<<endl<<pred_srv3<<endl;exit(1);
     //don't need to divide by max_sel because totn_srv1 is calculated using selectivities and the
     //max_sel would cancel out.

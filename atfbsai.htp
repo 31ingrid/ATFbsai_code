@@ -80,7 +80,10 @@ class model_data : public ad_comm{
   data_3array obs_p_srv_age_mal;
   data_vector M;
   data_number offset_const;
-  data_int survey;
+  data_vector Lower_bound;
+  data_vector Upper_bound;
+  data_vector Phase;
+  data_int assess;
   int styr_rec;
   dvector cv_srv1;
   dvector cv_srv2;
@@ -91,6 +94,7 @@ class model_data : public ad_comm{
   int k;
   int ii;
   int m;
+  dvector test;
   dvector obs_sexr;
   dmatrix obs_sexr_srv_2;
   dvector obs_sexr_srv1_2;
@@ -99,6 +103,7 @@ class model_data : public ad_comm{
   double obs_mean_sexr;
   double obs_SD_sexr;
   dvector pred_sexr;
+  dvector q;
   ~model_data();
   model_data(int argc,char * argv[]);
   friend class model_parameters;
@@ -136,6 +141,7 @@ public:
 private:
   ivector integer_control_flags;
   dvector double_control_flags;
+  param_init_bounded_number_vector q_surv;
   param_init_bounded_number q1;
   param_init_bounded_number q2;
   param_init_bounded_number q3;
@@ -173,6 +179,8 @@ private:
   param_matrix log_sel_fish;
   param_matrix sel;
   param_3array sel_srv;
+  param_matrix sel_srv_fem;
+  param_matrix sel_srv_mal;
   param_matrix sel_srv1;
   param_matrix sel_srv2;
   param_matrix sel_srv3;
@@ -252,6 +260,7 @@ private:
   param_number maxsel_srv1;
   param_number maxsel_srv2;
   param_number maxsel_srv3;
+  param_vector maxsel_srv;
   param_number mlike;
   param_number qlike;
   param_number flike;

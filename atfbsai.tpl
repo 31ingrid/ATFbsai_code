@@ -142,13 +142,15 @@ DATA_SECTION
   init_3darray obs_p_srv_age_mal(1,nsurv_aged,1,nobs_srv_age,1,nages) //(57.6) survey age comps by sex and year males  
   init_vector M(1,2) //(58) female then male natural mortality            
   init_number offset_const //(59) a constant to offset zero values
-  init_int survey //(60) 1 if BSAI assessment, 2 if GOA
-
+  init_vector Lower_bound(1,nsurv); //(60)
+  init_vector Upper_bound(1,nsurv); //(61)
+  init_vector Phase(1,nsurv); //(62)
+  init_int assess;  //(63)
   int styr_rec; 
   vector cv_srv1(1,nobs_srv1);      //shelf survey CV
   vector cv_srv2(1,nobs_srv2);      //slope survey CV
   vector cv_srv3(1,nobs_srv3);      //Aleutian Islands survey CV 
-  matrix cv_srv(1,nsurv,1,nobs_srv)  //matrix to hold CVs for surveys
+  matrix cv_srv(1,nsurv,1,nobs_srv);  //matrix to hold CVs for surveys
  //year
   int i
 //age
@@ -158,7 +160,7 @@ DATA_SECTION
 //
   int ii
   int m
- 
+  vector test(1,4);
 
  LOCAL_CALCS
    styr_rec=styr-nages+1;
@@ -189,6 +191,7 @@ DATA_SECTION
   number obs_mean_sexr    //average proportion of males in shelf survey population estimates
   number obs_SD_sexr      //standard deviation from male prop. in shelf survey population estimates
   vector pred_sexr(styr,endyr)   //proportion of males in num at age matrix to be calculated
+  vector q(1,nsurv)  //combining catchabilities into a vector
   
 INITIALIZATION_SECTION
   //can have different mortality for males and females
@@ -196,7 +199,8 @@ INITIALIZATION_SECTION
   F35 .21
   F30 .23
   mean_log_rec 10.
-  log_avg_fmort -5.
+  log_avg_fmort -5.  
+  //proportion in each region constrained with catchability so it does not add to 1. Expect to add to less than 1?
   q1 .75   // shelf
   q2 .10   // slope
   q3 .14   // Aleutian Islands
@@ -223,7 +227,7 @@ INITIALIZATION_SECTION
   srv3_slope_m  .4
   srv3_sel50_m  8.
   alpha 1.
-  beta 0.
+  beta 0. 
 
 PARAMETER_SECTION
  //parameters to be estimated are all ones that begin with init_ and have a positive
@@ -231,7 +235,20 @@ PARAMETER_SECTION
  //phase of 8 is greater than last phase so does q1 in last phase  
   // init_bounded_number q1(.5,2,8)
  //fix q1 to be 1 otherwise it went to lower bound of .5
-  init_bounded_number q1(0.5,2.0,-4)
+ LOCAL_CALCS 
+  dvector lower_bound(1,nsurv);
+  dvector upper_bound(1,nsurv);
+  ivector phase(1,nsurv);
+  for (i=1;i<=nsurv;i++)
+  {
+	  lower_bound(i)=Lower_bound(i); 
+	  upper_bound(i)=Upper_bound(i);
+	  phase(i)=Phase(i); 
+  }  
+ END_CALCS 
+  init_bounded_number_vector q_surv(1,nsurv,lower_bound,upper_bound,phase)    
+ !!cout<<"q_surv"<<q_surv<<std::endl;
+  init_bounded_number q1(0.5,2.0,-4) //since this is fixed, it uses the midpoint between bounds.
   init_bounded_number q2(0.05,1.5,-4)
   init_bounded_number q3(0.05,1.5,-4)
   init_number alpha(4)       // used to estimate temperature effect on shelf survey catchability
@@ -282,8 +299,10 @@ PARAMETER_SECTION
   init_bounded_number F30(0.01,1.,phase_F40)
 
   matrix log_sel_fish(1,2,1,nages)
-  matrix sel(1,2,1,nages) //fishery selectivity
-  3darray sel_srv(1,nsurv,1,2,1,nages) //new matrix to combine selectivity for 3 surveys
+  matrix sel(1,2,1,nages) //fishery selectivity 
+  3darray sel_srv(1,2,1,nsurv,1,nages) //try 3d array here
+  matrix sel_srv_fem(1,nsurv,1,nages) //new matrix to combine selectivity for 3 surveys
+  matrix sel_srv_mal(1,nsurv,1,nages)
   matrix sel_srv1(1,2,1,nages)
   matrix sel_srv2(1,2,1,nages)
   matrix sel_srv3(1,2,1,nages)
@@ -363,13 +382,16 @@ PARAMETER_SECTION
   number maxsel_fish
   number maxsel_srv1
   number maxsel_srv2
-  number maxsel_srv3
+  number maxsel_srv3 
+  vector maxsel_srv(1,nsurv)
   number mlike
   number qlike
   number flike
   vector qtime(styr,endyr)
+  
 
-PRELIMINARY_CALCS_SECTION
+PRELIMINARY_CALCS_SECTION  
+
   obs_mean_sexr=0.34;  //initial value for avg proportion of male population estimated from shelf surveys; calculated below
   obs_SD_sexr=0.0485;  //initial value for standard deviation of mean male population proportion: calculated below
 //sex ratio in the fishery  
@@ -620,21 +642,24 @@ FUNCTION get_selectivity
      }
 
 //  exit(1);  
-//    sel_srv1(1) = get_sel(srv1_slope_f1,srv1_sel50_f1,srv1_slope_f2,srv1_sel50_f2);    
-//    sel_srv1(2) = get_sel(srv1_slope_m1,srv1_sel50_m1,srv1_slope_m2,srv1_sel50_m2); 
-//    sel_srv2(1) = get_sel(srv2_slope_f,srv2_sel50_f);
-//    sel_srv2(2) = get_sel(srv2_slope_m,srv2_sel50_m); 
-//    sel_srv3(1) = get_sel(srv3_slope_f,srv3_sel50_f);
-//    sel_srv3(2) = get_sel(srv3_slope_m,srv3_sel50_m);
+    sel_srv1(1) = get_sel(srv1_slope_f1,srv1_sel50_f1,srv1_slope_f2,srv1_sel50_f2);    
+    sel_srv1(2) = get_sel(srv1_slope_m1,srv1_sel50_m1,srv1_slope_m2,srv1_sel50_m2); 
+    sel_srv2(1) = get_sel(srv2_slope_f,srv2_sel50_f);
+    sel_srv2(2) = get_sel(srv2_slope_m,srv2_sel50_m); 
+    sel_srv3(1) = get_sel(srv3_slope_f,srv3_sel50_f);
+    sel_srv3(2) = get_sel(srv3_slope_m,srv3_sel50_m);
 
-//  3darray sel_srv(1,nsurv,1,2,1,nages)
     sel_srv(1,1)=get_sel(srv1_slope_f1,srv1_sel50_f1,srv1_slope_f2,srv1_sel50_f2);  
-    sel_srv(1,2)=get_sel(srv1_slope_m1,srv1_sel50_m1,srv1_slope_m2,srv1_sel50_m2);
-    sel_srv(2,1)=get_sel(srv2_slope_f,srv2_sel50_f); 
+    sel_srv(1,2)=get_sel(srv2_slope_f,srv2_sel50_f);
+    sel_srv(1,3)=get_sel(srv3_slope_f,srv3_sel50_f); 
+
+    sel_srv(2,1)=get_sel(srv1_slope_m1,srv1_sel50_m1,srv1_slope_m2,srv1_sel50_m2);
     sel_srv(2,2)=get_sel(srv2_slope_m,srv2_sel50_m); 
-    sel_srv(3,1)=get_sel(srv3_slope_f,srv3_sel50_f); 
-    sel_srv(3,2)=get_sel(srv3_slope_m,srv3_sel50_m); 
-  cout<<"sel_srv"<<sel_srv<<std::endl;
+    sel_srv(2,3)=get_sel(srv3_slope_m,srv3_sel50_m); 
+//  cout<<"sel_srv"<<sel_srv<<std::endl;
+//  cout<<"sel_srv(1,1)"<<sel_srv(1,1)<<std::endl;
+///  cout<<"sel_srv(1,2)"<<sel_srv(1,2)<<std::endl;
+ // exit(1);
 //     logistic selectivity curves, asymptotic for fishery, slope survey and the Aleutian Islands but domed shape for shelf survey  
 
 FUNCTION dvar_vector get_sel(const dvariable& slp, const dvariable& a50)
@@ -660,7 +685,7 @@ FUNCTION get_mortality
   if(maxsel_fish<max(sel(2)))  //if highest female selectivity is > male selectivity, make maxsel_fish=male high selectivity
       maxsel_fish=max(sel(2));
 
-  fmort = mfexp( log_avg_fmort+fmort_dev); 
+  fmort = mfexp(log_avg_fmort+fmort_dev); 
   for(k=1;k<=2;k++)
   {
     for (i=styr;i<=endyr;i++)
@@ -676,6 +701,13 @@ FUNCTION get_numbers_at_age
   if(maxsel_fish<max(sel(2)))//if females greater than males, then set the max to the females.
     maxsel_fish=max(sel(2)); //set max to whichever sex is larger
 
+  for(i=1;i<=nsurv;i++)
+ {
+   maxsel_srv(i)=max(sel_srv_fem(i));
+   if(maxsel_srv(i)<max(sel_srv_mal(i)))
+   maxsel_srv(i)=max(sel_srv_mal(i)); 
+ }
+//proly delete below
   maxsel_srv1=max(sel_srv1(1));
   if(maxsel_srv1<max(sel_srv1(2)))
     maxsel_srv1=max(sel_srv1(2)); 
@@ -687,6 +719,7 @@ FUNCTION get_numbers_at_age
   maxsel_srv3=max(sel_srv3(1));
   if(maxsel_srv3<max(sel_srv3(2)))
     maxsel_srv3=max(sel_srv3(2)); 
+//delete above
 
   int itmp;
 
@@ -723,35 +756,16 @@ FUNCTION get_numbers_at_age
   {
     for (i=styr;i< endyr;i++)
     {
-      //subvector - avoids writing a j loop  =++ increments the right side 
-      //(1,nages-1) to 1+1 to nages-1+1 then does the assignment x(i)(1,n) 
-      //takes the ith row of x the columns 1 to n
-      //      natage(k,i+1)(2,nages)=++elem_prod(natage(k,i)(1,nages-1),S(k,i)(1,nages-1));
       for(j=1;j<nages;j++)
       {
         natage(k,i+1,j+1)=natage(k,i,j)*S(k,i,j); 
       }
-      //accumulates oldest ages
-      // cout<<"done with j loop"<<endl;
       natage(k,i+1,nages)+=natage(k,i,nages)*S(k,i,nages);
-      // cout<<"done with natage nages"<<endl;
-      //popn is exploitable numbers
       popn(k,i)= natage(k,i)*sel(k);
-      // cout<<"popn "<<endl;
-      // cout<<popn(k,i)<<endl;
     }
-    // cout<<"to popn"<<endl; 
     popn(k,endyr)=natage(k,endyr)*sel(k);
   }
-  for (i=styr;i<=endyr;i++)
-  {
-      pred_sexr(i)=sum(natage(2,i))/(sum((natage(1,i)+natage(2,i))));  //calculation of prop. of males in pred. population 
-    for(k=1;k<=2;k++)
-    {
-      totn_srv1(k,i)=q1*(natage(k,i)*sel_srv1(k)); // not used in further calculations
-      totn_srv2(k,i)=q2*(natage(k,i)*sel_srv2(k)); // not used in further calculations        
-    }
-  }
+
   //predicted survey values
   fspbio.initialize(); 
   qtime=q1;
@@ -759,24 +773,21 @@ FUNCTION get_numbers_at_age
   {
     fspbio(i) = natage(1,i)*elem_prod(wt(1),maturity);
     explbiom(i)=0.;
-    pred_bio(i)=0.;
+    pred_bio(i)=0.; 
     pred_srv1(i)=0.;
     pred_srv2(i)=0.;
     pred_srv3(i)=0.; //JNI
 
-    // if (i>=1982 )      //catchability calculation for survey years
-    if (i>=1982 && i-1981 <= nobs_srv1)      //JNI catchability calculation for survey years
-    
+    //catchability calculation for survey years
+    if (i>=1982 && i-1981 <= nobs_srv1 && assess==1)      //JNI catchability calculation for survey years    
     qtime(i)=q1*mfexp(-alpha+beta*bottom_temps(i-1981));
-    
-
     for(k=1;k<=2;k++)
     {
       
       pred_srv1(i) += qtime(i)*(natage(k,i)*elem_prod(sel_srv1(k),wt(k)))/maxsel_srv1;   //shelf survey, dividing by the maxsel constrains female selectivity to be 1.0
       //pred_srv1(i) += q1*(natage(k,i)*elem_prod(sel_srv1(k),wt(k)))/maxsel_srv1;   //shelf survey, without temperature q modeling
-      pred_srv2(i) += q2*(natage(k,i)*elem_prod(sel_srv2(k),wt(k))); // /maxsel_srv2;         //slope survey JNI
-      pred_srv3(i) += q3*(natage(k,i)*elem_prod(sel_srv3(k),wt(k))); // /maxsel_srv3;         //Aleutian Islands survey JNI
+      pred_srv2(i) += q2*(natage(k,i)*elem_prod(sel_srv2(k),wt(k)))/maxsel_srv2;         //slope survey JNI  division not necessary because logistic
+      pred_srv3(i) += q3*(natage(k,i)*elem_prod(sel_srv3(k),wt(k)))/maxsel_srv3;         //Aleutian Islands survey JNI
 
       //next line used to fix q1 to 1.0 - problem is if you start from a bin file, even if the bounds
       // are set different in the tpl file the program will take to value from the bin file and use that 
@@ -784,7 +795,45 @@ FUNCTION get_numbers_at_age
       explbiom(i)+=natage(k,i)*elem_prod(sel(k),wt(k))/maxsel_fish;
       pred_bio(i)+=natage(k,i)*wt(k);
     }
-  }
+  }    
+//test below
+//  matrix pred_srv(1,nsurv,styr,endyr)
+//  for (j=1;j<=nsurv;j++)
+//  {
+//    for (i=styr;i<=endyr;i++)
+//    {
+//  fspbio(i) = natage(1,i)*elem_prod(wt(1),maturity);
+//  explbiom(i)=0.;
+//  pred_bio(i)=0.; 
+//  pred_srv(j,i)=0.;
+//  pred_srv2(i)=0.;
+//  pred_srv3(i)=0.; //JNI
+
+  //catchability calculation for survey years
+//  if (i>=1982 && i-1981 <= nobs_srv1 && assess==1)      //JNI catchability calculation for survey years    
+//  qtime(i)=q1*mfexp(-alpha+beta*bottom_temps(i-1981));
+//  for(k=1;k<=2;k++)
+//    {
+//    if (j==1 && assess==1)
+//      {             
+//    pred_srv(j,i) += qtime(i)*(natage(k,i)*elem_prod(sel_srv1(k),wt(k)))/maxsel_srv(j);   //shelf survey, dividing by the maxsel constrains female selectivity to be 1.0
+//      } 
+//    else 
+//      {
+//    pred_srv(j,i) += q(j)*(natage(k,i)*elem_prod(sel_srv2(k),wt(k)));/maxsel_srv(j);         //slope survey JNI
+//      }        
+       //Aleutian Islands survey JNI
+
+    //next line used to fix q1 to 1.0 - problem is if you start from a bin file, even if the bounds
+    // are set different in the tpl file the program will take to value from the bin file and use that 
+    //   pred_srv1(i)=1.0*(natage(i)*elem_prod(sel_srv1,wt));
+//    explbiom(i)+=natage(k,i)*elem_prod(sel(k),wt(k))/maxsel_fish;
+//    pred_bio(i)+=natage(k,i)*wt(k);
+//      }
+//    }  
+//  }
+// test above
+
       // cout <<q3<<endl<<pred_srv3<<endl;exit(1);
     //don't need to divide by max_sel because totn_srv1 is calculated using selectivities and the
     //max_sel would cancel out.
