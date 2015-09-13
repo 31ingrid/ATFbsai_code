@@ -201,9 +201,9 @@ INITIALIZATION_SECTION
   mean_log_rec 10.
   log_avg_fmort -5.  
   //proportion in each region constrained with catchability so it does not add to 1. Expect to add to less than 1?
-  q1 .75   // shelf
-  q2 .10   // slope
-  q3 .14   // Aleutian Islands
+//  q1 .75   // shelf
+//  q2 .10   // slope
+//  q3 .14   // Aleutian Islands
   fmort_dev 0.00001
 //note: you can initialize things you do not use.
   fish_slope_f .4
@@ -702,15 +702,22 @@ FUNCTION get_numbers_at_age
     maxsel_fish=max(sel(2)); //set max to whichever sex is larger
 
   for(i=1;i<=nsurv;i++)
- {
-   maxsel_srv(i)=max(sel_srv_fem(i));
-   if(maxsel_srv(i)<max(sel_srv_mal(i)))
-   maxsel_srv(i)=max(sel_srv_mal(i)); 
- }
+    for (k=1;k<2;k++)  //sex
+  {
+   {
+   maxsel_srv(i)=max(sel_srv(k,i));
+   if(maxsel_srv(i)<max(sel_srv(k,i)))
+   maxsel_srv(i)=max(sel_srv(k,i));
+   } 
+ }     
+// cout<<"maxsel_srv"<<maxsel_srv<<std::endl;   
+
 //proly delete below
   maxsel_srv1=max(sel_srv1(1));
   if(maxsel_srv1<max(sel_srv1(2)))
     maxsel_srv1=max(sel_srv1(2)); 
+
+// cout<<"maxsel_srv1"<<endl<<maxsel_srv1<<std::endl; 
 
   maxsel_srv2=max(sel_srv2(1));
   if(maxsel_srv2<max(sel_srv2(2)))
@@ -751,7 +758,8 @@ FUNCTION get_numbers_at_age
     }
   }
 
- //numbers at age
+ //numbers at age 
+
   for(k=1;k<=2;k++)
   {
     for (i=styr;i< endyr;i++)
@@ -768,7 +776,7 @@ FUNCTION get_numbers_at_age
 
   //predicted survey values
   fspbio.initialize(); 
-  qtime=q1;
+  qtime=q_surv(1);
   for (i=styr;i<=endyr;i++)
   {
     fspbio(i) = natage(1,i)*elem_prod(wt(1),maturity);
@@ -778,63 +786,64 @@ FUNCTION get_numbers_at_age
     pred_srv2(i)=0.;
     pred_srv3(i)=0.; //JNI
 
-    //catchability calculation for survey years
+//    //catchability calculation for survey years
     if (i>=1982 && i-1981 <= nobs_srv1 && assess==1)      //JNI catchability calculation for survey years    
     qtime(i)=q1*mfexp(-alpha+beta*bottom_temps(i-1981));
     for(k=1;k<=2;k++)
-    {
-      
+    {    
       pred_srv1(i) += qtime(i)*(natage(k,i)*elem_prod(sel_srv1(k),wt(k)))/maxsel_srv1;   //shelf survey, dividing by the maxsel constrains female selectivity to be 1.0
-      //pred_srv1(i) += q1*(natage(k,i)*elem_prod(sel_srv1(k),wt(k)))/maxsel_srv1;   //shelf survey, without temperature q modeling
+//      //pred_srv1(i) += q1*(natage(k,i)*elem_prod(sel_srv1(k),wt(k)))/maxsel_srv1;   //shelf survey, without temperature q modeling
       pred_srv2(i) += q2*(natage(k,i)*elem_prod(sel_srv2(k),wt(k)))/maxsel_srv2;         //slope survey JNI  division not necessary because logistic
       pred_srv3(i) += q3*(natage(k,i)*elem_prod(sel_srv3(k),wt(k)))/maxsel_srv3;         //Aleutian Islands survey JNI
 
       //next line used to fix q1 to 1.0 - problem is if you start from a bin file, even if the bounds
       // are set different in the tpl file the program will take to value from the bin file and use that 
       //   pred_srv1(i)=1.0*(natage(i)*elem_prod(sel_srv1,wt));
-      explbiom(i)+=natage(k,i)*elem_prod(sel(k),wt(k))/maxsel_fish;
-      pred_bio(i)+=natage(k,i)*wt(k);
+//      explbiom(i)+=natage(k,i)*elem_prod(sel(k),wt(k))/maxsel_fish;
+//      pred_bio(i)+=natage(k,i)*wt(k);
     }
-  }    
-//test below
+  }  
+  
+//test below   
+
 //  matrix pred_srv(1,nsurv,styr,endyr)
-//  for (j=1;j<=nsurv;j++)
-//  {
-//    for (i=styr;i<=endyr;i++)
-//    {
-//  fspbio(i) = natage(1,i)*elem_prod(wt(1),maturity);
-//  explbiom(i)=0.;
-//  pred_bio(i)=0.; 
-//  pred_srv(j,i)=0.;
+  for (j=1;j<=nsurv;j++)
+ {
+    for (i=styr;i<=endyr;i++)
+   {
+  fspbio(i) = natage(1,i)*elem_prod(wt(1),maturity);
+  explbiom(i)=0.;
+  pred_bio(i)=0.; 
+  pred_srv(j,i)=0.;
 //  pred_srv2(i)=0.;
 //  pred_srv3(i)=0.; //JNI
-
+//  matrix pred_srv(1,nsurv,styr,endyr) //matrix combine pred_srv into 3 surveys  
   //catchability calculation for survey years
-//  if (i>=1982 && i-1981 <= nobs_srv1 && assess==1)      //JNI catchability calculation for survey years    
-//  qtime(i)=q1*mfexp(-alpha+beta*bottom_temps(i-1981));
-//  for(k=1;k<=2;k++)
-//    {
-//    if (j==1 && assess==1)
-//      {             
-//    pred_srv(j,i) += qtime(i)*(natage(k,i)*elem_prod(sel_srv1(k),wt(k)))/maxsel_srv(j);   //shelf survey, dividing by the maxsel constrains female selectivity to be 1.0
-//      } 
-//    else 
-//      {
-//    pred_srv(j,i) += q(j)*(natage(k,i)*elem_prod(sel_srv2(k),wt(k)));/maxsel_srv(j);         //slope survey JNI
-//      }        
+  if (i>=1982 && i-1981 <= nobs_srv1 && assess==1)      //JNI catchability calculation for survey years    
+  {qtime(i)=q1*mfexp(-alpha+beta*bottom_temps(i-1981));}
+  for(k=1;k<=2;k++)
+    {
+    if (j==1 && assess==1)
+      {             
+    pred_srv(j,i) += qtime(i)*(natage(k,i)*elem_prod(sel_srv(k,j)/maxsel_srv(j),wt(k)));   //shelf survey, dividing by the maxsel constrains female selectivity to be 1.0
+      } 
+    else 
+      {
+    pred_srv(j,i) += q_surv(j)*(natage(k,i)*elem_prod(sel_srv(k,j),wt(k)))/maxsel_srv(j);         //slope survey JNI  do not need to divide by maxsel_srv if it is logistic but does not hurt
+      }        
        //Aleutian Islands survey JNI
 
     //next line used to fix q1 to 1.0 - problem is if you start from a bin file, even if the bounds
     // are set different in the tpl file the program will take to value from the bin file and use that 
     //   pred_srv1(i)=1.0*(natage(i)*elem_prod(sel_srv1,wt));
-//    explbiom(i)+=natage(k,i)*elem_prod(sel(k),wt(k))/maxsel_fish;
-//    pred_bio(i)+=natage(k,i)*wt(k);
-//      }
-//    }  
-//  }
+    explbiom(i)+=natage(k,i)*elem_prod(sel(k),wt(k))/maxsel_fish;
+    pred_bio(i)+=natage(k,i)*wt(k);
+      }
+   }  
+ }
 // test above
-
-      // cout <<q3<<endl<<pred_srv3<<endl;exit(1);
+    
+//    cout <<"pred_srv"<<endl<<pred_srv<<std::endl;exit(1);
     //don't need to divide by max_sel because totn_srv1 is calculated using selectivities and the
     //max_sel would cancel out.
 
@@ -1026,6 +1035,7 @@ FUNCTION evaluate_the_objective_function
   age_like.initialize();
   fpen.initialize();
   rec_like.initialize();
+  surv_like.initialize();
   surv1_like.initialize();
   surv2_like.initialize();
   surv3_like.initialize();
@@ -1088,12 +1098,15 @@ FUNCTION evaluate_the_objective_function
   // Fit to indices (lognormal) 
   //weight each years estimate by 1/(2*variance) - use cv as an approx to s.d. of log(biomass) 
 
+  for (i=1;i<=nsurv;i++)
+  {   
+  surv_like(i) = norm2(elem_div(log(obs_srv(i))-log(pred_srv(i)(yrs_srv(i))),sqrt(2)*cv_srv(i)));
+  } 
    surv1_like = norm2(elem_div(log(obs_srv1+.01)-log(pred_srv1(yrs_srv1)+.01),sqrt(2)*cv_srv1));
    surv2_like = norm2(elem_div(log(obs_srv2+.01)-log(pred_srv2(yrs_srv2)+.01),sqrt(2)*cv_srv2));
    surv3_like = norm2(elem_div(log(obs_srv3+.01)-log(pred_srv3(yrs_srv3)+.01),sqrt(2)*cv_srv3));
-   double var_tmp; for (i=1;i<=nobs_srv3;i++) { var_tmp = 2.*square(log(obs_srv3(i))*cv_srv3(i)); surv3_like += square(log(obs_srv3(i)+.01)-log(pred_srv3(yrs_srv3(i))+.01))/var_tmp; }
-   // surv_like = norm2(log(obs_srv1+.01)-log(pred_srv1(yrs_srv1)+.01));
-
+//   double var_tmp; for (i=1;i<=nobs_srv3;i++) { var_tmp = 2.*square(log(obs_srv3(i))*cv_srv3(i)); surv3_like += square(log(obs_srv3(i)+.01)-log(pred_srv3(yrs_srv3(i))+.01))/var_tmp; }
+   
     catch_like=norm2(log(catch_bio+.000001)-log(pred_catch+.000001));
 
    // sex ratio likelihood
