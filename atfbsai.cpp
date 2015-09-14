@@ -1,4 +1,5 @@
 #include <admodel.h>
+#include <contrib.h>
 
   extern "C"  {
     void ad_boundf(int i);
@@ -66,6 +67,11 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
  cout<<nsamples_srv3_length<<endl;
   nsamples_srv_length_fem.allocate(1,nsurv,1,nobs_srv_length,"nsamples_srv_length_fem");
   nsamples_srv_length_mal.allocate(1,nsurv,1,nobs_srv_length,"nsamples_srv_length_mal");
+ cout<<"nsamples_srv_length_fem"<<endl;
+ cout<<nsamples_srv_length_fem<<endl;  
+ cout<<"nsamples_srv_length_mal"<<endl;
+ cout<<nsamples_srv_length_mal<<endl;
+  nsamples_srv_length.allocate(1,nsurv,1,2,1,nobs_srv_length,"nsamples_srv_length");
   obs_p_srv1_length.allocate(1,2,1,nobs_srv1_length,1,nlen,"obs_p_srv1_length");
   obs_p_srv2_length.allocate(1,2,1,nobs_srv2_length,1,nlen,"obs_p_srv2_length");
   obs_p_srv3_length.allocate(1,2,1,nobs_srv3_length,1,nlen,"obs_p_srv3_length");
@@ -473,6 +479,8 @@ cout<<"q_surv"<<q_surv<<std::endl;
   endbiom.allocate("endbiom");
   depletion.allocate("depletion");
   obj_fun.allocate("obj_fun");
+  prior_function_value.allocate("prior_function_value");
+  likelihood_function_value.allocate("likelihood_function_value");
   tmp.allocate("tmp");
   #ifndef NO_AD_INITIALIZE
   tmp.initialize();
@@ -593,7 +601,11 @@ cout<<"q_surv"<<q_surv<<std::endl;
 void model_parameters::preliminary_calculations(void)
 {
 
+#if defined(USE_ADPVM)
+
   admaster_slave_variable_interface(*this);
+
+#endif
   obs_mean_sexr=0.34;  //initial value for avg proportion of male population estimated from shelf surveys; calculated below
   obs_SD_sexr=0.0485;  //initial value for standard deviation of mean male population proportion: calculated below
   for(i=1; i<=nobs_fish;i++)
@@ -693,6 +705,7 @@ void model_parameters::preliminary_calculations(void)
 
 void model_parameters::userfunction(void)
 {
+  obj_fun =0.0;
   ofstream& evalout= *pad_evalout;
    get_selectivity();
    get_mortality();
@@ -779,9 +792,7 @@ void model_parameters::get_selectivity(void)
             {
              sel(1,j)=sel(1,j-1);
              sel(2,j)=sel(2,j-1);
-            }
- //   		sel_srv1(1,j)=sel_srv1(1,j)*temp1(j);
- //   		sel_srv1(2,j)=sel_srv1(2,j)*temp2(j);
+            }  						
           } 
      }
     sel_srv1(1) = get_sel(srv1_slope_f1,srv1_sel50_f1,srv1_slope_f2,srv1_sel50_f2);    
@@ -796,7 +807,6 @@ void model_parameters::get_selectivity(void)
     sel_srv(2,1)=get_sel(srv1_slope_m1,srv1_sel50_m1,srv1_slope_m2,srv1_sel50_m2);
     sel_srv(2,2)=get_sel(srv2_slope_m,srv2_sel50_m); 
     sel_srv(2,3)=get_sel(srv3_slope_m,srv3_sel50_m); 
- // exit(1);
 }
 
 dvar_vector model_parameters::get_sel(const dvariable& slp, const dvariable& a50)
@@ -929,7 +939,6 @@ void model_parameters::get_numbers_at_age(void)
       pred_srv3(i) += q3*(natage(k,i)*elem_prod(sel_srv3(k),wt(k)))/maxsel_srv3;         //Aleutian Islands survey JNI
       //next line used to fix q1 to 1.0 - problem is if you start from a bin file, even if the bounds
       // are set different in the tpl file the program will take to value from the bin file and use that 
-      //   pred_srv1(i)=1.0*(natage(i)*elem_prod(sel_srv1,wt));
     }
   }  
   
@@ -1215,7 +1224,7 @@ void model_parameters::evaluate_the_objective_function(void)
     age_like(4)-=offset(6);
   //end of if(active (rec_dev))
   }
-  // Fit to indices (lognormal) 
+  // Fit to indices (lognormal)  
   //weight each years estimate by 1/(2*variance) - use cv as an approx to s.d. of log(biomass) 
   for (i=1;i<=nsurv;i++)
   {   
@@ -1223,13 +1232,13 @@ void model_parameters::evaluate_the_objective_function(void)
   } 
    surv1_like = norm2(elem_div(log(obs_srv1+.01)-log(pred_srv1(yrs_srv1)+.01),sqrt(2)*cv_srv1));
    surv2_like = norm2(elem_div(log(obs_srv2+.01)-log(pred_srv2(yrs_srv2)+.01),sqrt(2)*cv_srv2));
-   surv3_like = norm2(elem_div(log(obs_srv3+.01)-log(pred_srv3(yrs_srv3)+.01),sqrt(2)*cv_srv3));
+   surv3_like = norm2(elem_div(log(obs_srv3+.01)-log(pred_srv3(yrs_srv3)+.01),sqrt(2)*cv_srv3));    
    
-    catch_like=norm2(log(catch_bio+.000001)-log(pred_catch+.000001));
+   catch_like=norm2(log(catch_bio+.000001)-log(pred_catch+.000001));
    // sex ratio likelihood
-     sexr_like=0.5*norm2((obs_mean_sexr-pred_sexr)/obs_SD_sexr); 
+   sexr_like=0.5*norm2((obs_mean_sexr-pred_sexr)/obs_SD_sexr); 
  //selectivity likelihood is penalty on how smooth selectivities are   
- //here are taking the sum of squares of the second differences 
+ //here are taking the sum of squares of the second differences  
   if(active(log_selcoffs_fish))
   {  
     sel_like(1)=wt_like(1)*norm2(first_difference(first_difference(log_sel_fish(1))));
@@ -1270,15 +1279,16 @@ void model_parameters::evaluate_the_objective_function(void)
   obj_fun += 1.*length_like(4);     //emphasis factor = 1
   obj_fun += 1.*age_like(2);           //emphasis factor = 1 
   obj_fun += 1.*age_like(4);           //emphasis factor = 1 
-  obj_fun += 1.*surv1_like;         //emphasis factor = 1
-  obj_fun += 1.*surv2_like;         //emphasis factor = 1
-  obj_fun += 1.*surv3_like;         //emphasis factor = 1
+  for (i=1;i<=nsurv;i++)
+  {
+  obj_fun += 1.*surv_like(i); //emphasis factor = 1
+  }
   obj_fun += 300*catch_like;        // large emphasis to fit observed catch
   obj_fun += fpen;
   obj_fun += sprpen;
 }
 
-void model_parameters::report()
+void model_parameters::report(const dvector& gradients)
 {
  adstring ad_tmp=initial_params::get_reportfile_name();
   ofstream report((char*)(adprogram_name + ad_tmp));
@@ -1671,12 +1681,7 @@ int main(int argc,char * argv[])
   gradient_structure::set_CMPDIF_BUFFER_SIZE(4000000);
     gradient_structure::set_NO_DERIVATIVES();
     gradient_structure::set_YES_SAVE_VARIABLES_VALUES();
-  #if defined(__GNUDOS__) || defined(DOS386) || defined(__DPMI32__)  || \
-     defined(__MSVC32__)
-      if (!arrmblsize) arrmblsize=150000;
-  #else
-      if (!arrmblsize) arrmblsize=25000;
-  #endif
+    if (!arrmblsize) arrmblsize=15000000;
     model_parameters mp(arrmblsize,argc,argv);
     mp.iprint=10;
     mp.preliminary_calculations();

@@ -68,6 +68,11 @@ DATA_SECTION
   !! cout<<nsamples_srv3_length<<endl;
   init_imatrix nsamples_srv_length_fem(1,nsurv,1,nobs_srv_length)   //(31.5) sample sizes for each length comp by sex and year for shelf, slope, AI survey
   init_imatrix nsamples_srv_length_mal(1,nsurv,1,nobs_srv_length)   //(31.6)
+  !! cout<<"nsamples_srv_length_fem"<<endl;
+  !! cout<<nsamples_srv_length_fem<<endl;  
+  !! cout<<"nsamples_srv_length_mal"<<endl;
+  !! cout<<nsamples_srv_length_mal<<endl;
+  init_3darray nsamples_srv_length(1,nsurv,1,2,1,nobs_srv_length) //(31.7)     
   init_3darray obs_p_srv1_length(1,2,1,nobs_srv1_length,1,nlen) //(32) shelf survey length comps by bin, sex and yr
   init_3darray obs_p_srv2_length(1,2,1,nobs_srv2_length,1,nlen) //(33) slope survey length comps by bin, sex and yr
   init_3darray obs_p_srv3_length(1,2,1,nobs_srv3_length,1,nlen) //(34) Aleutian Islands survey length comps by bin, sex and yr
@@ -590,24 +595,7 @@ FUNCTION get_selectivity
        }
       //cout<<"sel survey"<<sel_srv1<<endl;
     } 
-//    for (j=1;j<=nages;j++)  //this is selectivity for the surveys
-//    { 
-//      
-//      //ascending limb of curve for shelf survey
-//		sel_srv1(1,j)=1./(1.+mfexp(-1.*srv1_slope_f1*(double(j)-srv1_sel50_f1)));
-//		sel_srv1(2,j)=1./(1.+mfexp(-1.*srv1_slope_m1*(double(j)-srv1_sel50_m1)));
-//		//decending limb of curve for shelf survey 
-//		temp1=1./(1.+mfexp(srv1_slope_f2*(double(j)-srv1_sel50_f2)));
-//		temp2=1./(1.+mfexp(srv1_slope_m2*(double(j)-srv1_sel50_m2)));
-//		sel_srv1(1,j)=sel_srv1(1,j)*temp1(j);
-//		sel_srv1(2,j)=sel_srv1(2,j)*temp2(j);
-//		//slope surveys
-//		sel_srv2(1,j)=1./(1.+mfexp(-1.*srv2_slope_f*(double(j)-srv2_sel50_f)));
-//		sel_srv2(2,j)=1./(1.+mfexp(-1.*srv2_slope_m*(double(j)-srv2_sel50_m)));
-//		//Aleutian Islands surveys
-//		sel_srv3(1,j) = 1./(1.+mfexp(-1.*srv3_slope_f*(double(j)-srv3_sel50_f)));
-//		sel_srv3(2,j) = 1./(1.+mfexp(-1.*srv3_slope_m*(double(j)-srv3_sel50_m)));							
-//    }
+
  }//  end if(active(log_selcoffs_fish))
   else
     {
@@ -623,25 +611,10 @@ FUNCTION get_selectivity
             {
              sel(1,j)=sel(1,j-1);
              sel(2,j)=sel(2,j-1);
-            }
-//            //ascending limb of curve for shelf survey
-//			sel_srv1(1,j)=1./(1.+mfexp(-1.*srv1_slope_f1*(double(j)-srv1_sel50_f1)));
-//			sel_srv1(2,j)=1./(1.+mfexp(-1.*srv1_slope_m1*(double(j)-srv1_sel50_m1)));
-//			//decending limb of curve for shelf survey 
-//			temp1=1./(1.+mfexp(srv1_slope_f2*(double(j)-srv1_sel50_f2)));
-//			temp2=1./(1.+mfexp(srv1_slope_m2*(double(j)-srv1_sel50_m2)));
- //   		sel_srv1(1,j)=sel_srv1(1,j)*temp1(j);
- //   		sel_srv1(2,j)=sel_srv1(2,j)*temp2(j);
-//			//slope surveys
-//			sel_srv2(1,j)=1./(1.+mfexp(-1.*srv2_slope_f*(double(j)-srv2_sel50_f)));
-//			sel_srv2(2,j)=1./(1.+mfexp(-1.*srv2_slope_m*(double(j)-srv2_sel50_m)));
-//			//Aleutian Islands surveys
-//			sel_srv3(1,j) = 1./(1.+mfexp(-1.*srv3_slope_f*(double(j)-srv3_sel50_f)));
-//			sel_srv3(2,j) = 1./(1.+mfexp(-1.*srv3_slope_m*(double(j)-srv3_sel50_m)));							
+            }  						
           } 
      }
 
-//  exit(1);  
     sel_srv1(1) = get_sel(srv1_slope_f1,srv1_sel50_f1,srv1_slope_f2,srv1_sel50_f2);    
     sel_srv1(2) = get_sel(srv1_slope_m1,srv1_sel50_m1,srv1_slope_m2,srv1_sel50_m2); 
     sel_srv2(1) = get_sel(srv2_slope_f,srv2_sel50_f);
@@ -652,14 +625,10 @@ FUNCTION get_selectivity
     sel_srv(1,1)=get_sel(srv1_slope_f1,srv1_sel50_f1,srv1_slope_f2,srv1_sel50_f2);  
     sel_srv(1,2)=get_sel(srv2_slope_f,srv2_sel50_f);
     sel_srv(1,3)=get_sel(srv3_slope_f,srv3_sel50_f); 
-
     sel_srv(2,1)=get_sel(srv1_slope_m1,srv1_sel50_m1,srv1_slope_m2,srv1_sel50_m2);
     sel_srv(2,2)=get_sel(srv2_slope_m,srv2_sel50_m); 
     sel_srv(2,3)=get_sel(srv3_slope_m,srv3_sel50_m); 
-//  cout<<"sel_srv"<<sel_srv<<std::endl;
-//  cout<<"sel_srv(1,1)"<<sel_srv(1,1)<<std::endl;
-///  cout<<"sel_srv(1,2)"<<sel_srv(1,2)<<std::endl;
- // exit(1);
+
 //     logistic selectivity curves, asymptotic for fishery, slope survey and the Aleutian Islands but domed shape for shelf survey  
 
 FUNCTION dvar_vector get_sel(const dvariable& slp, const dvariable& a50)
@@ -798,7 +767,6 @@ FUNCTION get_numbers_at_age
 
       //next line used to fix q1 to 1.0 - problem is if you start from a bin file, even if the bounds
       // are set different in the tpl file the program will take to value from the bin file and use that 
-      //   pred_srv1(i)=1.0*(natage(i)*elem_prod(sel_srv1,wt));
 //      explbiom(i)+=natage(k,i)*elem_prod(sel(k),wt(k))/maxsel_fish;
 //      pred_bio(i)+=natage(k,i)*wt(k);
     }
@@ -843,7 +811,11 @@ FUNCTION get_numbers_at_age
  }
 // test above
     
-//    cout <<"pred_srv"<<endl<<pred_srv<<std::endl;exit(1);
+//    cout <<"pred_srv"<<endl<<pred_srv<<std::endl;
+//    cout <<"pred_srv1"<<endl<<pred_srv(1)<<std::endl; 
+//  exit(1);
+
+
     //don't need to divide by max_sel because totn_srv1 is calculated using selectivities and the
     //max_sel would cancel out.
 
@@ -1095,7 +1067,9 @@ FUNCTION evaluate_the_objective_function
 
   //end of if(active (rec_dev))
   }
-  // Fit to indices (lognormal) 
+  // Fit to indices (lognormal)  
+
+
   //weight each years estimate by 1/(2*variance) - use cv as an approx to s.d. of log(biomass) 
 
   for (i=1;i<=nsurv;i++)
@@ -1104,15 +1078,21 @@ FUNCTION evaluate_the_objective_function
   } 
    surv1_like = norm2(elem_div(log(obs_srv1+.01)-log(pred_srv1(yrs_srv1)+.01),sqrt(2)*cv_srv1));
    surv2_like = norm2(elem_div(log(obs_srv2+.01)-log(pred_srv2(yrs_srv2)+.01),sqrt(2)*cv_srv2));
-   surv3_like = norm2(elem_div(log(obs_srv3+.01)-log(pred_srv3(yrs_srv3)+.01),sqrt(2)*cv_srv3));
+   surv3_like = norm2(elem_div(log(obs_srv3+.01)-log(pred_srv3(yrs_srv3)+.01),sqrt(2)*cv_srv3));    
+//  cout<<"surv_like"<<surv_like<<std::endl;
+// cout<<"surv1_like"<<surv1_like<<std::endl;
+//  cout<<"surv2_like"<<surv2_like<<std::endl;
+//  cout<<"surv3_like"<<surv3_like<<std::endl;    
+//  exit(1);             
 //   double var_tmp; for (i=1;i<=nobs_srv3;i++) { var_tmp = 2.*square(log(obs_srv3(i))*cv_srv3(i)); surv3_like += square(log(obs_srv3(i)+.01)-log(pred_srv3(yrs_srv3(i))+.01))/var_tmp; }
    
-    catch_like=norm2(log(catch_bio+.000001)-log(pred_catch+.000001));
+   catch_like=norm2(log(catch_bio+.000001)-log(pred_catch+.000001));
 
    // sex ratio likelihood
-     sexr_like=0.5*norm2((obs_mean_sexr-pred_sexr)/obs_SD_sexr); 
+   sexr_like=0.5*norm2((obs_mean_sexr-pred_sexr)/obs_SD_sexr); 
  //selectivity likelihood is penalty on how smooth selectivities are   
- //here are taking the sum of squares of the second differences 
+ //here are taking the sum of squares of the second differences  
+
   if(active(log_selcoffs_fish))
   {  
     sel_like(1)=wt_like(1)*norm2(first_difference(first_difference(log_sel_fish(1))));
@@ -1159,9 +1139,13 @@ FUNCTION evaluate_the_objective_function
   obj_fun += 1.*length_like(4);     //emphasis factor = 1
   obj_fun += 1.*age_like(2);           //emphasis factor = 1 
   obj_fun += 1.*age_like(4);           //emphasis factor = 1 
-  obj_fun += 1.*surv1_like;         //emphasis factor = 1
-  obj_fun += 1.*surv2_like;         //emphasis factor = 1
-  obj_fun += 1.*surv3_like;         //emphasis factor = 1
+//  obj_fun += 1.*surv1_like;         //emphasis factor = 1
+//  obj_fun += 1.*surv2_like;         //emphasis factor = 1
+//  obj_fun += 1.*surv3_like;         //emphasis factor = 1  
+  for (i=1;i<=nsurv;i++)
+  {
+  obj_fun += 1.*surv_like(i); //emphasis factor = 1
+  }
   obj_fun += 300*catch_like;        // large emphasis to fit observed catch
   obj_fun += fpen;
   obj_fun += sprpen;

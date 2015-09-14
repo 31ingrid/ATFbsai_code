@@ -1,4 +1,4 @@
- index   name               value      std dev   
+ index   name               value      std.dev
      1   alpha             -1.1163e+00 3.1068e-02
      2   beta               7.9533e-02 2.1558e-02
      3   mean_log_rec       1.7658e+01 2.4127e-02
@@ -20,8 +20,8 @@
     19   rec_dev           -4.1589e-01 5.3277e-01
     20   rec_dev            5.0731e-01 4.0263e-01
     21   rec_dev            4.4898e-01 4.0923e-01
-    22   rec_dev           -8.1331e-02 4.0846e-01
-    23   rec_dev           -5.3253e-01 3.8049e-01
+    22   rec_dev           -8.1330e-02 4.0846e-01
+    23   rec_dev           -5.3254e-01 3.8050e-01
     24   rec_dev           -1.4377e-01 2.3148e-01
     25   rec_dev            3.7459e-01 1.3285e-01
     26   rec_dev           -1.4688e-01 1.5740e-01
@@ -34,7 +34,7 @@
     33   rec_dev            1.2698e-01 1.1073e-01
     34   rec_dev            1.3378e-01 1.1840e-01
     35   rec_dev            1.0764e+00 6.8916e-02
-    36   rec_dev            4.8260e-01 9.7736e-02
+    36   rec_dev            4.8260e-01 9.7735e-02
     37   rec_dev            4.7763e-01 9.0974e-02
     38   rec_dev            1.3170e-01 1.0607e-01
     39   rec_dev            1.6350e-01 9.7198e-02
@@ -125,42 +125,42 @@
    124   log_selcoffs_fish -2.5414e+00 7.1894e-01
    125   log_selcoffs_fish -1.8642e+00 7.1715e-01
    126   log_selcoffs_fish -1.2156e+00 7.1629e-01
-   127   log_selcoffs_fish -6.4613e-01 7.1586e-01
-   128   log_selcoffs_fish -2.2975e-01 7.1582e-01
-   129   log_selcoffs_fish  4.3287e-02 7.1661e-01
+   127   log_selcoffs_fish -6.4614e-01 7.1586e-01
+   128   log_selcoffs_fish -2.2976e-01 7.1582e-01
+   129   log_selcoffs_fish  4.3280e-02 7.1661e-01
    130   log_selcoffs_fish  2.2427e-01 7.1825e-01
    131   log_selcoffs_fish  3.5179e-01 7.1962e-01
    132   log_selcoffs_fish  4.3912e-01 7.1890e-01
-   133   log_selcoffs_fish  4.9300e-01 7.1563e-01
-   134   log_selcoffs_fish  5.2225e-01 7.1224e-01
-   135   log_selcoffs_fish  5.3311e-01 7.1205e-01
-   136   log_selcoffs_fish  5.3297e-01 7.1272e-01
-   137   log_selcoffs_fish  5.3028e-01 7.1322e-01
-   138   log_selcoffs_fish  5.2742e-01 7.1434e-01
+   133   log_selcoffs_fish  4.9299e-01 7.1563e-01
+   134   log_selcoffs_fish  5.2224e-01 7.1224e-01
+   135   log_selcoffs_fish  5.3310e-01 7.1205e-01
+   136   log_selcoffs_fish  5.3296e-01 7.1272e-01
+   137   log_selcoffs_fish  5.3027e-01 7.1322e-01
+   138   log_selcoffs_fish  5.2741e-01 7.1434e-01
    139   log_selcoffs_fish  5.2536e-01 7.1624e-01
-   140   fish_slope_f       1.0732e+00 2.4416e+03
-   141   fish_sel50_f       6.5685e+00 1.7746e+04
-   142   fish_slope_m       4.0302e-01 2.2885e+02
-   143   fish_sel50_m       7.3086e+00 3.2218e+04
+   140   fish_slope_f       9.6614e-01 2.2322e+03
+   141   fish_sel50_f       6.6299e+00 1.7811e+04
+   142   fish_slope_m       4.1712e-01 2.2954e+02
+   143   fish_sel50_m       7.2255e+00 3.1943e+04
    144   srv1_slope_f1      1.4433e+00 6.1925e-02
    145   srv1_sel50_f1      3.4127e+00 9.5961e-02
    146   srv1_slope_f2      1.1145e-01 1.4491e-02
-   147   srv1_sel50_f2      1.0000e+00 4.1924e-04
-   148   srv1_slope_m1      5.0000e-01 1.9027e-06
+   147   srv1_sel50_f2      1.0000e+00 4.2235e-04
+   148   srv1_slope_m1      5.0000e-01 1.9012e-06
    149   srv1_sel50_m1      7.3853e+00 1.5209e-01
-   150   srv1_slope_m2      5.0000e-01 9.7258e-06
+   150   srv1_slope_m2      5.0000e-01 9.7224e-06
    151   srv1_sel50_m2      8.6806e+00 2.6361e-01
    152   srv2_slope_f       1.9422e+00 1.6815e-01
    153   srv2_sel50_f       6.4836e+00 9.5186e-02
-   154   srv2_slope_m       5.0000e-01 2.1347e-06
+   154   srv2_slope_m       5.0000e-01 2.1333e-06
    155   srv2_sel50_m       9.3737e+00 1.3910e-01
    156   srv3_slope_f       5.8048e-01 2.3771e-02
    157   srv3_sel50_f       7.4886e+00 2.0747e-01
-   158   srv3_slope_m       5.0000e-01 2.8438e-06
+   158   srv3_slope_m       5.0000e-01 2.8496e-06
    159   srv3_sel50_m       7.6634e+00 1.4363e-01
    160   F40                1.6904e-01 3.3535e-02
    161   F35                2.0114e-01 4.1039e-02
-   162   F30                3.3981e-01 3.0948e+02
+   162   F30                2.5852e-01 2.6191e+02
    163   totalbiomass       1.0185e+05 2.9865e+03
    164   totalbiomass       9.2787e+04 2.4166e+03
    165   totalbiomass       9.1776e+04 2.1065e+03
@@ -213,10 +213,10 @@
    212   fspbiom_fut        7.1794e+04 6.1536e+03
    213   fspbiom_fut        8.3690e+04 7.2945e+03
    214   fspbiom_fut        6.1712e+04 4.1509e+03
-   215   fspbiom_fut        5.8592e+04 1.3741e+07
-   216   fspbiom_fut        5.5401e+04 2.4099e+07
-   217   fspbiom_fut        5.5421e+04 3.0971e+07
-   218   fspbiom_fut        6.3771e+04 3.6186e+07
+   215   fspbiom_fut        6.2325e+04 1.2432e+07
+   216   fspbiom_fut        6.2163e+04 2.3240e+07
+   217   fspbiom_fut        6.4372e+04 3.1652e+07
+   218   fspbiom_fut        7.4470e+04 3.8660e+07
    219   fspbiom_fut        6.1712e+04 4.1509e+03
    220   fspbiom_fut        7.5999e+04 4.6768e+03
    221   fspbiom_fut        9.0648e+04 5.1798e+03
@@ -232,11 +232,11 @@
    231   catch_future       1.5998e+04 2.1451e+03
    232   catch_future       1.8187e+04 2.2760e+03
    233   catch_future       2.3176e+04 2.8882e+03
-   234   catch_future       2.3466e+04 1.8899e+07
-   235   catch_future       2.2318e+04 1.3602e+07
-   236   catch_future       2.2114e+04 1.0550e+07
-   237   catch_future       2.4563e+04 1.0843e+07
-   238   catch_future       3.1620e+04 1.5041e+07
+   234   catch_future       1.8357e+04 1.6937e+07
+   235   catch_future       1.8389e+04 1.3861e+07
+   236   catch_future       1.8894e+04 1.1943e+07
+   237   catch_future       2.1237e+04 1.2443e+07
+   238   catch_future       2.7139e+04 1.6379e+07
    239   future_biomass     1.9278e+05 8.7468e+03
    240   future_biomass     2.3794e+05 9.1400e+03
    241   future_biomass     3.0181e+05 9.8223e+03
@@ -248,10 +248,10 @@
    247   future_biomass     3.7451e+05 1.0933e+04
    248   future_biomass     4.6085e+05 1.2102e+04
    249   future_biomass     1.9278e+05 8.7468e+03
-   250   future_biomass     2.2576e+05 2.0743e+07
-   251   future_biomass     2.7975e+05 3.5481e+07
-   252   future_biomass     3.5043e+05 4.7085e+07
-   253   future_biomass     4.2965e+05 5.9799e+07
+   250   future_biomass     2.3137e+05 1.8605e+07
+   251   future_biomass     2.8961e+05 3.3552e+07
+   252   future_biomass     3.6377e+05 4.6370e+07
+   253   future_biomass     4.4678e+05 6.0169e+07
    254   future_biomass     1.9278e+05 8.7468e+03
    255   future_biomass     2.5156e+05 9.5538e+03
    256   future_biomass     3.2953e+05 1.0154e+04

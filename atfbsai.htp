@@ -43,6 +43,7 @@ class model_data : public ad_comm{
   data_matrix nsamples_srv3_length;
   data_imatrix nsamples_srv_length_fem;
   data_imatrix nsamples_srv_length_mal;
+  data_3array nsamples_srv_length;
   data_3array obs_p_srv1_length;
   data_3array obs_p_srv2_length;
   data_3array obs_p_srv3_length;
@@ -137,6 +138,10 @@ public:
   {
     return (initial_params::current_phase
       >=initial_params::max_number_phases);
+  }
+  static prevariable current_feval(void)
+  {
+    return *objective_function_value::pobjfun;
   }
 private:
   ivector integer_control_flags;
@@ -233,6 +238,8 @@ private:
   param_number surv3_like;
   param_stddev_number endbiom;
   param_stddev_number depletion;
+  param_number prior_function_value;
+  param_number likelihood_function_value;
   objective_function_value obj_fun;
   param_number tmp;
   param_vector pred_sexr;
@@ -267,7 +274,7 @@ private:
   param_vector qtime;
 public:
   virtual void userfunction(void);
-  virtual void report(void);
+  virtual void report(const dvector& gradients);
   virtual void final_calcs(void);
   model_parameters(int sz,int argc, char * argv[]);
   virtual void initializationfunction(void);
