@@ -230,6 +230,7 @@ private:
   param_number sexr_like;
   param_vector age_like;
   param_vector length_like;
+  param_vector length_like2;
   param_vector sel_like;
   param_number fpen;
   param_vector surv_like;

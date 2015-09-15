@@ -452,6 +452,10 @@ cout<<"q_surv"<<q_surv<<std::endl;
   #ifndef NO_AD_INITIALIZE
     length_like.initialize();
   #endif
+  length_like2.allocate(1,4,"length_like2");
+  #ifndef NO_AD_INITIALIZE
+    length_like2.initialize();
+  #endif
   sel_like.allocate(1,4,"sel_like");
   #ifndef NO_AD_INITIALIZE
     sel_like.initialize();
@@ -644,6 +648,7 @@ void model_parameters::preliminary_calculations(void)
     for(k=1; k<=2;k++)
       offset(1) -= nsamples_fish(k,i)*obs_p_fish(k,i) * log(obs_p_fish(k,i)+.0001);
   }
+  cout<<"nsamples_srv_length(1)"<<nsamples_srv_length(1)<<std::endl;    //this has females then males for survey
   //this loops over all surveys and makes sure all proportions sum to 1.
   for(i=1;i<=nsurv;i++){
 	for(j=1;j<=nobs_srv_length(i);j++){    
@@ -1017,7 +1022,6 @@ void model_parameters::get_numbers_at_age(void)
 			pred_p_srv_len_mal(i,j)/=sum_tot;
 	 }
    }
- 
     //Calculation of survey age composition
     for(i=1; i<=nobs_srv1_age;i++)
     {
@@ -1210,6 +1214,7 @@ void model_parameters::evaluate_the_objective_function(void)
   if (active(rec_dev))
   {
     length_like.initialize();   //length-like vector has the likelihoods for the 4 components: 1) fishery length 2) shelf survey lengths 3) slope survey lengths 4) Aleutians
+    length_like2.initialize();
     int ii;
     //recruitment likelihood - norm2 is sum of square values   
     rec_like = norm2(rec_dev);
@@ -1239,6 +1244,23 @@ void model_parameters::evaluate_the_objective_function(void)
       for (i=1; i <=nobs_srv3_length; i++)
         length_like(4)-=nsamples_srv3_length(k,i)*(1e-3+obs_p_srv3_length(k,i))*log(pred_p_srv3_len(k,i)+1e-3);
     length_like(4)-=offset(4);
+ 
+  cout<<"nobs_srv_length(1)"  << nobs_srv_length(1) <<std::endl;  
+  cout<<"nobs_srv1_length"  << nobs_srv1_length<<std::endl;  
+  //survey length composition fitting 
+   for (i=1;i<=nsurv;i++)
+   {
+     for (j=1;j<=nobs_srv_length(i);j++) 
+     {    
+	   length_like2(i+1)-=((nsamples_srv_length_fem(i,j)*(offset_const+obs_p_srv_length_fem(i,j))*log(pred_p_srv_len_fem(i,j)+offset_const))
+	                      +(nsamples_srv_length_mal(i,j)*(offset_const+obs_p_srv_length_mal(i,j))*log(pred_p_srv_len_mal(i,j)+offset_const)));
+	} 
+	  length_like2(i+1)-=offset(i+1); 
+     
+   } 
+  cout<<"length_like"<<length_like<<std::endl;
+  cout<<"length_like2"<<length_like2<<std::endl; 
+  exit(1); 
    //shelf survey age composition fitting
     for(k=1;k<=2;k++)
       for (i=1; i <=nobs_srv1_age; i++)
@@ -1254,13 +1276,20 @@ void model_parameters::evaluate_the_objective_function(void)
   }
   // Fit to indices (lognormal)  
   //weight each years estimate by 1/(2*variance) - use cv as an approx to s.d. of log(biomass) 
+  cout<<"log(obs_srv(1))"<<log(obs_srv(1))<<std::endl;
+  cout<<"log(obs_srv1+.01)"<<log(obs_srv1+.01)<<std::endl; 
+  cout<<"log(obs_srv1)"<<log(obs_srv1)<<std::endl; 
   for (i=1;i<=nsurv;i++)
   {   
   surv_like(i) = norm2(elem_div(log(obs_srv(i))-log(pred_srv(i)(yrs_srv(i))),sqrt(2)*cv_srv(i)));
   } 
    surv1_like = norm2(elem_div(log(obs_srv1+.01)-log(pred_srv1(yrs_srv1)+.01),sqrt(2)*cv_srv1));
-   surv2_like = norm2(elem_div(log(obs_srv2+.01)-log(pred_srv2(yrs_srv2)+.01),sqrt(2)*cv_srv2));
-   surv3_like = norm2(elem_div(log(obs_srv3+.01)-log(pred_srv3(yrs_srv3)+.01),sqrt(2)*cv_srv3));    
+   surv2_like = norm2(elem_div(log(obs_srv2)-log(pred_srv2(yrs_srv2)),sqrt(2)*cv_srv2));
+   //surv3_like = norm2(elem_div(log(obs_srv3+.01)-log(pred_srv3(yrs_srv3)+.01),sqrt(2)*cv_srv3)); 
+   surv3_like = norm2(elem_div(log(obs_srv3)-log(pred_srv3(yrs_srv3)),sqrt(2)*cv_srv3));
+   //the .01 does not seem to make a difference at all in the likelihood.    
+  cout<<"surv_like(1)"<<surv_like(1)<<std::endl;
+  cout<<"surv1_like"<<surv1_like<<std::endl; 
    
    catch_like=norm2(log(catch_bio+.000001)-log(pred_catch+.000001));
    // sex ratio likelihood
