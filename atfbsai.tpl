@@ -819,6 +819,7 @@ FUNCTION get_numbers_at_age
     //don't need to divide by max_sel because totn_srv1 is calculated using selectivities and the
     //max_sel would cancel out.
 
+//delete below
     // Fitting the survey length compositions
     for(i=1; i<=nobs_srv1_length;i++)
     {
@@ -848,7 +849,22 @@ FUNCTION get_numbers_at_age
       pred_p_srv3_len(1,i) /= sum_tot;
       pred_p_srv3_len(2,i) /= sum_tot;
     }
+//delete above
 
+  //Fit survey length compositions
+  for (i=1;i<=nsurv;i++)
+  {
+	for (j=1;j<=nobs_srv_length(i);j++)
+	{
+			ii=yrs_srv_length(i,j);
+			pred_p_srv_len_fem(i,j)=q_surv(i)*elem_prod(sel_srv(1,i),natage(1,ii))*lenage(1);
+			pred_p_srv_len_mal(i,j)=q_surv(i)*elem_prod(sel_srv(2,i),natage(2,ii))*lenage(2);
+			dvariable sum_tot=sum(pred_p_srv_len_fem(i,j)+pred_p_srv_len_mal(i,j));
+			pred_p_srv_len_fem(i,j)/=sum_tot;
+			pred_p_srv_len_mal(i,j)/=sum_tot;
+	 }
+   }
+ 
     //Calculation of survey age composition
 
     for(i=1; i<=nobs_srv1_age;i++)
@@ -870,6 +886,20 @@ FUNCTION get_numbers_at_age
       pred_p_srv3_age(1,i) /= sum_tot;
       pred_p_srv3_age(2,i) /= sum_tot;
     }
+     
+  //Fit survey age composition
+   for (i=1;i<=nsurv_aged;i++)
+  {
+	for (j=1;j<=nobs_srv_age(i);j++)
+	{
+			ii=yrs_srv_age(i,j);
+			pred_p_srv_age_fem(i,j)=q_surv(i)*elem_prod(sel_srv(1,i),natage(1,ii));
+			pred_p_srv_age_mal(i,j)=q_surv(i)*elem_prod(sel_srv(2,i),natage(2,ii));
+			dvariable sum_tot=sum(pred_p_srv_age_fem(i,j)+pred_p_srv_age_mal(i,j));
+			pred_p_srv_age_fem(i,j)/=sum_tot;
+			pred_p_srv_age_mal(i,j)/=sum_tot;
+	 }
+   }
 
   depletion=pred_bio(endyr)/pred_bio(styr);
   endbiom=pred_bio(endyr);
