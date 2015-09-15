@@ -26,11 +26,7 @@ DATA_SECTION
   init_int phase_logistic_sel //(12)
  //sample size for length comps for weighting likelihoods  
   init_int nlen             //(13) # of length bins
-!! cout<<"nlen"<<endl;
-!! cout<<  nlen<<endl;
   init_int nobs_fish          //(14) # of years of fishery data
-!! cout<<"nobs_fish"<<endl;
-!! cout<<  nobs_fish<<endl;
   init_ivector yrs_fish(1,nobs_fish)   //(15) years with fishery data
 !! cout<<"yrs_fish"<<endl;
 !! cout<<  yrs_fish<<endl;
@@ -346,7 +342,7 @@ PARAMETER_SECTION
   vector fmort(styr,endyr)
   number rbar
   vector surv(1,2)  //survival for each sex
-  vector offset(1,7)
+  vector offset(1,10) //change back to 7 later ***
   number rec_like
   number catch_like
   number sexr_like
@@ -520,6 +516,24 @@ PRELIMINARY_CALCS_SECTION
     obs_p_srv3_age(2,i) = obs_p_srv3_age(2,i) / sumtot; 
     for(k=1; k<=2;k++)
       offset(6) -= nsamples_srv3_age(k,i)*obs_p_srv3_age(k,i) * log(obs_p_srv3_age(k,i)+.0001);
+  }                                                                     
+
+//  init_3darray obs_p_srv_age_fem(1,nsurv_aged,1,nobs_srv_age,1,nages) 
+// cout<<"nobs_srv_age(1)"<<nobs_srv_age(1)<<std::endl;
+// cout<<"obs_p_srv_age_fem(1)"<<obs_p_srv_age_fem(1)<<std::endl;
+// exit(1) ;
+  //survey age offsets (checked that it works)
+  for (i=1;i<=nsurv_aged;i++)
+  {
+    for (j=1;j<=nobs_srv_age(i);j++)
+    {
+	double sumtot;
+	sumtot=sum(obs_p_srv_age_fem(i,j)+obs_p_srv_age_mal(i,j));
+	obs_p_srv_age_fem(i,j)=obs_p_srv_age_fem(i,j)/sumtot;
+	obs_p_srv_age_mal(i,j)=obs_p_srv_age_mal(i,j)/sumtot;
+	offset(i+4)-=nsamples_srv_age(i,1,j)*obs_p_srv_age_fem(i,j)*log(obs_p_srv_age_fem(i,j)+.0001)+
+	             nsamples_srv_age(i,2,j)*obs_p_srv_age_mal(i,j)*log(obs_p_srv_age_mal(i,j)+.0001);
+    }  
   }
 
 PROCEDURE_SECTION
@@ -1066,10 +1080,12 @@ FUNCTION evaluate_the_objective_function
         ii=yrs_fish(i);
         //fishery length likelihood fitting
           length_like(1) -= nsamples_fish(k,i)*(1e-5+obs_p_fish(k,i))*log(pred_p_fish(k,ii)+1e-5);
+          length_like2(1) -= nsamples_fish(k,i)*(1e-5+obs_p_fish(k,i))*log(pred_p_fish(k,ii)+1e-5);
       }
     }
     //add the offset to the likelihood   
     length_like(1)-=offset(1);
+    length_like2(1)-=offset(1);
 
     //shelf survey length composition fitting
     for(k=1;k<=2;k++)
@@ -1093,8 +1109,8 @@ FUNCTION evaluate_the_objective_function
 //  cout<<"nsamples_srv1_length(1,1)"  << nsamples_srv1_length(1,1) <<std::endl;  
 //  cout<<"obs_p_srv_length_fem(1,1)"  << obs_p_srv_length_fem(1,1) <<std::endl;  
 //  cout<<"obs_p_srv1_length(1,1)"  << obs_p_srv1_length(1,1) <<std::endl;
-  cout<<"nobs_srv_length(1)"  << nobs_srv_length(1) <<std::endl;  
-  cout<<"nobs_srv1_length"  << nobs_srv1_length<<std::endl;  
+//  cout<<"nobs_srv_length(1)"  << nobs_srv_length(1) <<std::endl;  
+//  cout<<"nobs_srv1_length"  << nobs_srv1_length<<std::endl;  
 //  exit(1);
 
   //survey length composition fitting 
@@ -1109,9 +1125,9 @@ FUNCTION evaluate_the_objective_function
      
    } 
 
-  cout<<"length_like"<<length_like<<std::endl;
-  cout<<"length_like2"<<length_like2<<std::endl; 
-  exit(1); 
+//  cout<<"length_like"<<length_like<<std::endl;
+//  cout<<"length_like2"<<length_like2<<std::endl; 
+//  exit(1); 
 
    //shelf survey age composition fitting
     for(k=1;k<=2;k++)
@@ -1131,9 +1147,9 @@ FUNCTION evaluate_the_objective_function
 
 
   //weight each years estimate by 1/(2*variance) - use cv as an approx to s.d. of log(biomass) 
-  cout<<"log(obs_srv(1))"<<log(obs_srv(1))<<std::endl;
-  cout<<"log(obs_srv1+.01)"<<log(obs_srv1+.01)<<std::endl; 
-  cout<<"log(obs_srv1)"<<log(obs_srv1)<<std::endl; 
+//  cout<<"log(obs_srv(1))"<<log(obs_srv(1))<<std::endl;
+//  cout<<"log(obs_srv1+.01)"<<log(obs_srv1+.01)<<std::endl; 
+//  cout<<"log(obs_srv1)"<<log(obs_srv1)<<std::endl; 
 //  cout<<"rep(.01,10)"<<rep(.01,10)<<std::endl;
 
   for (i=1;i<=nsurv;i++)
@@ -1141,13 +1157,12 @@ FUNCTION evaluate_the_objective_function
   surv_like(i) = norm2(elem_div(log(obs_srv(i))-log(pred_srv(i)(yrs_srv(i))),sqrt(2)*cv_srv(i)));
   } 
    surv1_like = norm2(elem_div(log(obs_srv1+.01)-log(pred_srv1(yrs_srv1)+.01),sqrt(2)*cv_srv1));
-   surv2_like = norm2(elem_div(log(obs_srv2)-log(pred_srv2(yrs_srv2)),sqrt(2)*cv_srv2));
-   //surv3_like = norm2(elem_div(log(obs_srv3+.01)-log(pred_srv3(yrs_srv3)+.01),sqrt(2)*cv_srv3)); 
-   surv3_like = norm2(elem_div(log(obs_srv3)-log(pred_srv3(yrs_srv3)),sqrt(2)*cv_srv3));
+   surv2_like = norm2(elem_div(log(obs_srv2+.01)-log(pred_srv2(yrs_srv2)+.01),sqrt(2)*cv_srv2)); 
+   surv3_like = norm2(elem_div(log(obs_srv3+.01)-log(pred_srv3(yrs_srv3)+.01),sqrt(2)*cv_srv3));
 
    //the .01 does not seem to make a difference at all in the likelihood.    
-  cout<<"surv_like(1)"<<surv_like(1)<<std::endl;
-  cout<<"surv1_like"<<surv1_like<<std::endl; 
+//  cout<<"surv_like(1)"<<surv_like(1)<<std::endl;
+//  cout<<"surv1_like"<<surv1_like<<std::endl; 
 
 //  cout<<"surv2_like"<<surv2_like<<std::endl;
 //  cout<<"surv3_like"<<surv3_like<<std::endl;    
@@ -1476,7 +1491,9 @@ REPORT_SECTION
 
 		  report <<" Predicted female Aleutians survey age composition " << endl;
 		    for (i=1; i<=nobs_srv3_age; i++)
-		      report << yrs_srv3_age(i)  << pred_p_srv3_age(1,i) << endl;
+		      report << yrs_srv3_age(i)  << pred_p_srv3_age(1,i) << endl; 
+		
+		report<<"mean_log_rec"<<mean_log_rec<<std::endl;
 	
   report << " Go drink coffee " << endl; 
 
