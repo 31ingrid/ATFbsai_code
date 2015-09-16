@@ -540,7 +540,7 @@
   1
 #(52) phase for smooth selectivity curve fishery
   4
-#(53) weights for smooth selectivity likelihoods 1 fishery female, 2 survey female, 3 fishery male, 4 survey male
+#(53) wt_like weights for smooth selectivity likelihoods 1 fishery female, 2 survey female, 3 fishery male, 4 survey male
   10. 120. 40. 1.  
 # weights for constraint on monotonicity 1 fishery female, 2 fishery male, 3 survey female, 4 survey male
   200. 100. 20000. 1000.
