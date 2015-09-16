@@ -346,9 +346,9 @@ PARAMETER_SECTION
   number rec_like
   number catch_like
   number sexr_like
-  vector age_like(1,4) //really only need shelf and AI but may need other elements later
+  vector age_like(1,nsurv_aged) //really only need shelf and AI but may need other elements later
   vector length_like(1,4)  
-  vector length_like2(1,4)
+  vector length_like2(1,nsurv+1)
   vector sel_like(1,4)
   number fpen 
   vector surv_like(1,nsurv) //survey likelihood for each survey   
@@ -1129,31 +1129,33 @@ FUNCTION evaluate_the_objective_function
 //  cout<<"length_like2"<<length_like2<<std::endl; 
 //  exit(1); 
 
+//delete below
    //shelf survey age composition fitting
-    for(k=1;k<=2;k++)
-      for (i=1; i <=nobs_srv1_age; i++)
-        age_like(1)-=nsamples_srv1_age(k,i)*(1e-3+obs_p_srv1_age(k,i))*log(pred_p_srv1_age(k,i)+1e-3);
-    age_like(1)-=offset(5);
+//    for(k=1;k<=2;k++)
+//      for (i=1; i <=nobs_srv1_age; i++)
+//        age_like(1)-=nsamples_srv1_age(k,i)*(1e-3+obs_p_srv1_age(k,i))*log(pred_p_srv1_age(k,i)+1e-3);
+//    age_like(1)-=offset(5);
   
    //AI survey age composition fitting   LOOK BACK HERE
-    for(k=1;k<=2;k++)
-      for (i=1; i <=nobs_srv3_age; i++)
-        age_like(2)-=nsamples_srv3_age(k,i)*(1e-3+obs_p_srv3_age(k,i))*log(pred_p_srv3_age(k,i)+1e-3);
-    age_like(2)-=offset(6);
+//    for(k=1;k<=2;k++)
+//      for (i=1; i <=nobs_srv3_age; i++)
+//        age_like(2)-=nsamples_srv3_age(k,i)*(1e-3+obs_p_srv3_age(k,i))*log(pred_p_srv3_age(k,i)+1e-3);
+//    age_like(2)-=offset(6);
+//delete above
 
-//loop test below
+//survey age composition fitting 
   for (i=1;i<=nsurv_aged;i++)
   {
 	for (j=1;j<=nobs_srv_age(i);j++)
 	{
-   age_like(i+2)-=nsamples_srv_age(i,1,j)*(1e-3+obs_p_srv_age_fem(i,j))*log(pred_p_srv_age_fem(i,j)+1e-3)+
+   age_like(i)-=nsamples_srv_age(i,1,j)*(1e-3+obs_p_srv_age_fem(i,j))*log(pred_p_srv_age_fem(i,j)+1e-3)+
                   nsamples_srv_age(i,2,j)*(1e-3+obs_p_srv_age_mal(i,j))*log(pred_p_srv_age_mal(i,j)+1e-3); 	
 	}	
-	age_like(i+2)-=offset(i+4);
+	age_like(i)-=offset(i+4);
   }
  
-  cout<<"age_like"<<age_like<<std::endl;
-  exit(1);
+//  cout<<"age_like"<<age_like<<std::endl;
+//  exit(1);
   //end of if(active (rec_dev))
   }
   // Fit to indices (lognormal)  
@@ -1210,7 +1212,7 @@ FUNCTION evaluate_the_objective_function
     obj_fun+=1.*square(avgsel_fish(2));
 
   } //end if active(log_selcoffs_fish)
-//  cout<<" f after catch = "<<f<<endl;
+
   // Phases less than 3, penalize High F's
     if (current_phase()<2)
     {
@@ -1229,14 +1231,22 @@ FUNCTION evaluate_the_objective_function
     }
 
   obj_fun += rec_like;
-  obj_fun += 1.*length_like(1);     //emphasis factor = 1 for fishery lengths   
-  obj_fun += 1.*length_like(2);     //emphasis factor = 1
-  obj_fun += 1.*length_like(3);     //emphasis factor = 1
-  obj_fun += 1.*length_like(4);     //emphasis factor = 1
+//  obj_fun += 1.*length_like(1);     //emphasis factor = 1 for fishery lengths   
+//  obj_fun += 1.*length_like(2);     //emphasis factor = 1
+//  obj_fun += 1.*length_like(3);     //emphasis factor = 1
+//  obj_fun += 1.*length_like(4);     //emphasis factor = 1 
+  for (i=1;i<=nsurv+1;i++)  
+  {
+  obj_fun += 1.*length_like2(i);
+  }
 //  obj_fun += 1.*age_like(2);           //emphasis factor = 1 
 //  obj_fun += 1.*age_like(4);           //emphasis factor = 1
-  obj_fun += 1.*age_like(1);           //emphasis factor = 1 
-  obj_fun += 1.*age_like(2);           //emphasis factor = 1 
+//  obj_fun += 1.*age_like(1);           //emphasis factor = 1 
+//  obj_fun += 1.*age_like(2);           //emphasis factor = 1  
+  for(i=1;i<=nsurv_aged;i++)
+  {
+  obj_fun+=1.*age_like(i);  
+  }
 //  obj_fun += 1.*surv1_like;         //emphasis factor = 1
 //  obj_fun += 1.*surv2_like;         //emphasis factor = 1
 //  obj_fun += 1.*surv3_like;         //emphasis factor = 1  

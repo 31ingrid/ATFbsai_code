@@ -440,7 +440,7 @@ cout<<"q_surv"<<q_surv<<std::endl;
   #ifndef NO_AD_INITIALIZE
   sexr_like.initialize();
   #endif
-  age_like.allocate(1,4,"age_like");
+  age_like.allocate(1,nsurv_aged,"age_like");
   #ifndef NO_AD_INITIALIZE
     age_like.initialize();
   #endif
@@ -448,7 +448,7 @@ cout<<"q_surv"<<q_surv<<std::endl;
   #ifndef NO_AD_INITIALIZE
     length_like.initialize();
   #endif
-  length_like2.allocate(1,4,"length_like2");
+  length_like2.allocate(1,nsurv+1,"length_like2");
   #ifndef NO_AD_INITIALIZE
     length_like2.initialize();
   #endif
@@ -1268,28 +1268,18 @@ void model_parameters::evaluate_the_objective_function(void)
      
    } 
    //shelf survey age composition fitting
-    for(k=1;k<=2;k++)
-      for (i=1; i <=nobs_srv1_age; i++)
-        age_like(1)-=nsamples_srv1_age(k,i)*(1e-3+obs_p_srv1_age(k,i))*log(pred_p_srv1_age(k,i)+1e-3);
-    age_like(1)-=offset(5);
   
    //AI survey age composition fitting   LOOK BACK HERE
-    for(k=1;k<=2;k++)
-      for (i=1; i <=nobs_srv3_age; i++)
-        age_like(2)-=nsamples_srv3_age(k,i)*(1e-3+obs_p_srv3_age(k,i))*log(pred_p_srv3_age(k,i)+1e-3);
-    age_like(2)-=offset(6);
   for (i=1;i<=nsurv_aged;i++)
   {
 	for (j=1;j<=nobs_srv_age(i);j++)
 	{
-   age_like(i+2)-=nsamples_srv_age(i,1,j)*(1e-3+obs_p_srv_age_fem(i,j))*log(pred_p_srv_age_fem(i,j)+1e-3)+
+   age_like(i)-=nsamples_srv_age(i,1,j)*(1e-3+obs_p_srv_age_fem(i,j))*log(pred_p_srv_age_fem(i,j)+1e-3)+
                   nsamples_srv_age(i,2,j)*(1e-3+obs_p_srv_age_mal(i,j))*log(pred_p_srv_age_mal(i,j)+1e-3); 	
 	}	
-	age_like(i+2)-=offset(i+4);
+	age_like(i)-=offset(i+4);
   }
  
-  cout<<"age_like"<<age_like<<std::endl;
-  exit(1);
   //end of if(active (rec_dev))
   }
   // Fit to indices (lognormal)  
@@ -1342,12 +1332,14 @@ void model_parameters::evaluate_the_objective_function(void)
       fpen+=.01*norm2(fmort_dev);
     }
   obj_fun += rec_like;
-  obj_fun += 1.*length_like(1);     //emphasis factor = 1 for fishery lengths   
-  obj_fun += 1.*length_like(2);     //emphasis factor = 1
-  obj_fun += 1.*length_like(3);     //emphasis factor = 1
-  obj_fun += 1.*length_like(4);     //emphasis factor = 1
-  obj_fun += 1.*age_like(1);           //emphasis factor = 1 
-  obj_fun += 1.*age_like(2);           //emphasis factor = 1 
+  for (i=1;i<=nsurv+1;i++)  
+  {
+  obj_fun += 1.*length_like2(i);
+  }
+  for(i=1;i<=nsurv_aged;i++)
+  {
+  obj_fun+=1.*age_like(i);  
+  }
   for (i=1;i<=nsurv;i++)
   {
   obj_fun += 1.*surv_like(i); //emphasis factor = 1
