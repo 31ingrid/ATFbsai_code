@@ -86,9 +86,6 @@ class model_data : public ad_comm{
   data_vector Phase;
   data_int assess;
   int styr_rec;
-  dvector cv_srv1;
-  dvector cv_srv2;
-  dvector cv_srv3;
   dmatrix cv_srv;
   int i;
   int j;
@@ -98,13 +95,9 @@ class model_data : public ad_comm{
   dvector test;
   dvector obs_sexr;
   dmatrix obs_sexr_srv_2;
-  dvector obs_sexr_srv1_2;
-  dvector obs_sexr_srv2_2;
-  dvector obs_sexr_srv3_2;
   double obs_mean_sexr;
   double obs_SD_sexr;
   dvector pred_sexr;
-  dvector q;
   ~model_data();
   model_data(int argc,char * argv[]);
   friend class model_parameters;
@@ -234,9 +227,6 @@ private:
   param_vector sel_like;
   param_number fpen;
   param_vector surv_like;
-  param_number surv1_like;
-  param_number surv2_like;
-  param_number surv3_like;
   param_stddev_number endbiom;
   param_stddev_number depletion;
   param_number prior_function_value;
