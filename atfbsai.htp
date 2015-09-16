@@ -86,9 +86,6 @@ class model_data : public ad_comm{
   data_vector Phase;
   data_int assess;
   int styr_rec;
-  dvector cv_srv1;
-  dvector cv_srv2;
-  dvector cv_srv3;
   dmatrix cv_srv;
   int i;
   int j;

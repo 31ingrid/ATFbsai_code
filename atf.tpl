@@ -19,9 +19,6 @@ DATA_SECTION
   init_int nsurv_aged //(7.4)     
  //selectivity is set to the selectivity at nselages-1 after age nselages 
   init_int nselages       //(8) fishery (for asymptotic selectivity) set to 19
-  init_int nselages_srv1  //(9) slope survey (for asymptotic selectivity) 
-  init_int nselages_srv2  //(10) shelf survey (for asymptotic selectivity)
-  init_int nselages_srv3  //(11) Aleutian Islands survey (for asymptotic selectivity)
   init_ivector nselages_srv(1,nsurv) //(11.5)
   init_int phase_logistic_sel //(12)
  //sample size for length comps for weighting likelihoods  

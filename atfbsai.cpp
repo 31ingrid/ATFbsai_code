@@ -142,9 +142,6 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   Upper_bound.allocate(1,nsurv,"Upper_bound");
   Phase.allocate(1,nsurv,"Phase");
   assess.allocate("assess");
-  cv_srv1.allocate(1,nobs_srv1);
-  cv_srv2.allocate(1,nobs_srv2);
-  cv_srv3.allocate(1,nobs_srv3);
   cv_srv.allocate(1,nsurv,1,nobs_srv);
   test.allocate(1,4);
    styr_rec=styr-nages+1;
