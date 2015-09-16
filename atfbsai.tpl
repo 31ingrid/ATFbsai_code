@@ -885,25 +885,25 @@ FUNCTION get_numbers_at_age
 //delete below 
     //Calculation of survey age composition
 
-    for(i=1; i<=nobs_srv1_age;i++)
-    {
-      ii = yrs_srv1_age(i);
-      pred_p_srv1_age(1,i) = q1 * elem_prod(sel_srv1(1),natage(1,ii));
-      pred_p_srv1_age(2,i) = q1 * elem_prod(sel_srv1(2),natage(2,ii));
-      dvariable sum_tot = sum(pred_p_srv1_age(1,i)+pred_p_srv1_age(2,i));
-      pred_p_srv1_age(1,i) /= sum_tot;
-      pred_p_srv1_age(2,i) /= sum_tot;
-    } 
-
-    for(i=1; i<=nobs_srv3_age;i++)  //LOOK BACK EHRE
-    {
-      ii = yrs_srv3_age(i);
-      pred_p_srv3_age(1,i) = q3 * elem_prod(sel_srv3(1),natage(1,ii));
-      pred_p_srv3_age(2,i) = q3 * elem_prod(sel_srv3(2),natage(2,ii));
-      dvariable sum_tot = sum(pred_p_srv3_age(1,i)+pred_p_srv3_age(2,i));
-      pred_p_srv3_age(1,i) /= sum_tot;
-      pred_p_srv3_age(2,i) /= sum_tot;
-    }
+//    for(i=1; i<=nobs_srv1_age;i++)
+//    {
+//      ii = yrs_srv1_age(i);
+//      pred_p_srv1_age(1,i) = q1 * elem_prod(sel_srv1(1),natage(1,ii));
+//      pred_p_srv1_age(2,i) = q1 * elem_prod(sel_srv1(2),natage(2,ii));
+//      dvariable sum_tot = sum(pred_p_srv1_age(1,i)+pred_p_srv1_age(2,i));
+//      pred_p_srv1_age(1,i) /= sum_tot;
+//      pred_p_srv1_age(2,i) /= sum_tot;
+//    } 
+//
+//    for(i=1; i<=nobs_srv3_age;i++)  //LOOK BACK EHRE
+//    {
+//      ii = yrs_srv3_age(i);
+//      pred_p_srv3_age(1,i) = q3 * elem_prod(sel_srv3(1),natage(1,ii));
+//      pred_p_srv3_age(2,i) = q3 * elem_prod(sel_srv3(2),natage(2,ii));
+//      dvariable sum_tot = sum(pred_p_srv3_age(1,i)+pred_p_srv3_age(2,i));
+//      pred_p_srv3_age(1,i) /= sum_tot;
+//      pred_p_srv3_age(2,i) /= sum_tot;
+//    }
 //delete above
      
   //Fit survey age composition
@@ -965,7 +965,7 @@ FUNCTION Future_projections
           break;
       }
 
-      // Get future F's
+// Get future F's
      for(k=1;k<=2;k++)
      {
       for (i=endyr+1;i<=endyr_fut;i++)
@@ -977,7 +977,7 @@ FUNCTION Future_projections
           S_future(k,i,j) = exp(-1.*Z_future(k,i,j));
         }
       }
-    // Future Recruitment (and spawners)
+// Future Recruitment (and spawners)
       for (i=styr_fut;i<endyr_fut;i++)
       {
         nage_future(k,i,1)  = median_rec;
@@ -1025,14 +1025,13 @@ FUNCTION compute_spr_rates
     Nspr(3,j)=Nspr(3,j-1)*exp(-1.*(M(1)+F35*sel(1,j-1)/maxsel_fish));
     Nspr(4,j)=Nspr(4,j-1)*exp(-1.*(M(1)+F30*sel(1,j-1)/maxsel_fish));
   }
-  //cout<<F40<<" "<<F30<<" "<<Nspr<<endl; 
- // cout<<"spr calc"<<endl;
+
  // Now do plus group
   Nspr(1,nages)=Nspr(1,nages-1)*exp(-1.*M(1))/(1.-exp(-1.*M(1)));
   Nspr(2,nages)=Nspr(2,nages-1)*exp(-1.* (M(1)+F40*sel(1,nages-1)/maxsel_fish))/ (1.-exp(-1.*(M(1)+F40*sel(1,nages)/maxsel_fish)));
   Nspr(3,nages)=Nspr(3,nages-1)*exp(-1.* (M(1)+F35*sel(1,nages-1)/maxsel_fish))/ (1.-exp(-1.*(M(1)+F35*sel(1,nages)/maxsel_fish)));
   Nspr(4,nages)=Nspr(4,nages-1)*exp(-1.* (M(1)+F30*sel(1,nages-1)/maxsel_fish))/ (1.-exp(-1.*(M(1)+F30*sel(1,nages)/maxsel_fish)));
- //cout<<"plus group"<<endl;
+
   for (j=1;j<=nages;j++)
   {
    // Kill them off till april (0.25) atf spawn in winter so put in 0.0
@@ -1052,7 +1051,7 @@ FUNCTION Do_depend
   obj_fun += 1.*sexr_like;             // male proportion prior, emphasis factor = 1
 
 FUNCTION evaluate_the_objective_function
-  length_like.initialize();
+  length_like2.initialize();
   age_like.initialize();
   fpen.initialize();
   rec_like.initialize();
@@ -1066,8 +1065,8 @@ FUNCTION evaluate_the_objective_function
 
   if (active(rec_dev))
   {
-    length_like.initialize();   //length-like vector has the likelihoods for the 4 components: 1) fishery length 2) shelf survey lengths 3) slope survey lengths 4) Aleutians
-    length_like2.initialize();
+//    length_like.initialize();   //length-like vector has the likelihoods for the 4 components: 1) fishery length 2) shelf survey lengths 3) slope survey lengths 4) Aleutians
+ //   length_like2.initialize();
     int ii;
 
     //recruitment likelihood - norm2 is sum of square values   
@@ -1087,32 +1086,6 @@ FUNCTION evaluate_the_objective_function
     length_like(1)-=offset(1);
     length_like2(1)-=offset(1);
 
-    //shelf survey length composition fitting
-//    for(k=1;k<=2;k++)
-//      for (i=1; i <=nobs_srv1_length; i++)
-//        length_like(2)-=nsamples_srv1_length(k,i)*(1e-3+obs_p_srv1_length(k,i))*log(pred_p_srv1_len(k,i)+1e-3);
-//    length_like(2)-=offset(2);
-
-    //slope survey length composition fitting
-//    for(k=1;k<=2;k++)
-//      for (i=1; i <=nobs_srv2_length; i++)
-//        length_like(3)-=nsamples_srv2_length(k,i)*(1e-3+obs_p_srv2_length(k,i))*log(pred_p_srv2_len(k,i)+1e-3);
-//    length_like(3)-=offset(3);
-
-    //Aleutian Island survey length composition fitting
-//    for(k=1;k<=2;k++)
-//      for (i=1; i <=nobs_srv3_length; i++)
-//        length_like(4)-=nsamples_srv3_length(k,i)*(1e-3+obs_p_srv3_length(k,i))*log(pred_p_srv3_len(k,i)+1e-3);
-//    length_like(4)-=offset(4);
- 
-//  cout<<"nsamples_srv_length_fem(1,1)"  << nsamples_srv_length_fem(1,1) <<std::endl;  
-//  cout<<"nsamples_srv1_length(1,1)"  << nsamples_srv1_length(1,1) <<std::endl;  
-//  cout<<"obs_p_srv_length_fem(1,1)"  << obs_p_srv_length_fem(1,1) <<std::endl;  
-//  cout<<"obs_p_srv1_length(1,1)"  << obs_p_srv1_length(1,1) <<std::endl;
-//  cout<<"nobs_srv_length(1)"  << nobs_srv_length(1) <<std::endl;  
-//  cout<<"nobs_srv1_length"  << nobs_srv1_length<<std::endl;  
-//  exit(1);
-
   //survey length composition fitting 
    for (i=1;i<=nsurv;i++)
    {
@@ -1125,24 +1098,6 @@ FUNCTION evaluate_the_objective_function
      
    } 
 
-//  cout<<"length_like"<<length_like<<std::endl;
-//  cout<<"length_like2"<<length_like2<<std::endl; 
-//  exit(1); 
-
-//delete below
-   //shelf survey age composition fitting
-//    for(k=1;k<=2;k++)
-//      for (i=1; i <=nobs_srv1_age; i++)
-//        age_like(1)-=nsamples_srv1_age(k,i)*(1e-3+obs_p_srv1_age(k,i))*log(pred_p_srv1_age(k,i)+1e-3);
-//    age_like(1)-=offset(5);
-  
-   //AI survey age composition fitting   LOOK BACK HERE
-//    for(k=1;k<=2;k++)
-//      for (i=1; i <=nobs_srv3_age; i++)
-//        age_like(2)-=nsamples_srv3_age(k,i)*(1e-3+obs_p_srv3_age(k,i))*log(pred_p_srv3_age(k,i)+1e-3);
-//    age_like(2)-=offset(6);
-//delete above
-
 //survey age composition fitting 
   for (i=1;i<=nsurv_aged;i++)
   {
@@ -1153,36 +1108,16 @@ FUNCTION evaluate_the_objective_function
 	}	
 	age_like(i)-=offset(i+4);
   }
- 
-//  cout<<"age_like"<<age_like<<std::endl;
-//  exit(1);
+
   //end of if(active (rec_dev))
   }
   // Fit to indices (lognormal)  
-
-
   //weight each years estimate by 1/(2*variance) - use cv as an approx to s.d. of log(biomass) 
-//  cout<<"log(obs_srv(1))"<<log(obs_srv(1))<<std::endl;
-//  cout<<"log(obs_srv1+.01)"<<log(obs_srv1+.01)<<std::endl; 
-//  cout<<"log(obs_srv1)"<<log(obs_srv1)<<std::endl; 
-//  cout<<"rep(.01,10)"<<rep(.01,10)<<std::endl;
 
   for (i=1;i<=nsurv;i++)
   {   
   surv_like(i) = norm2(elem_div(log(obs_srv(i))-log(pred_srv(i)(yrs_srv(i))),sqrt(2)*cv_srv(i)));
   } 
-//   surv1_like = norm2(elem_div(log(obs_srv1+.01)-log(pred_srv1(yrs_srv1)+.01),sqrt(2)*cv_srv1));
-//   surv2_like = norm2(elem_div(log(obs_srv2+.01)-log(pred_srv2(yrs_srv2)+.01),sqrt(2)*cv_srv2)); 
-//   surv3_like = norm2(elem_div(log(obs_srv3+.01)-log(pred_srv3(yrs_srv3)+.01),sqrt(2)*cv_srv3));
-
-   //the .01 does not seem to make a difference at all in the likelihood.    
-//  cout<<"surv_like(1)"<<surv_like(1)<<std::endl;
-//  cout<<"surv1_like"<<surv1_like<<std::endl; 
-
-//  cout<<"surv2_like"<<surv2_like<<std::endl;
-//  cout<<"surv3_like"<<surv3_like<<std::endl;    
-//  exit(1);             
-//   double var_tmp; for (i=1;i<=nobs_srv3;i++) { var_tmp = 2.*square(log(obs_srv3(i))*cv_srv3(i)); surv3_like += square(log(obs_srv3(i)+.01)-log(pred_srv3(yrs_srv3(i))+.01))/var_tmp; }
    
    catch_like=norm2(log(catch_bio+.000001)-log(pred_catch+.000001));
 
@@ -1194,9 +1129,7 @@ FUNCTION evaluate_the_objective_function
   if(active(log_selcoffs_fish))
   {  
     sel_like(1)=wt_like(1)*norm2(first_difference(first_difference(log_sel_fish(1)))); //fishery females
-//    sel_like(2)=wt_like(2)*norm2(first_difference(first_difference(log_sel_srv1(1))));
-    sel_like(3)=wt_like(3)*norm2(first_difference(first_difference(log_sel_fish(2)))); //fishery males
-//    sel_like(4)=wt_like(4)*norm2(first_difference(first_difference(log_sel_srv1(2)))); 
+    sel_like(3)=wt_like(3)*norm2(first_difference(first_difference(log_sel_fish(2)))); //fishery males 
    for (j=1;j<nages;j++)
    {
     if(monot_sel==1)
@@ -1231,43 +1164,12 @@ FUNCTION evaluate_the_objective_function
     }
 
   obj_fun += rec_like;
-//  obj_fun += 1.*length_like(1);     //emphasis factor = 1 for fishery lengths   
-//  obj_fun += 1.*length_like(2);     //emphasis factor = 1
-//  obj_fun += 1.*length_like(3);     //emphasis factor = 1
-//  obj_fun += 1.*length_like(4);     //emphasis factor = 1 
-//  for (i=1;i<=nsurv+1;i++)  
-//  {
- // obj_fun += 1.*length_like2(i);
- // }  
-  obj_fun += 1.*sum(length_like2);
-//  obj_fun += 1.*age_like(2);           //emphasis factor = 1 
-//  obj_fun += 1.*age_like(4);           //emphasis factor = 1
-//  obj_fun += 1.*age_like(1);           //emphasis factor = 1 
-//  obj_fun += 1.*age_like(2);           //emphasis factor = 1  
-//  for(i=1;i<=nsurv_aged;i++)
-//  {
-//  obj_fun+=1.*age_like(i);  
-//  }    
-  obj_fun+= 1.*sum(age_like);
-//  obj_fun += 1.*surv1_like;         //emphasis factor = 1
-//  obj_fun += 1.*surv2_like;         //emphasis factor = 1
-//  obj_fun += 1.*surv3_like;         //emphasis factor = 1  
-  for (i=1;i<=nsurv;i++)
-  {
-  obj_fun += 1.*surv_like(i); //emphasis factor = 1
-  } 
+  obj_fun += 1.*sum(length_like2);  
+  obj_fun+= 1.*sum(age_like); 
   obj_fun += 1.*sum(surv_like);
   obj_fun += 300*catch_like;        // large emphasis to fit observed catch
   obj_fun += fpen;
   obj_fun += sprpen;
-
-//bayesian part normal proirs for M and q1 
-//   mlike=mfexp(norm2(M(1)-mfavg)/(2.*(mfcv*mfavg)^2.0))+mfexp(norm2(M(2)-mmavg)/(2.*(mmcv*mmavg)^2.0));
-//   qlike=mfexp(norm2(q1-q1avg)/(2.*(q1cv*q1avg)^2.0));
-
-//   flike=f;
-//   f=f*mlike*qlike;
-
 
 REPORT_SECTION
   report << "Estimated numbers of female fish at age " << endl;
@@ -1438,19 +1340,19 @@ REPORT_SECTION
 
   report << "Likelihood components" << endl;
   report << "shelf survey like component " << endl;
-  report << surv1_like << endl;
+  report << surv_like(1) << endl;
   report << "slope survey like component " << endl;
-  report << surv2_like << endl;
+  report << surv_like(2) << endl;
   report << "Aleutian Islands survey lilke component "<< endl;
-  report <<surv3_like << endl;
+  report <<surv_like(3) << endl;
   report << "shelf survey length composition " << endl;
-  report << length_like(2) << endl;
+  report << length_like2(2) << endl;
   report << "slope survey length composition " << endl;
-  report << length_like(3) << endl;
+  report << length_like2(3) << endl;
   report << "Aleutian Islands survey length composition " << endl;
-  report << length_like(4) << endl;
+  report << length_like2(4) << endl;
   report << "fishery length composition likelihood " << endl;
-  report << length_like(1) << endl;
+  report << length_like2(1) << endl;
   report << "recruitment likelihood component est.  " << endl;
   report << rec_like << endl;
   report << "catch likelihood component est.  " << endl;

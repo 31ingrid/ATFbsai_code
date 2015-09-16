@@ -1032,24 +1032,6 @@ void model_parameters::get_numbers_at_age(void)
 	 }
    }
     //Calculation of survey age composition
-    for(i=1; i<=nobs_srv1_age;i++)
-    {
-      ii = yrs_srv1_age(i);
-      pred_p_srv1_age(1,i) = q1 * elem_prod(sel_srv1(1),natage(1,ii));
-      pred_p_srv1_age(2,i) = q1 * elem_prod(sel_srv1(2),natage(2,ii));
-      dvariable sum_tot = sum(pred_p_srv1_age(1,i)+pred_p_srv1_age(2,i));
-      pred_p_srv1_age(1,i) /= sum_tot;
-      pred_p_srv1_age(2,i) /= sum_tot;
-    } 
-    for(i=1; i<=nobs_srv3_age;i++)  //LOOK BACK EHRE
-    {
-      ii = yrs_srv3_age(i);
-      pred_p_srv3_age(1,i) = q3 * elem_prod(sel_srv3(1),natage(1,ii));
-      pred_p_srv3_age(2,i) = q3 * elem_prod(sel_srv3(2),natage(2,ii));
-      dvariable sum_tot = sum(pred_p_srv3_age(1,i)+pred_p_srv3_age(2,i));
-      pred_p_srv3_age(1,i) /= sum_tot;
-      pred_p_srv3_age(2,i) /= sum_tot;
-    }
      
   //Fit survey age composition
    for (i=1;i<=nsurv_aged;i++)
@@ -1114,7 +1096,6 @@ void model_parameters::Future_projections(void)
           ftmp.initialize();
           break;
       }
-      // Get future F's
      for(k=1;k<=2;k++)
      {
       for (i=endyr+1;i<=endyr_fut;i++)
@@ -1126,7 +1107,6 @@ void model_parameters::Future_projections(void)
           S_future(k,i,j) = exp(-1.*Z_future(k,i,j));
         }
       }
-    // Future Recruitment (and spawners)
       for (i=styr_fut;i<endyr_fut;i++)
       {
         nage_future(k,i,1)  = median_rec;
@@ -1176,14 +1156,11 @@ void model_parameters::compute_spr_rates(void)
     Nspr(3,j)=Nspr(3,j-1)*exp(-1.*(M(1)+F35*sel(1,j-1)/maxsel_fish));
     Nspr(4,j)=Nspr(4,j-1)*exp(-1.*(M(1)+F30*sel(1,j-1)/maxsel_fish));
   }
-  //cout<<F40<<" "<<F30<<" "<<Nspr<<endl; 
- // cout<<"spr calc"<<endl;
  // Now do plus group
   Nspr(1,nages)=Nspr(1,nages-1)*exp(-1.*M(1))/(1.-exp(-1.*M(1)));
   Nspr(2,nages)=Nspr(2,nages-1)*exp(-1.* (M(1)+F40*sel(1,nages-1)/maxsel_fish))/ (1.-exp(-1.*(M(1)+F40*sel(1,nages)/maxsel_fish)));
   Nspr(3,nages)=Nspr(3,nages-1)*exp(-1.* (M(1)+F35*sel(1,nages-1)/maxsel_fish))/ (1.-exp(-1.*(M(1)+F35*sel(1,nages)/maxsel_fish)));
   Nspr(4,nages)=Nspr(4,nages-1)*exp(-1.* (M(1)+F30*sel(1,nages-1)/maxsel_fish))/ (1.-exp(-1.*(M(1)+F30*sel(1,nages)/maxsel_fish)));
- //cout<<"plus group"<<endl;
   for (j=1;j<=nages;j++)
   {
    // Kill them off till april (0.25) atf spawn in winter so put in 0.0
@@ -1209,7 +1186,7 @@ void model_parameters::Do_depend(void)
 void model_parameters::evaluate_the_objective_function(void)
 {
   ofstream& evalout= *pad_evalout;
-  length_like.initialize();
+  length_like2.initialize();
   age_like.initialize();
   fpen.initialize();
   rec_like.initialize();
@@ -1222,8 +1199,7 @@ void model_parameters::evaluate_the_objective_function(void)
   obj_fun.initialize();
   if (active(rec_dev))
   {
-    length_like.initialize();   //length-like vector has the likelihoods for the 4 components: 1) fishery length 2) shelf survey lengths 3) slope survey lengths 4) Aleutians
-    length_like2.initialize();
+ //   length_like2.initialize();
     int ii;
     //recruitment likelihood - norm2 is sum of square values   
     rec_like = norm2(rec_dev);
@@ -1240,10 +1216,6 @@ void model_parameters::evaluate_the_objective_function(void)
     //add the offset to the likelihood   
     length_like(1)-=offset(1);
     length_like2(1)-=offset(1);
-    //shelf survey length composition fitting
-    //slope survey length composition fitting
-    //Aleutian Island survey length composition fitting
- 
   //survey length composition fitting 
    for (i=1;i<=nsurv;i++)
    {
@@ -1255,9 +1227,6 @@ void model_parameters::evaluate_the_objective_function(void)
 	  length_like2(i+1)-=offset(i+1); 
      
    } 
-   //shelf survey age composition fitting
-  
-   //AI survey age composition fitting   LOOK BACK HERE
   for (i=1;i<=nsurv_aged;i++)
   {
 	for (j=1;j<=nobs_srv_age(i);j++)
@@ -1267,7 +1236,6 @@ void model_parameters::evaluate_the_objective_function(void)
 	}	
 	age_like(i)-=offset(i+4);
   }
- 
   //end of if(active (rec_dev))
   }
   // Fit to indices (lognormal)  
@@ -1276,7 +1244,6 @@ void model_parameters::evaluate_the_objective_function(void)
   {   
   surv_like(i) = norm2(elem_div(log(obs_srv(i))-log(pred_srv(i)(yrs_srv(i))),sqrt(2)*cv_srv(i)));
   } 
-   //the .01 does not seem to make a difference at all in the likelihood.    
    
    catch_like=norm2(log(catch_bio+.000001)-log(pred_catch+.000001));
    // sex ratio likelihood
@@ -1286,7 +1253,7 @@ void model_parameters::evaluate_the_objective_function(void)
   if(active(log_selcoffs_fish))
   {  
     sel_like(1)=wt_like(1)*norm2(first_difference(first_difference(log_sel_fish(1)))); //fishery females
-    sel_like(3)=wt_like(3)*norm2(first_difference(first_difference(log_sel_fish(2)))); //fishery males
+    sel_like(3)=wt_like(3)*norm2(first_difference(first_difference(log_sel_fish(2)))); //fishery males 
    for (j=1;j<nages;j++)
    {
     if(monot_sel==1)
@@ -1317,14 +1284,8 @@ void model_parameters::evaluate_the_objective_function(void)
       fpen+=.01*norm2(fmort_dev);
     }
   obj_fun += rec_like;
- // obj_fun += 1.*length_like2(i);
- // }  
-  obj_fun += 1.*sum(length_like2);
-  obj_fun+= 1.*sum(age_like);
-  for (i=1;i<=nsurv;i++)
-  {
-  obj_fun += 1.*surv_like(i); //emphasis factor = 1
-  } 
+  obj_fun += 1.*sum(length_like2);  
+  obj_fun+= 1.*sum(age_like); 
   obj_fun += 1.*sum(surv_like);
   obj_fun += 300*catch_like;        // large emphasis to fit observed catch
   obj_fun += fpen;
@@ -1480,19 +1441,19 @@ void model_parameters::report(const dvector& gradients)
   report  << SB0 << endl;
   report << "Likelihood components" << endl;
   report << "shelf survey like component " << endl;
-  report << surv1_like << endl;
+  report << surv_like(1) << endl;
   report << "slope survey like component " << endl;
-  report << surv2_like << endl;
+  report << surv_like(2) << endl;
   report << "Aleutian Islands survey lilke component "<< endl;
-  report <<surv3_like << endl;
+  report <<surv_like(3) << endl;
   report << "shelf survey length composition " << endl;
-  report << length_like(2) << endl;
+  report << length_like2(2) << endl;
   report << "slope survey length composition " << endl;
-  report << length_like(3) << endl;
+  report << length_like2(3) << endl;
   report << "Aleutian Islands survey length composition " << endl;
-  report << length_like(4) << endl;
+  report << length_like2(4) << endl;
   report << "fishery length composition likelihood " << endl;
-  report << length_like(1) << endl;
+  report << length_like2(1) << endl;
   report << "recruitment likelihood component est.  " << endl;
   report << rec_like << endl;
   report << "catch likelihood component est.  " << endl;
