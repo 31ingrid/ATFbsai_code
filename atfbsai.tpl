@@ -699,19 +699,19 @@ FUNCTION get_numbers_at_age
 // cout<<"maxsel_srv"<<maxsel_srv<<std::endl;   
 
 //proly delete below
-  maxsel_srv1=max(sel_srv1(1));
-  if(maxsel_srv1<max(sel_srv1(2)))
-    maxsel_srv1=max(sel_srv1(2)); 
+//  maxsel_srv1=max(sel_srv1(1));
+//  if(maxsel_srv1<max(sel_srv1(2)))
+//    maxsel_srv1=max(sel_srv1(2)); 
 
 // cout<<"maxsel_srv1"<<endl<<maxsel_srv1<<std::endl; 
 
-  maxsel_srv2=max(sel_srv2(1));
-  if(maxsel_srv2<max(sel_srv2(2)))
-    maxsel_srv2=max(sel_srv2(2)); 
+//  maxsel_srv2=max(sel_srv2(1));
+//  if(maxsel_srv2<max(sel_srv2(2)))
+//    maxsel_srv2=max(sel_srv2(2)); 
   
-  maxsel_srv3=max(sel_srv3(1));
-  if(maxsel_srv3<max(sel_srv3(2)))
-    maxsel_srv3=max(sel_srv3(2)); 
+//  maxsel_srv3=max(sel_srv3(1));
+//  if(maxsel_srv3<max(sel_srv3(2)))
+//    maxsel_srv3=max(sel_srv3(2)); 
 //delete above
 
   int itmp;
@@ -763,31 +763,26 @@ FUNCTION get_numbers_at_age
   //predicted survey values
   fspbio.initialize(); 
   qtime=q_surv(1);
-  for (i=styr;i<=endyr;i++)
-  {
-    fspbio(i) = natage(1,i)*elem_prod(wt(1),maturity);
-    explbiom(i)=0.;
-    pred_bio(i)=0.; 
-    pred_srv1(i)=0.;
-    pred_srv2(i)=0.;
-    pred_srv3(i)=0.; //JNI
+//  for (i=styr;i<=endyr;i++)
+//  {
+//    fspbio(i) = natage(1,i)*elem_prod(wt(1),maturity);
+//    explbiom(i)=0.;
+//    pred_bio(i)=0.; 
+//    pred_srv1(i)=0.;
+//    pred_srv2(i)=0.;
+//    pred_srv3(i)=0.; //JNI
 
 //    //catchability calculation for survey years
-    if (i>=1982 && i-1981 <= nobs_srv1 && assess==1)      //JNI catchability calculation for survey years    
-    qtime(i)=q1*mfexp(-alpha+beta*bottom_temps(i-1981));
-    for(k=1;k<=2;k++)
-    {    
-      pred_srv1(i) += qtime(i)*(natage(k,i)*elem_prod(sel_srv1(k),wt(k)))/maxsel_srv1;   //shelf survey, dividing by the maxsel constrains female selectivity to be 1.0
-//      //pred_srv1(i) += q1*(natage(k,i)*elem_prod(sel_srv1(k),wt(k)))/maxsel_srv1;   //shelf survey, without temperature q modeling
-      pred_srv2(i) += q2*(natage(k,i)*elem_prod(sel_srv2(k),wt(k)))/maxsel_srv2;         //slope survey JNI  division not necessary because logistic
-      pred_srv3(i) += q3*(natage(k,i)*elem_prod(sel_srv3(k),wt(k)))/maxsel_srv3;         //Aleutian Islands survey JNI
+//    if (i>=1982 && i-1981 <= nobs_srv1 && assess==1)      //JNI catchability calculation for survey years    
+//    qtime(i)=q1*mfexp(-alpha+beta*bottom_temps(i-1981));
+//    for(k=1;k<=2;k++)
+//    {    
+//      pred_srv1(i) += qtime(i)*(natage(k,i)*elem_prod(sel_srv1(k),wt(k)))/maxsel_srv1;   //shelf survey, dividing by the maxsel constrains female selectivity to be 1.0
+//      pred_srv2(i) += q2*(natage(k,i)*elem_prod(sel_srv2(k),wt(k)))/maxsel_srv2;         //slope survey JNI  division not necessary because logistic
+//      pred_srv3(i) += q3*(natage(k,i)*elem_prod(sel_srv3(k),wt(k)))/maxsel_srv3;         //Aleutian Islands survey JNI
 
-      //next line used to fix q1 to 1.0 - problem is if you start from a bin file, even if the bounds
-      // are set different in the tpl file the program will take to value from the bin file and use that 
-//      explbiom(i)+=natage(k,i)*elem_prod(sel(k),wt(k))/maxsel_fish;
-//      pred_bio(i)+=natage(k,i)*wt(k);
-    }
-  }  
+//    }
+//  }  
   
 //test below   
 
@@ -820,52 +815,46 @@ FUNCTION get_numbers_at_age
 
     //next line used to fix q1 to 1.0 - problem is if you start from a bin file, even if the bounds
     // are set different in the tpl file the program will take to value from the bin file and use that 
-    //   pred_srv1(i)=1.0*(natage(i)*elem_prod(sel_srv1,wt));
     explbiom(i)+=natage(k,i)*elem_prod(sel(k),wt(k))/maxsel_fish;
     pred_bio(i)+=natage(k,i)*wt(k);
       }
    }  
  }
 // test above
-    
-//    cout <<"pred_srv"<<endl<<pred_srv<<std::endl;
-//    cout <<"pred_srv1"<<endl<<pred_srv(1)<<std::endl; 
-//  exit(1);
-
 
     //don't need to divide by max_sel because totn_srv1 is calculated using selectivities and the
     //max_sel would cancel out.
 
 //delete below
     // Fitting the survey length compositions
-    for(i=1; i<=nobs_srv1_length;i++)
-    {
-      ii = yrs_srv1_length(i);
-      pred_p_srv1_len(1,i) = q1 * elem_prod(sel_srv1(1),natage(1,ii)) * lenage(1);
-      pred_p_srv1_len(2,i) = q1 * elem_prod(sel_srv1(2),natage(2,ii)) * lenage(2);
-      dvariable sum_tot = sum(pred_p_srv1_len(1,i)+pred_p_srv1_len(2,i));
-      pred_p_srv1_len(1,i) /= sum_tot;
-      pred_p_srv1_len(2,i) /= sum_tot;
-    }
+//    for(i=1; i<=nobs_srv1_length;i++)
+//    {
+//      ii = yrs_srv1_length(i);
+//      pred_p_srv1_len(1,i) = q1 * elem_prod(sel_srv1(1),natage(1,ii)) * lenage(1);
+//      pred_p_srv1_len(2,i) = q1 * elem_prod(sel_srv1(2),natage(2,ii)) * lenage(2);
+//      dvariable sum_tot = sum(pred_p_srv1_len(1,i)+pred_p_srv1_len(2,i));
+//      pred_p_srv1_len(1,i) /= sum_tot;
+//      pred_p_srv1_len(2,i) /= sum_tot;
+//    }
    
-    for(i=1; i<=nobs_srv2_length;i++)
-    {
-      ii = yrs_srv2_length(i);
-      pred_p_srv2_len(1,i)=q2*elem_prod(sel_srv2(1),natage(1,ii))*lenage(1);
-      pred_p_srv2_len(2,i)=q2*elem_prod(sel_srv2(2),natage(2,ii))*lenage(2);
-      dvariable sum_tot = sum(pred_p_srv2_len(1,i)+pred_p_srv2_len(2,i));
-      pred_p_srv2_len(1,i) /= sum_tot;
-      pred_p_srv2_len(2,i) /= sum_tot;
-    }
-    for(i=1; i<=nobs_srv3_length;i++)
-    {
-      ii = yrs_srv3_length(i);
-      pred_p_srv3_len(1,i)=q3*elem_prod(sel_srv3(1),natage(1,ii))*lenage(1);
-      pred_p_srv3_len(2,i)=q3*elem_prod(sel_srv3(2),natage(2,ii))*lenage(2);
-      dvariable sum_tot = sum(pred_p_srv3_len(1,i)+pred_p_srv3_len(2,i));
-      pred_p_srv3_len(1,i) /= sum_tot;
-      pred_p_srv3_len(2,i) /= sum_tot;
-    }
+//    for(i=1; i<=nobs_srv2_length;i++)
+//    {
+//      ii = yrs_srv2_length(i);
+//      pred_p_srv2_len(1,i)=q2*elem_prod(sel_srv2(1),natage(1,ii))*lenage(1);
+//      pred_p_srv2_len(2,i)=q2*elem_prod(sel_srv2(2),natage(2,ii))*lenage(2);
+//      dvariable sum_tot = sum(pred_p_srv2_len(1,i)+pred_p_srv2_len(2,i));
+//      pred_p_srv2_len(1,i) /= sum_tot;
+//      pred_p_srv2_len(2,i) /= sum_tot;
+//    }
+//    for(i=1; i<=nobs_srv3_length;i++)
+//    {
+//      ii = yrs_srv3_length(i);
+//      pred_p_srv3_len(1,i)=q3*elem_prod(sel_srv3(1),natage(1,ii))*lenage(1);
+//      pred_p_srv3_len(2,i)=q3*elem_prod(sel_srv3(2),natage(2,ii))*lenage(2);
+//      dvariable sum_tot = sum(pred_p_srv3_len(1,i)+pred_p_srv3_len(2,i));
+//      pred_p_srv3_len(1,i) /= sum_tot;
+//      pred_p_srv3_len(2,i) /= sum_tot;
+//    }
 //delete above
 
   //Fit survey length compositions
