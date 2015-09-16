@@ -32,27 +32,12 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   nobs_srv2.allocate("nobs_srv2");
   nobs_srv3.allocate("nobs_srv3");
   nobs_srv.allocate(1,nsurv,"nobs_srv");
-  yrs_srv1.allocate(1,nobs_srv1,"yrs_srv1");
-  yrs_srv2.allocate(1,nobs_srv2,"yrs_srv2");
-  yrs_srv3.allocate(1,nobs_srv3,"yrs_srv3");
   yrs_srv.allocate(1,nsurv,1,nobs_srv,"yrs_srv");
-  nobs_srv1_length.allocate("nobs_srv1_length");
-  nobs_srv2_length.allocate("nobs_srv2_length");
-  nobs_srv3_length.allocate("nobs_srv3_length");
   nobs_srv_length.allocate(1,nsurv,"nobs_srv_length");
-  yrs_srv1_length.allocate(1,nobs_srv1_length,"yrs_srv1_length");
-  yrs_srv2_length.allocate(1,nobs_srv2_length,"yrs_srv2_length");
-  yrs_srv3_length.allocate(1,nobs_srv3_length,"yrs_srv3_length");
   yrs_srv_length.allocate(1,nsurv,1,nobs_srv_length,"yrs_srv_length");
-  nsamples_srv1_length.allocate(1,2,1,nobs_srv1_length,"nsamples_srv1_length");
-  nsamples_srv2_length.allocate(1,2,1,nobs_srv2_length,"nsamples_srv2_length");
-  nsamples_srv3_length.allocate(1,2,1,nobs_srv3_length,"nsamples_srv3_length");
   nsamples_srv_length_fem.allocate(1,nsurv,1,nobs_srv_length,"nsamples_srv_length_fem");
   nsamples_srv_length_mal.allocate(1,nsurv,1,nobs_srv_length,"nsamples_srv_length_mal");
   nsamples_srv_length.allocate(1,nsurv,1,2,1,nobs_srv_length,"nsamples_srv_length");
-  obs_p_srv1_length.allocate(1,2,1,nobs_srv1_length,1,nlen,"obs_p_srv1_length");
-  obs_p_srv2_length.allocate(1,2,1,nobs_srv2_length,1,nlen,"obs_p_srv2_length");
-  obs_p_srv3_length.allocate(1,2,1,nobs_srv3_length,1,nlen,"obs_p_srv3_length");
   obs_p_fish.allocate(1,2,1,nobs_fish,1,nlen,"obs_p_fish");
   obs_p_srv_length_fem.allocate(1,nsurv,1,nobs_srv_length,1,nlen,"obs_p_srv_length_fem");
   obs_p_srv_length_mal.allocate(1,nsurv,1,nobs_srv_length,1,nlen,"obs_p_srv_length_mal");
@@ -91,6 +76,7 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   Upper_bound.allocate(1,nsurv,"Upper_bound");
   Phase.allocate(1,nsurv,"Phase");
   assess.allocate("assess");
+cout<<test<<std::endl;
   cv_srv.allocate(1,nsurv,1,nobs_srv);
   test.allocate(1,4);
    styr_rec=styr-nages+1;
@@ -107,6 +93,7 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   obs_sexr.allocate(1,nobs_fish);
   obs_sexr_srv_2.allocate(1,nsurv,1,nobs_srv_length);
   pred_sexr.allocate(styr,endyr);
+cout<<test<<std::endl;  
 }
 
 void model_parameters::initializationfunction(void)
@@ -295,18 +282,6 @@ cout<<"q_surv"<<q_surv<<std::endl;
   pred_p_srv3_age.allocate(1,2,1,nobs_srv3_age,1,nages,"pred_p_srv3_age");
   #ifndef NO_AD_INITIALIZE
     pred_p_srv3_age.initialize();
-  #endif
-  pred_p_srv1_len.allocate(1,2,1,nobs_srv1_length,1,nlen,"pred_p_srv1_len");
-  #ifndef NO_AD_INITIALIZE
-    pred_p_srv1_len.initialize();
-  #endif
-  pred_p_srv2_len.allocate(1,2,1,nobs_srv2_length,1,nlen,"pred_p_srv2_len");
-  #ifndef NO_AD_INITIALIZE
-    pred_p_srv2_len.initialize();
-  #endif
-  pred_p_srv3_len.allocate(1,2,1,nobs_srv3_length,1,nlen,"pred_p_srv3_len");
-  #ifndef NO_AD_INITIALIZE
-    pred_p_srv3_len.initialize();
   #endif
   pred_p_srv_age_fem.allocate(1,nsurv_aged,1,nobs_srv_age,1,nages,"pred_p_srv_age_fem");
   #ifndef NO_AD_INITIALIZE
@@ -592,7 +567,7 @@ void model_parameters::preliminary_calculations(void)
     for(k=1; k<=2;k++)
       offset(6) -= nsamples_srv3_age(k,i)*obs_p_srv3_age(k,i) * log(obs_p_srv3_age(k,i)+.0001);
   }                                                                     
-  //survey age offsets (checked that it works)
+  //survey age offsets (checked that it works) starts with 5, 6
   for (i=1;i<=nsurv_aged;i++)
   {
     for (j=1;j<=nobs_srv_age(i);j++)
@@ -880,34 +855,7 @@ void model_parameters::get_numbers_at_age(void)
     //don't need to divide by max_sel because totn_srv1 is calculated using selectivities and the
     //max_sel would cancel out.
     // Fitting the survey length compositions
-    for(i=1; i<=nobs_srv1_length;i++)
-    {
-      ii = yrs_srv1_length(i);
-      pred_p_srv1_len(1,i) = q1 * elem_prod(sel_srv1(1),natage(1,ii)) * lenage(1);
-      pred_p_srv1_len(2,i) = q1 * elem_prod(sel_srv1(2),natage(2,ii)) * lenage(2);
-      dvariable sum_tot = sum(pred_p_srv1_len(1,i)+pred_p_srv1_len(2,i));
-      pred_p_srv1_len(1,i) /= sum_tot;
-      pred_p_srv1_len(2,i) /= sum_tot;
-    }
    
-    for(i=1; i<=nobs_srv2_length;i++)
-    {
-      ii = yrs_srv2_length(i);
-      pred_p_srv2_len(1,i)=q2*elem_prod(sel_srv2(1),natage(1,ii))*lenage(1);
-      pred_p_srv2_len(2,i)=q2*elem_prod(sel_srv2(2),natage(2,ii))*lenage(2);
-      dvariable sum_tot = sum(pred_p_srv2_len(1,i)+pred_p_srv2_len(2,i));
-      pred_p_srv2_len(1,i) /= sum_tot;
-      pred_p_srv2_len(2,i) /= sum_tot;
-    }
-    for(i=1; i<=nobs_srv3_length;i++)
-    {
-      ii = yrs_srv3_length(i);
-      pred_p_srv3_len(1,i)=q3*elem_prod(sel_srv3(1),natage(1,ii))*lenage(1);
-      pred_p_srv3_len(2,i)=q3*elem_prod(sel_srv3(2),natage(2,ii))*lenage(2);
-      dvariable sum_tot = sum(pred_p_srv3_len(1,i)+pred_p_srv3_len(2,i));
-      pred_p_srv3_len(1,i) /= sum_tot;
-      pred_p_srv3_len(2,i) /= sum_tot;
-    }
   //Fit survey length compositions
   for (i=1;i<=nsurv;i++)
   {
@@ -922,24 +870,6 @@ void model_parameters::get_numbers_at_age(void)
 	 }
    }
     //Calculation of survey age composition
-    for(i=1; i<=nobs_srv1_age;i++)
-    {
-      ii = yrs_srv1_age(i);
-      pred_p_srv1_age(1,i) = q1 * elem_prod(sel_srv1(1),natage(1,ii));
-      pred_p_srv1_age(2,i) = q1 * elem_prod(sel_srv1(2),natage(2,ii));
-      dvariable sum_tot = sum(pred_p_srv1_age(1,i)+pred_p_srv1_age(2,i));
-      pred_p_srv1_age(1,i) /= sum_tot;
-      pred_p_srv1_age(2,i) /= sum_tot;
-    } 
-    for(i=1; i<=nobs_srv3_age;i++)  //LOOK BACK EHRE
-    {
-      ii = yrs_srv3_age(i);
-      pred_p_srv3_age(1,i) = q3 * elem_prod(sel_srv3(1),natage(1,ii));
-      pred_p_srv3_age(2,i) = q3 * elem_prod(sel_srv3(2),natage(2,ii));
-      dvariable sum_tot = sum(pred_p_srv3_age(1,i)+pred_p_srv3_age(2,i));
-      pred_p_srv3_age(1,i) /= sum_tot;
-      pred_p_srv3_age(2,i) /= sum_tot;
-    }
      
   //Fit survey age composition
    for (i=1;i<=nsurv_aged;i++)
@@ -1146,13 +1076,23 @@ void model_parameters::evaluate_the_objective_function(void)
     for(k=1;k<=2;k++)
       for (i=1; i <=nobs_srv1_age; i++)
         age_like(2)-=nsamples_srv1_age(k,i)*(1e-3+obs_p_srv1_age(k,i))*log(pred_p_srv1_age(k,i)+1e-3);
-    age_like(2)-=offset(5);
+    age_like(1)-=offset(5);
   
    //AI survey age composition fitting   LOOK BACK HERE
     for(k=1;k<=2;k++)
       for (i=1; i <=nobs_srv3_age; i++)
         age_like(4)-=nsamples_srv3_age(k,i)*(1e-3+obs_p_srv3_age(k,i))*log(pred_p_srv3_age(k,i)+1e-3);
-    age_like(4)-=offset(6);
+    age_like(2)-=offset(6);  
+  //survey age composition fitting
+  for (i=1;i<=nsurv_aged;i++)
+  {
+	for (j=1;j<=nobs_srv_age(i);j++)
+	{
+	  age_like(i+2)-= 2;
+	}   
+   }
+  cout<<"age_like"<<age_like<<std::endl;
+  exit(1);
   //end of if(active (rec_dev))
   }
   // Fit to indices (lognormal)  
@@ -1247,85 +1187,17 @@ void model_parameters::report(const dvector& gradients)
   report << "Estimated male F mortality at age " << endl;
     for (i=styr; i<=endyr;i++)
       report <<  i <<F(2,i)<<endl;
-  report << "Estimated fishery selectivity for females at age " << endl;
-    for (j=1; j<=nages;j++)
-      report << j<<" " <<sel(1,j)/maxsel_fish<< endl;
     
-  report << "Estimated fishery selectivity for males at age " << endl;
-    for (j=1; j<=nages;j++)
-      report <<  j<<" "  <<sel(2,j)/maxsel_fish<<endl;
-  report << "Estimated shelf survey selectivity for females at age " << endl;
-    for (j=1; j<=nages;j++)
-      report << j<<" " <<sel_srv1(1,j)/maxsel_srv1<< endl;
    
-  report << "Estimated shelf survey selectivity for males at age " << endl;
-    for (j=1; j<=nages;j++)
-      report <<  j<<" "  <<sel_srv1(2,j)/maxsel_srv1<<endl;
-  report << "Estimated slope survey selectivity for females at age " << endl;
-    for (j=1; j<=nages;j++)
-      report << j <<" " <<sel_srv2(1,j)<< endl;
    
-  report << "Estimated slope survey selectivity for males at age " << endl;
-    for (j=1; j<=nages;j++)
-      report << j<<" "  <<sel_srv2(2,j)<<endl;
-  report << "Estimated Aleutian Islands survey selectivity for females at age " << endl;
-    for (j=1; j<=nages;j++)
-      report <<  j<<" "  <<sel_srv3(1,j)<< endl;
    
-  report << "Estimated Aleutian Islands survey selectivity for males at age " << endl;
-    for (j=1; j<=nages;j++)
-      report << j<<" "  <<sel_srv3(2,j)<<endl;
-  report << endl << "Bering Sea shelf survey biomass (Year, Obs_biomass, Pred_biomass) " << endl;
-    for (i=1; i<=nobs_srv1;i++)
-      report << yrs_srv1(i) << ","<< obs_srv1(i) << "," << pred_srv1(yrs_srv1(i)) << endl;
-  report << "Bering Sea slope survey biomass (Year, Obs_biomass, Pred_biomass) " << endl;
-    for (i=1; i<=nobs_srv2;i++)
-      report << yrs_srv2(i) << ","<< obs_srv2(i) << "," << pred_srv2(yrs_srv2(i)) << endl;
-  report << "Aleutian Islands survey biomass (Year, Obs_biomass, Pred_biomass) "  << endl;
-    for (i=1; i<=nobs_srv3;i++)
-      report << yrs_srv3(i) << ","<< obs_srv3(i) << "," << pred_srv3(yrs_srv3(i)) << endl;
-  report <<" Observed female shelf survey length composition " << endl;
-    for (i=1; i<=nobs_srv1_length; i++)
-      report << yrs_srv1_length(i) << obs_p_srv1_length(1,i) << endl;
-  report <<" Predicted female shelf survey length composition " << endl;
-    for (i=1; i<=nobs_srv1_length; i++)
-      report << yrs_srv1_length(i) << pred_p_srv1_len(1,i) << endl;
-  report <<" Predicted male shelf survey length composition " << endl;
-    for (i=1; i<=nobs_srv1_length; i++)
-      report << yrs_srv1_length(i)  << pred_p_srv1_len(2,i) << endl;
   
  //   for (i=1; i<=nobs_srv2_length; i++)
-  report <<" Predicted female slope survey length composition " << endl;
-    for (i=1; i<=nobs_srv2_length; i++)
-      report << yrs_srv2_length(i)  << pred_p_srv2_len(1,i) << endl;
+ //     report << yrs_srv2_length(i)  << pred_p_srv2_len(1,i) << endl;
  //     report << yrs_srv2_length(i) << obs_p_srv2_length(2,i) << endl;
   
-  report <<" Predicted male slope survey length composition " << endl;
-    for (i=1; i<=nobs_srv2_length; i++)
-      report << yrs_srv2_length(i)  << pred_p_srv2_len(2,i) << endl;
   
-  report <<" Predicted female Aleutian Islands survey length composition " << endl;
-    for (i=1; i<=nobs_srv3_length; i++)
-      report << yrs_srv3_length(i)  << pred_p_srv3_len(1,i) << endl;
-  report <<" Observed male Aleutian Islands survey length composition " << endl;
-    for (i=1; i<=nobs_srv3_length; i++)
-      report << yrs_srv3_length(i) << obs_p_srv3_length(2,i) << endl;
   
-  report <<" Predicted male Aleutian Islands survey length composition " << endl;
-    for (i=1; i<=nobs_srv3_length; i++)
-      report << yrs_srv3_length(i)  << pred_p_srv3_len(2,i) << endl;
-  report <<" Observed female shelf survey age composition " << endl;
-    for (i=1; i<=nobs_srv1_age; i++)
-      report << yrs_srv1_age(i) << obs_p_srv1_age(1,i) << endl;
-  report <<" Predicted female shelf survey age composition " << endl;
-    for (i=1; i<=nobs_srv1_age; i++)
-      report << yrs_srv1_age(i)  << pred_p_srv1_age(1,i) << endl;
-  report <<" Observed male shelf survey age composition " << endl;
-    for (i=1; i<=nobs_srv1_age; i++)
-      report << yrs_srv1_age(i) << obs_p_srv1_age(2,i) << endl;
-  report <<" Predicted male shelf survey age composition " << endl;
-    for (i=1; i<=nobs_srv1_age; i++)
-      report << yrs_srv1_age(i)  << pred_p_srv1_age(2,i) << endl;
   report <<" Observed Catch by year " << endl;
     for (i=styr;  i<=endyr; i++)
        report << i<<" " << catch_bio(i) << endl;
@@ -1388,9 +1260,6 @@ void model_parameters::report(const dvector& gradients)
   report << M(1) << endl;
   report << " male natural mortality for this run" << endl;
   report << M(2) << endl;
-  report <<endl << "temperature effect (q) for the shelf survey "<< endl;
-   for (i=1;i<=nobs_srv1;i++)
-     report <<yrs_srv1(i)<<","<<bottom_temps(i)<<","<<qtime(yrs_srv1(i))<<endl;
   report << "predicted male proportion in population" << endl;
    for (i=styr;i<=endyr;i++)
       report << i << " " << pred_sexr(i) << endl;
@@ -1529,27 +1398,6 @@ void model_parameters::report(const dvector& gradients)
  
  report<<"SURVEYMULT"<<endl;
  report<<"1 1 1"<<endl;
- report << "#EBS_trawl_survey - Bering Sea shelf survey biomass (Year, Obs_biomass, Pred_biomass) " << endl;
-    for (i=1; i<=nobs_srv1;i++)
-      report << yrs_srv1(i) << "	";
-      report<<endl;
-    for (i=1; i<=nobs_srv1;i++) 
-      report<< obs_srv1(i)<< "	";
-      report<< endl;
- report << "#BS_slope_trawl_survey - Bering Sea slope survey biomass (Year, Obs_biomass, Pred_biomass) " << endl;
-    for (i=1; i<=nobs_srv2;i++)
-      report << yrs_srv2(i) << "	";
-      report<<endl;
-    for (i=1; i<=nobs_srv2;i++)
-      report << obs_srv2(i) << "	";
-      report<<endl;
- report << "#AI_trawl_survey - Aleutian Islands survey biomass (Year, Obs_biomass, Pred_biomass) "  << endl;
-    for (i=1; i<=nobs_srv3;i++)
-      report << yrs_srv3(i) << "	"; 
-      report<<endl;
-    for (i=1; i<=nobs_srv3;i++)
-      report << obs_srv3(i) << "	";
-      report<<endl;	
  report<<"#STOCKNOTES"<<endl;
  report<<"SAFE report indicates that this stock was not subjected to overfishing in 2012 and is neither overfished nor approaching a condition of being overfished in 2013."<<endl;
 }
