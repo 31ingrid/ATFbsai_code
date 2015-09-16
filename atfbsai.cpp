@@ -25,11 +25,7 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   nselages_srv.allocate(1,nsurv,"nselages_srv");
   phase_logistic_sel.allocate("phase_logistic_sel");
   nlen.allocate("nlen");
- cout<<"nlen"<<endl;
- cout<<  nlen<<endl;
   nobs_fish.allocate("nobs_fish");
- cout<<"nobs_fish"<<endl;
- cout<<  nobs_fish<<endl;
   yrs_fish.allocate(1,nobs_fish,"yrs_fish");
  cout<<"yrs_fish"<<endl;
  cout<<  yrs_fish<<endl;
@@ -719,7 +715,6 @@ void model_parameters::preliminary_calculations(void)
 	             nsamples_srv_age(i,2,j)*obs_p_srv_age_mal(i,j)*log(obs_p_srv_age_mal(i,j)+.0001);
     }  
   }
- //  init_3darray nsamples_srv_age(1,nsurv_aged,1,2,1,nobs_srv_age)
 }
 
 void model_parameters::userfunction(void)
@@ -1275,14 +1270,26 @@ void model_parameters::evaluate_the_objective_function(void)
    //shelf survey age composition fitting
     for(k=1;k<=2;k++)
       for (i=1; i <=nobs_srv1_age; i++)
-        age_like(2)-=nsamples_srv1_age(k,i)*(1e-3+obs_p_srv1_age(k,i))*log(pred_p_srv1_age(k,i)+1e-3);
-    age_like(2)-=offset(5);
+        age_like(1)-=nsamples_srv1_age(k,i)*(1e-3+obs_p_srv1_age(k,i))*log(pred_p_srv1_age(k,i)+1e-3);
+    age_like(1)-=offset(5);
   
    //AI survey age composition fitting   LOOK BACK HERE
     for(k=1;k<=2;k++)
       for (i=1; i <=nobs_srv3_age; i++)
-        age_like(4)-=nsamples_srv3_age(k,i)*(1e-3+obs_p_srv3_age(k,i))*log(pred_p_srv3_age(k,i)+1e-3);
-    age_like(4)-=offset(6);
+        age_like(2)-=nsamples_srv3_age(k,i)*(1e-3+obs_p_srv3_age(k,i))*log(pred_p_srv3_age(k,i)+1e-3);
+    age_like(2)-=offset(6);
+  for (i=1;i<=nsurv_aged;i++)
+  {
+	for (j=1;j<=nobs_srv_age(i);j++)
+	{
+   age_like(i+2)-=nsamples_srv_age(i,1,j)*(1e-3+obs_p_srv_age_fem(i,j))*log(pred_p_srv_age_fem(i,j)+1e-3)+
+                  nsamples_srv_age(i,2,j)*(1e-3+obs_p_srv_age_mal(i,j))*log(pred_p_srv_age_mal(i,j)+1e-3); 	
+	}	
+	age_like(i+2)-=offset(i+4);
+  }
+ 
+  cout<<"age_like"<<age_like<<std::endl;
+  exit(1);
   //end of if(active (rec_dev))
   }
   // Fit to indices (lognormal)  
@@ -1339,8 +1346,8 @@ void model_parameters::evaluate_the_objective_function(void)
   obj_fun += 1.*length_like(2);     //emphasis factor = 1
   obj_fun += 1.*length_like(3);     //emphasis factor = 1
   obj_fun += 1.*length_like(4);     //emphasis factor = 1
+  obj_fun += 1.*age_like(1);           //emphasis factor = 1 
   obj_fun += 1.*age_like(2);           //emphasis factor = 1 
-  obj_fun += 1.*age_like(4);           //emphasis factor = 1 
   for (i=1;i<=nsurv;i++)
   {
   obj_fun += 1.*surv_like(i); //emphasis factor = 1

@@ -1132,15 +1132,28 @@ FUNCTION evaluate_the_objective_function
    //shelf survey age composition fitting
     for(k=1;k<=2;k++)
       for (i=1; i <=nobs_srv1_age; i++)
-        age_like(2)-=nsamples_srv1_age(k,i)*(1e-3+obs_p_srv1_age(k,i))*log(pred_p_srv1_age(k,i)+1e-3);
-    age_like(2)-=offset(5);
+        age_like(1)-=nsamples_srv1_age(k,i)*(1e-3+obs_p_srv1_age(k,i))*log(pred_p_srv1_age(k,i)+1e-3);
+    age_like(1)-=offset(5);
   
    //AI survey age composition fitting   LOOK BACK HERE
     for(k=1;k<=2;k++)
       for (i=1; i <=nobs_srv3_age; i++)
-        age_like(4)-=nsamples_srv3_age(k,i)*(1e-3+obs_p_srv3_age(k,i))*log(pred_p_srv3_age(k,i)+1e-3);
-    age_like(4)-=offset(6);
+        age_like(2)-=nsamples_srv3_age(k,i)*(1e-3+obs_p_srv3_age(k,i))*log(pred_p_srv3_age(k,i)+1e-3);
+    age_like(2)-=offset(6);
 
+//loop test below
+  for (i=1;i<=nsurv_aged;i++)
+  {
+	for (j=1;j<=nobs_srv_age(i);j++)
+	{
+   age_like(i+2)-=nsamples_srv_age(i,1,j)*(1e-3+obs_p_srv_age_fem(i,j))*log(pred_p_srv_age_fem(i,j)+1e-3)+
+                  nsamples_srv_age(i,2,j)*(1e-3+obs_p_srv_age_mal(i,j))*log(pred_p_srv_age_mal(i,j)+1e-3); 	
+	}	
+	age_like(i+2)-=offset(i+4);
+  }
+ 
+  cout<<"age_like"<<age_like<<std::endl;
+  exit(1);
   //end of if(active (rec_dev))
   }
   // Fit to indices (lognormal)  
@@ -1220,8 +1233,10 @@ FUNCTION evaluate_the_objective_function
   obj_fun += 1.*length_like(2);     //emphasis factor = 1
   obj_fun += 1.*length_like(3);     //emphasis factor = 1
   obj_fun += 1.*length_like(4);     //emphasis factor = 1
+//  obj_fun += 1.*age_like(2);           //emphasis factor = 1 
+//  obj_fun += 1.*age_like(4);           //emphasis factor = 1
+  obj_fun += 1.*age_like(1);           //emphasis factor = 1 
   obj_fun += 1.*age_like(2);           //emphasis factor = 1 
-  obj_fun += 1.*age_like(4);           //emphasis factor = 1 
 //  obj_fun += 1.*surv1_like;         //emphasis factor = 1
 //  obj_fun += 1.*surv2_like;         //emphasis factor = 1
 //  obj_fun += 1.*surv3_like;         //emphasis factor = 1  
