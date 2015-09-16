@@ -166,15 +166,15 @@ DATA_SECTION
  LOCAL_CALCS
    styr_rec=styr-nages+1;
    if(nselages>nages) nselages=nages;
-   if(nselages_srv1>nages) nselages_srv1=nages;  
-   if(nselages_srv2>nages) nselages_srv2=nages;  
+//   if(nselages_srv1>nages) nselages_srv1=nages;  
+//   if(nselages_srv2>nages) nselages_srv2=nages;  
    for (i=1; i<= nsurv; i++){
    if(nselages_srv(i)>nages) nselages_srv(i)=nages;
    }
    //calculate cv for surveys
-    cv_srv1=elem_div(obs_srv1_sd,obs_srv1);   //shelf survey CV
-    cv_srv2=elem_div(obs_srv2_sd,obs_srv2);   //slope survey CV
-    cv_srv3=elem_div(obs_srv3_sd,obs_srv3);   //Aleutian Island survey CV
+//    cv_srv1=elem_div(obs_srv1_sd,obs_srv1);   //shelf survey CV
+//    cv_srv2=elem_div(obs_srv2_sd,obs_srv2);   //slope survey CV
+//    cv_srv3=elem_div(obs_srv3_sd,obs_srv3);   //Aleutian Island survey CV
    for (int j=1;j<=nsurv;j++){
    for (i=1;i<=nobs_srv(j);i++){ 
    cv_srv(j,i)=obs_srv_sd(j,i)/(double)obs_srv(j,i); }}
@@ -186,9 +186,9 @@ DATA_SECTION
 
   vector obs_sexr(1,nobs_fish)  // prop. females in fishery length data
   matrix obs_sexr_srv_2(1,nsurv,1,nobs_srv_length)  //proportion males in survey data 
-  vector obs_sexr_srv1_2(1,nobs_srv1_length) // prop. males in shelf survey length data
-  vector obs_sexr_srv2_2(1,nobs_srv2_length) // prop. males in slope survey length data
-  vector obs_sexr_srv3_2(1,nobs_srv3_length) // prop. males in Aleutian Islands length data
+//  vector obs_sexr_srv1_2(1,nobs_srv1_length) // prop. males in shelf survey length data
+//  vector obs_sexr_srv2_2(1,nobs_srv2_length) // prop. males in slope survey length data
+//  vector obs_sexr_srv3_2(1,nobs_srv3_length) // prop. males in Aleutian Islands length data
   number obs_mean_sexr    //average proportion of males in shelf survey population estimates
   number obs_SD_sexr      //standard deviation from male prop. in shelf survey population estimates
   vector pred_sexr(styr,endyr)   //proportion of males in num at age matrix to be calculated
@@ -248,26 +248,22 @@ PARAMETER_SECTION
   }  
  END_CALCS 
   init_bounded_number_vector q_surv(1,nsurv,lower_bound,upper_bound,phase)    
- !!cout<<"q_surv"<<q_surv<<std::endl;
   init_bounded_number q1(0.5,2.0,-4) //since this is fixed, it uses the midpoint between bounds.
   init_bounded_number q2(0.05,1.5,-4)
   init_bounded_number q3(0.05,1.5,-4)
   init_number alpha(4)       // used to estimate temperature effect on shelf survey catchability
   init_number beta(4)  // used to estimate temperature effect on shelf survey catchability
  //phase of -1 means M is fixed   
- // init_bounded_vector M(1,2,.02,.8,-3)
   init_number mean_log_rec(1)
-  // init_bounded_dev_vector rec_dev(styr_rec,endyr-2,-15,15,2)
   init_bounded_dev_vector rec_dev(styr_rec,endyr-1,-15,15,2) //JNI
-//  init_vector rec_dev_future(styr_fut,endyr_fut,phase_F40);
   init_number log_avg_fmort(2)
-  !! cout <<"log_avg_fmort"<<endl;
-  !! cout <<log_avg_fmort<<endl;
   init_bounded_dev_vector fmort_dev(styr,endyr,-3,3,1)
  
 //  Selectivity parameters from the GOA version of the model
 
-  init_matrix log_selcoffs_fish(1,2,1,nselages,phase_selcoffs)
+  init_matrix log_selcoffs_fish(1,2,1,nselages,phase_selcoffs)     
+
+//these are specific to each survey and would need to be changed for each assessment
   init_bounded_number fish_slope_f(.1,5.,phase_logistic_sel)
   init_bounded_number fish_sel50_f(1.,15.,phase_logistic_sel)
   init_bounded_number fish_slope_m(.05,.8,phase_logistic_sel)
@@ -302,32 +298,28 @@ PARAMETER_SECTION
   matrix log_sel_fish(1,2,1,nages)
   matrix sel(1,2,1,nages) //fishery selectivity 
   3darray sel_srv(1,2,1,nsurv,1,nages) //try 3d array here
-  matrix sel_srv_fem(1,nsurv,1,nages) //new matrix to combine selectivity for 3 surveys
-  matrix sel_srv_mal(1,nsurv,1,nages)
-  matrix sel_srv1(1,2,1,nages)
-  matrix sel_srv2(1,2,1,nages)
-  matrix sel_srv3(1,2,1,nages)
+//  matrix sel_srv1(1,2,1,nages)
+//  matrix sel_srv2(1,2,1,nages)
+//  matrix sel_srv3(1,2,1,nages)
   vector avgsel_fish(1,2)
   matrix popn(1,2,styr,endyr)  
   3darray totn_srv(1,nsurv,1,2,styr,endyr)  //new matrix combine total numbers over 3 surveys
   matrix totn_srv1(1,2,styr,endyr)
   matrix totn_srv2(1,2,styr,endyr)
   matrix totn_srv3(1,2,styr,endyr)
-  vector temp1(1,nages)
-  vector temp2(1,nages)
   vector explbiom(styr,endyr)
   vector pred_bio(styr,endyr)
   vector fspbio(styr,endyr) 
   matrix pred_srv(1,nsurv,styr,endyr) //matrix combine pred_srv into 3 surveys
-  vector pred_srv1(styr,endyr)
-  vector pred_srv2(styr,endyr)
-  vector pred_srv3(styr,endyr)
+//  vector pred_srv1(styr,endyr)
+//  vector pred_srv2(styr,endyr)
+//  vector pred_srv3(styr,endyr)
   3darray pred_p_fish(1,2,styr,endyr,1,nlen)
-  3darray pred_p_srv1_age(1,2,1,nobs_srv1_age,1,nages)
-  3darray pred_p_srv3_age(1,2,1,nobs_srv3_age,1,nages) 
-  3darray pred_p_srv1_len(1,2,1,nobs_srv1_length,1,nlen)
-  3darray pred_p_srv2_len(1,2,1,nobs_srv2_length,1,nlen)
-  3darray pred_p_srv3_len(1,2,1,nobs_srv3_length,1,nlen)
+//  3darray pred_p_srv1_age(1,2,1,nobs_srv1_age,1,nages)
+//  3darray pred_p_srv3_age(1,2,1,nobs_srv3_age,1,nages) 
+//  3darray pred_p_srv1_len(1,2,1,nobs_srv1_length,1,nlen)
+//  3darray pred_p_srv2_len(1,2,1,nobs_srv2_length,1,nlen)
+//  3darray pred_p_srv3_len(1,2,1,nobs_srv3_length,1,nlen)
   3darray pred_p_srv_age_fem(1,nsurv_aged,1,nobs_srv_age,1,nages)//pred_p_srv_age for males and females for each survey
   3darray pred_p_srv_age_mal(1,nsurv_aged,1,nobs_srv_age,1,nages)//same but males
   3darray pred_p_srv_len_fem(1,nsurv,1,nobs_srv_length,1,nlen)//pred_p_srv_length for males and females for each survey 
@@ -347,20 +339,19 @@ PARAMETER_SECTION
   number catch_like
   number sexr_like
   vector age_like(1,nsurv_aged) //really only need shelf and AI but may need other elements later
-  vector length_like(1,4)  
+//  vector length_like(1,4)  
   vector length_like2(1,nsurv+1)
   vector sel_like(1,4)
   number fpen 
   vector surv_like(1,nsurv) //survey likelihood for each survey   
-  number surv1_like
-  number surv2_like
-  number surv3_like
+//  number surv1_like
+//  number surv2_like
+//  number surv3_like
   sdreport_number endbiom
   sdreport_number depletion
   objective_function_value obj_fun
   number tmp
   vector pred_sexr(styr,endyr)
-  vector preds_sexr(styr,endyr)
  // Stuff for SPR and yield projections
   number sigmar
   number ftmp
@@ -382,9 +373,9 @@ PARAMETER_SECTION
   sdreport_matrix future_biomass(1,4,styr_fut,endyr_fut)
   vector explbiom_fut(styr_fut,endyr_fut)
   number maxsel_fish
-  number maxsel_srv1
-  number maxsel_srv2
-  number maxsel_srv3 
+//  number maxsel_srv1
+//  number maxsel_srv2
+//  number maxsel_srv3 
   vector maxsel_srv(1,nsurv)
   number mlike
   number qlike
@@ -410,21 +401,24 @@ PRELIMINARY_CALCS_SECTION
 	}
   }
 
+  obs_mean_sexr=mean(obs_sexr_srv_2(1)); //previously was just estimated from shelf survey data so kept that here.
+  obs_SD_sexr=std_dev(obs_sexr_srv_2(1));
+
 //delete below
 //length obs sex ratio in surveys    proportion of males
-  for(i=1; i<=nobs_srv1_length;i++)
-    obs_sexr_srv1_2(i) = (sum(obs_p_srv1_length(2,i)))/
-                         (sum(obs_p_srv1_length(1,i)) + sum(obs_p_srv1_length(2,i)));
-    obs_mean_sexr=mean(obs_sexr_srv1_2);
-    obs_SD_sexr=std_dev(obs_sexr_srv1_2);
+//  for(i=1; i<=nobs_srv1_length;i++)
+//    obs_sexr_srv1_2(i) = (sum(obs_p_srv1_length(2,i)))/
+//                         (sum(obs_p_srv1_length(1,i)) + sum(obs_p_srv1_length(2,i)));
+//    obs_mean_sexr=mean(obs_sexr_srv1_2);
+//    obs_SD_sexr=std_dev(obs_sexr_srv1_2);
 
-  for(i=1; i<=nobs_srv2_length;i++)
-    obs_sexr_srv2_2(i) = (sum(obs_p_srv2_length(2,i)))/
-                         (sum(obs_p_srv2_length(1,i)) + sum(obs_p_srv2_length(2,i))); 
+//  for(i=1; i<=nobs_srv2_length;i++)
+//    obs_sexr_srv2_2(i) = (sum(obs_p_srv2_length(2,i)))/
+//                         (sum(obs_p_srv2_length(1,i)) + sum(obs_p_srv2_length(2,i))); 
 
-  for(i=1; i<=nobs_srv3_length;i++)
-    obs_sexr_srv3_2(i) = (sum(obs_p_srv3_length(2,i)))/
-                         (sum(obs_p_srv3_length(1,i)) + sum(obs_p_srv3_length(2,i))); 
+//  for(i=1; i<=nobs_srv3_length;i++)
+//    obs_sexr_srv3_2(i) = (sum(obs_p_srv3_length(2,i)))/
+//                         (sum(obs_p_srv3_length(1,i)) + sum(obs_p_srv3_length(2,i))); 
 
  // cout<< " thru sex ratio "<<endl;  
 // delete above
@@ -432,7 +426,7 @@ PRELIMINARY_CALCS_SECTION
  //Compute offset for multinomial and length bin proportions
  // offset is a constant nplog(p) is added to the likelihood     
  // magnitude depends on nsamples(sample size) and p's_
-  //k is sex loop
+
   offset.initialize(); 
 
 //fishery offset
@@ -446,8 +440,6 @@ PRELIMINARY_CALCS_SECTION
       offset(1) -= nsamples_fish(k,i)*obs_p_fish(k,i) * log(obs_p_fish(k,i)+.0001);
   }
 
-  cout<<"nsamples_srv_length(1)"<<nsamples_srv_length(1)<<std::endl;    //this has females then males for survey
-//  exit(1);
 //survey length offset and bin proportions 
   //this loops over all surveys and makes sure all proportions sum to 1.
   for(i=1;i<=nsurv;i++){
@@ -463,66 +455,62 @@ PRELIMINARY_CALCS_SECTION
 
 //delete below
  //shelf survey length offset and bin proportions
-  for (i=1; i <= nobs_srv1_length; i++)
-  {
-    double sumtot ;
-    sumtot = sum(obs_p_srv1_length(1,i)+obs_p_srv1_length(2,i));
-    obs_p_srv1_length(1,i) = obs_p_srv1_length(1,i) / sumtot; 
-    obs_p_srv1_length(2,i) = obs_p_srv1_length(2,i) / sumtot; 
-    for(k=1; k<=2;k++)
-      offset(2) -= nsamples_srv1_length(k,i)*obs_p_srv1_length(k,i) * log(obs_p_srv1_length(k,i)+.0001);
-  }
+//  for (i=1; i <= nobs_srv1_length; i++)
+//  {
+//    double sumtot ;
+//    sumtot = sum(obs_p_srv1_length(1,i)+obs_p_srv1_length(2,i));
+//    obs_p_srv1_length(1,i) = obs_p_srv1_length(1,i) / sumtot; 
+//    obs_p_srv1_length(2,i) = obs_p_srv1_length(2,i) / sumtot; 
+//    for(k=1; k<=2;k++)
+//      offset(2) -= nsamples_srv1_length(k,i)*obs_p_srv1_length(k,i) * log(obs_p_srv1_length(k,i)+.0001);
+//  }
 
 //slope survey length offset and bin proportions
-  for (i=1; i <= nobs_srv2_length; i++)
-  {
-    double sumtot ;
-    sumtot = sum(obs_p_srv2_length(1,i)+obs_p_srv2_length(2,i));
-    obs_p_srv2_length(1,i) = obs_p_srv2_length(1,i) / sumtot; 
-    obs_p_srv2_length(2,i) = obs_p_srv2_length(2,i) / sumtot; 
-    for(k=1; k<=2;k++)
-      offset(3) -= nsamples_srv2_length(k,i)*obs_p_srv2_length(k,i) * log(obs_p_srv2_length(k,i)+.0001);
-  }
+//  for (i=1; i <= nobs_srv2_length; i++)
+//  {
+//    double sumtot ;
+//    sumtot = sum(obs_p_srv2_length(1,i)+obs_p_srv2_length(2,i));
+//    obs_p_srv2_length(1,i) = obs_p_srv2_length(1,i) / sumtot; 
+//    obs_p_srv2_length(2,i) = obs_p_srv2_length(2,i) / sumtot; 
+//    for(k=1; k<=2;k++)
+//      offset(3) -= nsamples_srv2_length(k,i)*obs_p_srv2_length(k,i) * log(obs_p_srv2_length(k,i)+.0001);
+//  }
 
 //Aleutian Islands survey length offset and bin proportions
-  for (i=1; i <= nobs_srv3_length; i++)
-  {
-    double sumtot ;
-    sumtot = sum(obs_p_srv3_length(1,i)+obs_p_srv3_length(2,i));
-    obs_p_srv3_length(1,i) = obs_p_srv3_length(1,i) / sumtot; 
-    obs_p_srv3_length(2,i) = obs_p_srv3_length(2,i) / sumtot; 
-    for(k=1; k<=2;k++)
-      offset(4) -= nsamples_srv3_length(k,i)*obs_p_srv3_length(k,i) * log(obs_p_srv3_length(k,i)+.0001);
-  }
+//  for (i=1; i <= nobs_srv3_length; i++)
+//  {
+//    double sumtot ;
+//    sumtot = sum(obs_p_srv3_length(1,i)+obs_p_srv3_length(2,i));
+//    obs_p_srv3_length(1,i) = obs_p_srv3_length(1,i) / sumtot; 
+//    obs_p_srv3_length(2,i) = obs_p_srv3_length(2,i) / sumtot; 
+//    for(k=1; k<=2;k++)
+//      offset(4) -= nsamples_srv3_length(k,i)*obs_p_srv3_length(k,i) * log(obs_p_srv3_length(k,i)+.0001);
+//  }
 //delete above
 
 //shelf survey age offset 
-  for (i=1; i <= nobs_srv1_age; i++)
-  {
-    double sumtot ;
-    sumtot = sum(obs_p_srv1_age(1,i)+obs_p_srv1_age(2,i));
-    obs_p_srv1_age(1,i) = obs_p_srv1_age(1,i) / sumtot; 
-    obs_p_srv1_age(2,i) = obs_p_srv1_age(2,i) / sumtot; 
-    for(k=1; k<=2;k++)
-      offset(5) -= nsamples_srv1_age(k,i)*obs_p_srv1_age(k,i) * log(obs_p_srv1_age(k,i)+.0001);
-  }   
+//  for (i=1; i <= nobs_srv1_age; i++)
+//  {
+//    double sumtot ;
+//    sumtot = sum(obs_p_srv1_age(1,i)+obs_p_srv1_age(2,i));
+//    obs_p_srv1_age(1,i) = obs_p_srv1_age(1,i) / sumtot; 
+//    obs_p_srv1_age(2,i) = obs_p_srv1_age(2,i) / sumtot; 
+//    for(k=1; k<=2;k++)
+//      offset(5) -= nsamples_srv1_age(k,i)*obs_p_srv1_age(k,i) * log(obs_p_srv1_age(k,i)+.0001);
+//  }   
 
 //AI survey age offset 
-  for (i=1; i <= nobs_srv3_age; i++)
-  {
-    double sumtot ;
-    sumtot = sum(obs_p_srv3_age(1,i)+obs_p_srv3_age(2,i));
-    obs_p_srv3_age(1,i) = obs_p_srv3_age(1,i) / sumtot; 
-    obs_p_srv3_age(2,i) = obs_p_srv3_age(2,i) / sumtot; 
-    for(k=1; k<=2;k++)
-      offset(6) -= nsamples_srv3_age(k,i)*obs_p_srv3_age(k,i) * log(obs_p_srv3_age(k,i)+.0001);
-  }                                                                     
+//  for (i=1; i <= nobs_srv3_age; i++)
+//  {
+//    double sumtot ;
+//    sumtot = sum(obs_p_srv3_age(1,i)+obs_p_srv3_age(2,i));
+//    obs_p_srv3_age(1,i) = obs_p_srv3_age(1,i) / sumtot; 
+//    obs_p_srv3_age(2,i) = obs_p_srv3_age(2,i) / sumtot; 
+//    for(k=1; k<=2;k++)
+//      offset(6) -= nsamples_srv3_age(k,i)*obs_p_srv3_age(k,i) * log(obs_p_srv3_age(k,i)+.0001);
+//  }                                                                     
 
-//  init_3darray obs_p_srv_age_fem(1,nsurv_aged,1,nobs_srv_age,1,nages) 
-// cout<<"nobs_srv_age(1)"<<nobs_srv_age(1)<<std::endl;
-// cout<<"obs_p_srv_age_fem(1)"<<obs_p_srv_age_fem(1)<<std::endl;
-// exit(1) ;
-  //survey age offsets (checked that it works)
+  //survey age offsets
   for (i=1;i<=nsurv_aged;i++)
   {
     for (j=1;j<=nobs_srv_age(i);j++)
@@ -559,14 +547,12 @@ PROCEDURE_SECTION
     if (mceval_phase())
     {
       evalout << obj_fun << " " ;
-      // loop over years and print in one long row.
       for (i=styr;i<=endyr;i++)
       evalout<<  fspbio(i) << " ";
       for (i=styr;i<=endyr;i++)    
       evalout<< natage(1,i)*wt(1) + natage(2,i)*wt(2) <<" ";
       for (i=styr;i<=endyr;i++)
       evalout << 2*natage(1,i,1) <<" ";
-      // hit carriage return on file
       evalout <<  endl;
     }
   }
@@ -610,7 +596,6 @@ FUNCTION get_selectivity
        {
          sel(k)=sel(k)*sexr_param_fish; //fixed at 1 in GOA model not BSAI model
        }
-      //cout<<"sel survey"<<sel_srv1<<endl;
     } 
 
  }//  end if(active(log_selcoffs_fish))
@@ -632,12 +617,12 @@ FUNCTION get_selectivity
           } 
      }
 
-    sel_srv1(1) = get_sel(srv1_slope_f1,srv1_sel50_f1,srv1_slope_f2,srv1_sel50_f2);    
-    sel_srv1(2) = get_sel(srv1_slope_m1,srv1_sel50_m1,srv1_slope_m2,srv1_sel50_m2); 
-    sel_srv2(1) = get_sel(srv2_slope_f,srv2_sel50_f);
-    sel_srv2(2) = get_sel(srv2_slope_m,srv2_sel50_m); 
-    sel_srv3(1) = get_sel(srv3_slope_f,srv3_sel50_f);
-    sel_srv3(2) = get_sel(srv3_slope_m,srv3_sel50_m);
+//    sel_srv1(1) = get_sel(srv1_slope_f1,srv1_sel50_f1,srv1_slope_f2,srv1_sel50_f2);    
+//    sel_srv1(2) = get_sel(srv1_slope_m1,srv1_sel50_m1,srv1_slope_m2,srv1_sel50_m2); 
+//    sel_srv2(1) = get_sel(srv2_slope_f,srv2_sel50_f);
+//    sel_srv2(2) = get_sel(srv2_slope_m,srv2_sel50_m); 
+//    sel_srv3(1) = get_sel(srv3_slope_f,srv3_sel50_f);
+//    sel_srv3(2) = get_sel(srv3_slope_m,srv3_sel50_m);
 
     sel_srv(1,1)=get_sel(srv1_slope_f1,srv1_sel50_f1,srv1_slope_f2,srv1_sel50_f2);  
     sel_srv(1,2)=get_sel(srv2_slope_f,srv2_sel50_f);
@@ -1045,9 +1030,9 @@ FUNCTION evaluate_the_objective_function
   fpen.initialize();
   rec_like.initialize();
   surv_like.initialize();
-  surv1_like.initialize();
-  surv2_like.initialize();
-  surv3_like.initialize();
+//  surv1_like.initialize();
+//  surv2_like.initialize();
+//  surv3_like.initialize();
   catch_like.initialize();
   sexr_like.initialize();
   obj_fun.initialize();
@@ -1067,12 +1052,12 @@ FUNCTION evaluate_the_objective_function
       {
         ii=yrs_fish(i);
         //fishery length likelihood fitting
-          length_like(1) -= nsamples_fish(k,i)*(1e-5+obs_p_fish(k,i))*log(pred_p_fish(k,ii)+1e-5);
+//          length_like(1) -= nsamples_fish(k,i)*(1e-5+obs_p_fish(k,i))*log(pred_p_fish(k,ii)+1e-5);
           length_like2(1) -= nsamples_fish(k,i)*(1e-5+obs_p_fish(k,i))*log(pred_p_fish(k,ii)+1e-5);
       }
     }
     //add the offset to the likelihood   
-    length_like(1)-=offset(1);
+//    length_like(1)-=offset(1);
     length_like2(1)-=offset(1);
 
   //survey length composition fitting 
@@ -1196,11 +1181,11 @@ REPORT_SECTION
 
   report << "Estimated shelf survey selectivity for females at age " << endl;
     for (j=1; j<=nages;j++)
-      report << j<<" " <<sel_srv(1,1,j)/maxsel_srv1<< endl;
+      report << j<<" " <<sel_srv(1,1,j)/maxsel_srv(1)<< endl;
    
   report << "Estimated shelf survey selectivity for males at age " << endl;
     for (j=1; j<=nages;j++)
-      report <<  j<<" "  <<sel_srv(2,1,j)/maxsel_srv1<<endl;
+      report <<  j<<" "  <<sel_srv(2,1,j)/maxsel_srv(1)<<endl;
 
   report << "Estimated slope survey selectivity for females at age " << endl;
     for (j=1; j<=nages;j++)

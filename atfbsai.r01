@@ -283,49 +283,49 @@ Estimated fishery selectivity for males at age
 20 0.753034
 21 0.753034
 Estimated shelf survey selectivity for females at age 
-1 inf
-2 inf
-3 inf
-4 inf
-5 inf
-6 inf
-7 inf
-8 inf
-9 inf
-10 inf
-11 inf
-12 inf
-13 inf
-14 inf
-15 inf
-16 inf
-17 inf
-18 inf
-19 inf
-20 inf
-21 inf
+1 0.30502
+2 0.559055
+3 0.855639
+4 1
+5 0.855639
+6 0.559055
+7 0.30502
+8 0.150527
+9 0.0706508
+10 0.0323838
+11 0.0146827
+12 0.0066242
+13 0.00298189
+14 0.00134095
+15 0.000602751
+16 0.000270878
+17 0.000121723
+18 5.46953e-05
+19 2.45765e-05
+20 1.1043e-05
+21 4.96197e-06
 Estimated shelf survey selectivity for males at age 
-1 inf
-2 inf
-3 inf
-4 inf
-5 inf
-6 inf
-7 inf
-8 inf
-9 inf
-10 inf
-11 inf
-12 inf
-13 inf
-14 inf
-15 inf
-16 inf
-17 inf
-18 inf
-19 inf
-20 inf
-21 inf
+1 0.216152
+2 0.30502
+3 0.419974
+4 0.559055
+5 0.711578
+6 0.855639
+7 0.961043
+8 1
+9 0.961043
+10 0.855639
+11 0.711578
+12 0.559055
+13 0.419974
+14 0.30502
+15 0.216152
+16 0.150527
+17 0.103558
+18 0.0706508
+19 0.0479253
+20 0.0323838
+21 0.0218248
 Estimated slope survey selectivity for females at age 
 1 0.0573242
 2 0.0831727
@@ -877,19 +877,19 @@ sex ratio likelihood component
 shelf survey age composition  
  0 0
 Projected biomass
- 6.95213e-310 0 0 0 0
- 6.95213e-310 0 0 0 0
- 6.95213e-310 0 0 0 0
- 6.95213e-310 0 0 0 0
+ 6.92792e-310 0 0 0 0
+ 6.92792e-310 0 0 0 0
+ 6.92792e-310 0 0 0 0
+ 6.92792e-310 0 0 0 0
 projected future female spawning biomass 
- 6.95213e-310 0 0 0 0
- 6.95213e-310 0 0 0 0
- 6.95213e-310 0 0 0 0
- 6.95213e-310 0 0 0 0
+ 6.92792e-310 0 0 0 0
+ 6.92792e-310 0 0 0 0
+ 6.92792e-310 0 0 0 0
+ 6.92792e-310 0 0 0 0
 Future yield 
- 6.95213e-310 0 0 0 0
- 6.95213e-310 0 0 0 0
- 6.95213e-310 0 0 0 0
+ 6.92792e-310 0 0 0 0
+ 6.92792e-310 0 0 0 0
+ 6.92792e-310 0 0 0 0
 shelf survey q =
 1.25
 slope survey q = 
