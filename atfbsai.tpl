@@ -19,9 +19,9 @@ DATA_SECTION
   init_int nsurv_aged //(7.4)     
  //selectivity is set to the selectivity at nselages-1 after age nselages 
   init_int nselages       //(8) fishery (for asymptotic selectivity) set to 19
-  init_int nselages_srv1  //(9) slope survey (for asymptotic selectivity) 
-  init_int nselages_srv2  //(10) shelf survey (for asymptotic selectivity)
-  init_int nselages_srv3  //(11) Aleutian Islands survey (for asymptotic selectivity)
+//  init_int nselages_srv1  //(9) slope survey (for asymptotic selectivity) 
+//  init_int nselages_srv2  //(10) shelf survey (for asymptotic selectivity)
+//  init_int nselages_srv3  //(11) Aleutian Islands survey (for asymptotic selectivity)
   init_ivector nselages_srv(1,nsurv) //(11.5)
   init_int phase_logistic_sel //(12)
  //sample size for length comps for weighting likelihoods  
@@ -32,7 +32,8 @@ DATA_SECTION
   init_int nobs_srv1          //(17) # of years of shelf survey biomass data
   init_int nobs_srv2          //(18) # of years of slope survey data
   init_int nobs_srv3          //(19) # of years of Aleutian Islands data
-  init_ivector nobs_srv(1,nsurv) //(19.5) # yrs of shelf, slope, AI data
+  init_ivector nobs_srv(1,nsurv) //(19.5) # yrs of shelf, slope, AI data   
+  !!cout<<"nobs_srv"<<nobs_srv<<std::endl;
 //  init_ivector yrs_srv1(1,nobs_srv1)   //(20) years with shelf survey biomass data
 //  init_ivector yrs_srv2(1,nobs_srv2)   //(21) years with slope survey biomass data
 //  init_ivector yrs_srv3(1,nobs_srv3)   //(22) years with Aleutian Islands survey bioamass data
@@ -50,14 +51,16 @@ DATA_SECTION
 //  init_matrix nsamples_srv3_length(1,2,1,nobs_srv3_length)  //(31) sample size for each length comp by sex and year from Aleutian I survey
   init_imatrix nsamples_srv_length_fem(1,nsurv,1,nobs_srv_length)   //(31.5) sample sizes for each length comp by sex and year for shelf, slope, AI survey
   init_imatrix nsamples_srv_length_mal(1,nsurv,1,nobs_srv_length)   //(31.6)
-  init_3darray nsamples_srv_length(1,nsurv,1,2,1,nobs_srv_length) //(31.7)     
+  init_3darray nsamples_srv_length(1,nsurv,1,2,1,nobs_srv_length) //(31.7)   
+  !!cout<<"nsamples_srv_length"<<nsamples_srv_length<<std::endl;    
 //  init_3darray obs_p_srv1_length(1,2,1,nobs_srv1_length,1,nlen) //(32) shelf survey length comps by bin, sex and yr
 //  init_3darray obs_p_srv2_length(1,2,1,nobs_srv2_length,1,nlen) //(33) slope survey length comps by bin, sex and yr
 //  init_3darray obs_p_srv3_length(1,2,1,nobs_srv3_length,1,nlen) //(34) Aleutian Islands survey length comps by bin, sex and yr
   init_3darray obs_p_fish(1,2,1,nobs_fish,1,nlen)  //(35) fishery length comps
   init_3darray obs_p_srv_length_fem(1,nsurv,1,nobs_srv_length,1,nlen)  //(35.5) survey length comps by survey (shelf, slope, AI, bin, sex and yr)
   init_3darray obs_p_srv_length_mal(1,nsurv,1,nobs_srv_length,1,nlen)  //(35.6)
-  init_vector catch_bio(styr,endyr)    //(36) catch by year
+  init_vector catch_bio(styr,endyr)    //(36) catch by year 
+  !!cout<<"catch_bio"<<catch_bio<<std::endl;
   init_vector obs_srv1(1,nobs_srv1)    //(37) shelf survey biomass by year
   init_vector obs_srv1_sd(1,nobs_srv1) //(38) shelf survey SE by year
   init_vector obs_srv2(1,nobs_srv2)    //(39) slope survey biomass by year
@@ -93,7 +96,6 @@ DATA_SECTION
   init_vector Phase(1,nsurv); //(62)
   init_int assess;  //(63)
   int styr_rec;  
-    !!cout<<test<<std::endl;
   matrix cv_srv(1,nsurv,1,nobs_srv);  //matrix to hold CVs for surveys
  //year
   int i
@@ -131,7 +133,7 @@ DATA_SECTION
   number obs_SD_sexr      //standard deviation from male prop. in shelf survey population estimates
   vector pred_sexr(styr,endyr)   //proportion of males in num at age matrix to be calculated
 //  vector q(1,nsurv)  //combining catchabilities into a vector
-  !!cout<<test<<std::endl;  
+ 
 INITIALIZATION_SECTION
   //can have different mortality for males and females
   F40 .20
@@ -348,8 +350,8 @@ PRELIMINARY_CALCS_SECTION
     obs_mean_sexr=mean(obs_sexr_srv_2(1));
     obs_SD_sexr=std_dev(obs_sexr_srv_2(1));   
 
-  cout<<"obs_mean_sexr"<<obs_mean_sexr<<std::endl;
-  cout<<"obs_SD_sexr"<<obs_SD_sexr<<std::endl;
+//  cout<<"obs_mean_sexr"<<obs_mean_sexr<<std::endl;
+//  cout<<"obs_SD_sexr"<<obs_SD_sexr<<std::endl;
 
 //delete below
 //length obs sex ratio in surveys    proportion of males
@@ -402,7 +404,7 @@ PRELIMINARY_CALCS_SECTION
                    +nsamples_srv_length_mal(i,j)*obs_p_srv_length_mal(i,j)*log(obs_p_srv_length_mal(i,j)+offset_const); 
 	}
   } 
-
+//  cout<<404<<std::endl;
 //delete below
  //shelf survey length offset and bin proportions
 //  for (i=1; i <= nobs_srv1_length; i++)
@@ -477,7 +479,7 @@ PRELIMINARY_CALCS_SECTION
 	             nsamples_srv_age(i,2,j)*obs_p_srv_age_mal(i,j)*log(obs_p_srv_age_mal(i,j)+.0001);
     }  
   }
-
+//  cout<<479<<std::endl;
 PROCEDURE_SECTION
 //this is for bootstraping where qrun is a vector of q's from bootstrap irun is the 
 //run number.  sets the q (=q1) for the run.
@@ -701,7 +703,7 @@ FUNCTION get_numbers_at_age
     }
     popn(k,endyr)=natage(k,endyr)*sel(k);
   }
-
+//  cout<<703<<std::endl;
   //predicted survey values
   fspbio.initialize(); 
   qtime=q_surv(1);
@@ -730,7 +732,7 @@ FUNCTION get_numbers_at_age
 //      pred_bio(i)+=natage(k,i)*wt(k);
     }
   }  
-  
+//  cout<<732<<std::endl;  
 //test below   
 
 //  matrix pred_srv(1,nsurv,styr,endyr)
@@ -769,7 +771,7 @@ FUNCTION get_numbers_at_age
    }  
  }
 // test above
-    
+//  cout<<771<<std::endl;  
 //    cout <<"pred_srv"<<endl<<pred_srv<<std::endl;
 //    cout <<"pred_srv1"<<endl<<pred_srv(1)<<std::endl; 
 //  exit(1);
@@ -809,7 +811,7 @@ FUNCTION get_numbers_at_age
 //      pred_p_srv3_len(2,i) /= sum_tot;
 //    }
 //delete above
-
+//  cout<<881<<std::endl;
   //Fit survey length compositions
   for (i=1;i<=nsurv;i++)
   {
@@ -847,8 +849,14 @@ FUNCTION get_numbers_at_age
 //      pred_p_srv3_age(2,i) /= sum_tot;
 //    }
 //delete above
-     
-  //Fit survey age composition
+ //   cout<<849<<std::endl; 
+//  3darray pred_p_srv_age_fem(1,nsurv_aged,1,nobs_srv_age,1,nages)   
+//  3darray sel_srv(1,2,1,nsurv,1,nages)    
+  //Fit survey age composition 
+
+//  cout<<"q_surv"<<q_surv<<std::endl;
+//  cout<<"yrs_srv_age"<<yrs_srv_age<<std::endl;
+//  cout<<"sel_srv(1,1)"<<sel_srv(1,1)<<std::endl;
    for (i=1;i<=nsurv_aged;i++)
   {
 	for (j=1;j<=nobs_srv_age(i);j++)
@@ -861,10 +869,10 @@ FUNCTION get_numbers_at_age
 			pred_p_srv_age_mal(i,j)/=sum_tot;
 	 }
    }
-
+//  cout<<863<<std::endl;
   depletion=pred_bio(endyr)/pred_bio(styr);
   endbiom=pred_bio(endyr);
-
+//  cout<<866<<std::endl;
 FUNCTION get_catch_at_age
   for (i=styr; i<=endyr; i++)
   {
@@ -1095,8 +1103,8 @@ FUNCTION evaluate_the_objective_function
    }
 
 
-  cout<<"age_like"<<age_like<<std::endl;
-  exit(1);
+//  cout<<"age_like"<<age_like<<std::endl;
+//  exit(1);
   //end of if(active (rec_dev))
   }
   // Fit to indices (lognormal)  

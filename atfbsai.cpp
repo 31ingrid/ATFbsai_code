@@ -19,9 +19,6 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   nsurv.allocate("nsurv");
   nsurv_aged.allocate("nsurv_aged");
   nselages.allocate("nselages");
-  nselages_srv1.allocate("nselages_srv1");
-  nselages_srv2.allocate("nselages_srv2");
-  nselages_srv3.allocate("nselages_srv3");
   nselages_srv.allocate(1,nsurv,"nselages_srv");
   phase_logistic_sel.allocate("phase_logistic_sel");
   nlen.allocate("nlen");
@@ -32,16 +29,19 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   nobs_srv2.allocate("nobs_srv2");
   nobs_srv3.allocate("nobs_srv3");
   nobs_srv.allocate(1,nsurv,"nobs_srv");
+cout<<"nobs_srv"<<nobs_srv<<std::endl;
   yrs_srv.allocate(1,nsurv,1,nobs_srv,"yrs_srv");
   nobs_srv_length.allocate(1,nsurv,"nobs_srv_length");
   yrs_srv_length.allocate(1,nsurv,1,nobs_srv_length,"yrs_srv_length");
   nsamples_srv_length_fem.allocate(1,nsurv,1,nobs_srv_length,"nsamples_srv_length_fem");
   nsamples_srv_length_mal.allocate(1,nsurv,1,nobs_srv_length,"nsamples_srv_length_mal");
   nsamples_srv_length.allocate(1,nsurv,1,2,1,nobs_srv_length,"nsamples_srv_length");
+cout<<"nsamples_srv_length"<<nsamples_srv_length<<std::endl;    
   obs_p_fish.allocate(1,2,1,nobs_fish,1,nlen,"obs_p_fish");
   obs_p_srv_length_fem.allocate(1,nsurv,1,nobs_srv_length,1,nlen,"obs_p_srv_length_fem");
   obs_p_srv_length_mal.allocate(1,nsurv,1,nobs_srv_length,1,nlen,"obs_p_srv_length_mal");
   catch_bio.allocate(styr,endyr,"catch_bio");
+cout<<"catch_bio"<<catch_bio<<std::endl;
   obs_srv1.allocate(1,nobs_srv1,"obs_srv1");
   obs_srv1_sd.allocate(1,nobs_srv1,"obs_srv1_sd");
   obs_srv2.allocate(1,nobs_srv2,"obs_srv2");
@@ -76,7 +76,6 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   Upper_bound.allocate(1,nsurv,"Upper_bound");
   Phase.allocate(1,nsurv,"Phase");
   assess.allocate("assess");
-cout<<test<<std::endl;
   cv_srv.allocate(1,nsurv,1,nobs_srv);
   test.allocate(1,4);
    styr_rec=styr-nages+1;
@@ -93,7 +92,6 @@ cout<<test<<std::endl;
   obs_sexr.allocate(1,nobs_fish);
   obs_sexr_srv_2.allocate(1,nsurv,1,nobs_srv_length);
   pred_sexr.allocate(styr,endyr);
-cout<<test<<std::endl;  
 }
 
 void model_parameters::initializationfunction(void)
@@ -520,8 +518,6 @@ void model_parameters::preliminary_calculations(void)
   }
     obs_mean_sexr=mean(obs_sexr_srv_2(1));
     obs_SD_sexr=std_dev(obs_sexr_srv_2(1));   
-  cout<<"obs_mean_sexr"<<obs_mean_sexr<<std::endl;
-  cout<<"obs_SD_sexr"<<obs_SD_sexr<<std::endl;
  // cout<< " thru sex ratio "<<endl;  
  //Compute offset for multinomial and length bin proportions
  // offset is a constant nplog(p) is added to the likelihood     
@@ -820,7 +816,6 @@ void model_parameters::get_numbers_at_age(void)
       // are set different in the tpl file the program will take to value from the bin file and use that 
     }
   }  
-  
   for (j=1;j<=nsurv;j++)
  {
     for (i=styr;i<=endyr;i++)
@@ -851,7 +846,6 @@ void model_parameters::get_numbers_at_age(void)
       }
    }  
  }
-    
     //don't need to divide by max_sel because totn_srv1 is calculated using selectivities and the
     //max_sel would cancel out.
     // Fitting the survey length compositions
@@ -870,8 +864,8 @@ void model_parameters::get_numbers_at_age(void)
 	 }
    }
     //Calculation of survey age composition
-     
-  //Fit survey age composition
+ //   cout<<849<<std::endl; 
+  //Fit survey age composition 
    for (i=1;i<=nsurv_aged;i++)
   {
 	for (j=1;j<=nobs_srv_age(i);j++)
@@ -1091,8 +1085,6 @@ void model_parameters::evaluate_the_objective_function(void)
 	  age_like(i+2)-= 2;
 	}   
    }
-  cout<<"age_like"<<age_like<<std::endl;
-  exit(1);
   //end of if(active (rec_dev))
   }
   // Fit to indices (lognormal)  
