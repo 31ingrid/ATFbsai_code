@@ -388,7 +388,10 @@
 #(61)
 2.0 1.5 1.5
 #(62)
--4 -4 -4
+-4 -4 -4  
+#(62.5) q_surv init
+0.75 0.10 0.14
 #(63) assessment (1 for Bering Sea assessment)
-1
+1       
+
 

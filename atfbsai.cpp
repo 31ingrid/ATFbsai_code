@@ -168,6 +168,9 @@ void model_parameters::initializationfunction(void)
   F30.set_initial_value(.23);
   mean_log_rec.set_initial_value(10.);
   log_avg_fmort.set_initial_value(-5.);
+  q1.set_initial_value(.75);
+  q2.set_initial_value(.10);
+  q3.set_initial_value(.14);
   fmort_dev.set_initial_value(0.00001);
   fish_slope_f.set_initial_value(.4);
   fish_sel50_f.set_initial_value(5.);

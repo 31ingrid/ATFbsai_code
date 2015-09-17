@@ -41,8 +41,8 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   wt.allocate(1,2,1,nages,"wt");
   maturity.allocate(1,nages,"maturity");
   lenage.allocate(1,2,1,nages,1,nlen,"lenage");
-cout<<"nobs_srv(1)"<<nobs_srv(1)<<std::endl;
-  bottom_temps.allocate(1,33,"bottom_temps");
+ nyrs_temps = nobs_srv(1);
+  bottom_temps.allocate(1,nyrs_temps,"bottom_temps");
   monot_sel.allocate("monot_sel");
   phase_selcoffs.allocate("phase_selcoffs");
   wt_like.allocate(1,8,"wt_like");
@@ -56,6 +56,7 @@ cout<<"nobs_srv(1)"<<nobs_srv(1)<<std::endl;
   Lower_bound.allocate(1,nsurv,"Lower_bound");
   Upper_bound.allocate(1,nsurv,"Upper_bound");
   Phase.allocate(1,nsurv,"Phase");
+  q_surv_prior_mean.allocate(1,nsurv,"q_surv_prior_mean");
   assess.allocate("assess");
   cv_srv.allocate(1,nsurv,1,nobs_srv);
   test.allocate(1,4);
@@ -73,7 +74,6 @@ cout<<"nobs_srv(1)"<<nobs_srv(1)<<std::endl;
   obs_sexr.allocate(1,nobs_fish);
   obs_sexr_srv_2.allocate(1,nsurv,1,nobs_srv_length);
   pred_sexr.allocate(styr,endyr);
-  q.allocate(1,nsurv);
 }
 
 void model_parameters::initializationfunction(void)
@@ -83,6 +83,7 @@ void model_parameters::initializationfunction(void)
   F30.set_initial_value(.23);
   mean_log_rec.set_initial_value(10.);
   log_avg_fmort.set_initial_value(-5.);
+  q_surv.set_initial_value(q_surv_prior_mean);
   fmort_dev.set_initial_value(0.00001);
   fish_slope_f.set_initial_value(.4);
   fish_sel50_f.set_initial_value(5.);
@@ -122,9 +123,6 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
 	  phase(i)=Phase(i); 
   }  
   q_surv.allocate(1,nsurv,lower_bound,upper_bound,phase,"q_surv");
-  q1.allocate(0.5,2.0,-4,"q1");
-  q2.allocate(0.05,1.5,-4,"q2");
-  q3.allocate(0.05,1.5,-4,"q3");
   alpha.allocate(4,"alpha");
   beta.allocate(4,"beta");
   mean_log_rec.allocate(1,"mean_log_rec");
@@ -179,18 +177,6 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   totn_srv.allocate(1,nsurv,1,2,styr,endyr,"totn_srv");
   #ifndef NO_AD_INITIALIZE
     totn_srv.initialize();
-  #endif
-  totn_srv1.allocate(1,2,styr,endyr,"totn_srv1");
-  #ifndef NO_AD_INITIALIZE
-    totn_srv1.initialize();
-  #endif
-  totn_srv2.allocate(1,2,styr,endyr,"totn_srv2");
-  #ifndef NO_AD_INITIALIZE
-    totn_srv2.initialize();
-  #endif
-  totn_srv3.allocate(1,2,styr,endyr,"totn_srv3");
-  #ifndef NO_AD_INITIALIZE
-    totn_srv3.initialize();
   #endif
   explbiom.allocate(styr,endyr,"explbiom");
   #ifndef NO_AD_INITIALIZE
@@ -265,7 +251,7 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   #ifndef NO_AD_INITIALIZE
     surv.initialize();
   #endif
-  offset.allocate(1,10,"offset");
+  offset.allocate(1,6,"offset");
   #ifndef NO_AD_INITIALIZE
     offset.initialize();
   #endif
@@ -429,7 +415,6 @@ void model_parameters::preliminary_calculations(void)
   }
   obs_mean_sexr=mean(obs_sexr_srv_2(1)); //previously was just estimated from shelf survey data so kept that here.
   obs_SD_sexr=std_dev(obs_sexr_srv_2(1));
- // cout<< " thru sex ratio "<<endl;  
  //Compute offset for multinomial and length bin proportions
  // offset is a constant nplog(p) is added to the likelihood     
  // magnitude depends on nsamples(sample size) and p's_
@@ -450,11 +435,10 @@ void model_parameters::preliminary_calculations(void)
 		sumtot=sum(obs_p_srv_length_fem(i,j)+obs_p_srv_length_mal(i,j));
         obs_p_srv_length_mal(i,j)=obs_p_srv_length_mal(i,j)/sumtot;  //changing these to proportions rather than numbers
         obs_p_srv_length_fem(i,j)=obs_p_srv_length_fem(i,j)/sumtot;
-        offset(i+1)-= nsamples_srv_length_fem(i,j)*obs_p_srv_length_fem(i,j)*log(obs_p_srv_length_fem(i,j)+offset_const)
-                   +nsamples_srv_length_mal(i,j)*obs_p_srv_length_mal(i,j)*log(obs_p_srv_length_mal(i,j)+offset_const); 
+        offset(i+1)-= nsamples_srv_length_fem(i,j)*obs_p_srv_length_fem(i,j)*log(obs_p_srv_length_fem(i,j)+.0001)
+                   +nsamples_srv_length_mal(i,j)*obs_p_srv_length_mal(i,j)*log(obs_p_srv_length_mal(i,j)+.0001); 
 	}
   } 
- //shelf survey length offset and bin proportions
   //survey age offsets
   for (i=1;i<=nsurv_aged;i++)
   {
@@ -531,7 +515,7 @@ void model_parameters::get_selectivity(void)
    }
  //vector=vector-scalar same as  vector-=scalar  
  //scaling selectivities by subracting the mean so exp(mean(s))=1.   
- //selectivities can be greater than 1 but mean is 1.
+ //selectivities can be greater than 1 but mean is 1. 
   for(k=1;k<=2;k++)
     {
       log_sel_fish(k)-=log(mean(mfexp(log_sel_fish(k))));
@@ -539,8 +523,26 @@ void model_parameters::get_selectivity(void)
       if(k==2)
        {
          sel(k)=sel(k)*sexr_param_fish; //fixed at 1 in GOA model not BSAI model
-       }
+       }    
     } 
+    //for (j=1;j<=nages;j++)  //this is selectivity for the surveys
+    //{ 
+      
+      //ascending limb of curve for shelf survey
+	  //  sel_srv(1,1,j)=1./(1.+mfexp(-1.*srv1_slope_f1*(double(j)-srv1_sel50_f1)));
+	  //  sel_srv(2,1,j)=1./(1.+mfexp(-1.*srv1_slope_m1*(double(j)-srv1_sel50_m1)));
+		//decending limb of curve for shelf survey 
+	  //  temp1=1./(1.+mfexp(srv1_slope_f2*(double(j)-srv1_sel50_f2)));
+	  //  temp2=1./(1.+mfexp(srv1_slope_m2*(double(j)-srv1_sel50_m2)));
+	  //  sel_srv(1,1,j)=sel_srv(1,1,j)*temp1(j);
+	   // sel_srv(2,1,j)=sel_srv(2,1,j)*temp2(j);
+		//slope surveys
+	   // sel_srv(1,2,j)=1./(1.+mfexp(-1.*srv2_slope_f*(double(j)-srv2_sel50_f)));
+	   // sel_srv(2,2,j)=1./(1.+mfexp(-1.*srv2_slope_m*(double(j)-srv2_sel50_m)));
+		//Aleutian Islands surveys
+	   // sel_srv(1,3,j) = 1./(1.+mfexp(-1.*srv3_slope_f*(double(j)-srv3_sel50_f)));
+	   // sel_srv(2,3,j) = 1./(1.+mfexp(-1.*srv3_slope_m*(double(j)-srv3_sel50_m)));							
+    //}
  }//  end if(active(log_selcoffs_fish))
   else
     {
@@ -556,15 +558,33 @@ void model_parameters::get_selectivity(void)
             {
              sel(1,j)=sel(1,j-1);
              sel(2,j)=sel(2,j-1);
-            }  						
+            }      
+   //delete below
+            //ascending limb of curve for shelf survey
+		//	sel_srv(1,1,j)=1./(1.+mfexp(-1.*srv1_slope_f1*(double(j)-srv1_sel50_f1)));
+	   // 	sel_srv(2,1,j)=1./(1.+mfexp(-1.*srv1_slope_m1*(double(j)-srv1_sel50_m1)));
+			//decending limb of curve for shelf survey 
+	   // 	temp1=1./(1.+mfexp(srv1_slope_f2*(double(j)-srv1_sel50_f2)));
+	   // 	temp2=1./(1.+mfexp(srv1_slope_m2*(double(j)-srv1_sel50_m2)));
+	   // 	sel_srv(1,1,j)=sel_srv(1,1,j)*temp1(j);
+	   // 	sel_srv(2,1,j)=sel_srv(2,1,j)*temp2(j);
+			//slope surveys
+		//	sel_srv(1,2,j)=1./(1.+mfexp(-1.*srv2_slope_f*(double(j)-srv2_sel50_f)));
+		//	sel_srv(2,2,j)=1./(1.+mfexp(-1.*srv2_slope_m*(double(j)-srv2_sel50_m)));
+			//Aleutian Islands surveys
+		 //   sel_srv(1,3,j) = 1./(1.+mfexp(-1.*srv3_slope_f*(double(j)-srv3_sel50_f)));
+		 //   sel_srv(2,3,j) = 1./(1.+mfexp(-1.*srv3_slope_m*(double(j)-srv3_sel50_m)));							
+ 	 //delete above   				
           } 
      }
-    sel_srv(1,1)=get_sel(srv1_slope_f1,srv1_sel50_f1,srv1_slope_f2,srv1_sel50_f2);  
-    sel_srv(1,2)=get_sel(srv2_slope_f,srv2_sel50_f);
-    sel_srv(1,3)=get_sel(srv3_slope_f,srv3_sel50_f); 
-    sel_srv(2,1)=get_sel(srv1_slope_m1,srv1_sel50_m1,srv1_slope_m2,srv1_sel50_m2);
-    sel_srv(2,2)=get_sel(srv2_slope_m,srv2_sel50_m); 
-    sel_srv(2,3)=get_sel(srv3_slope_m,srv3_sel50_m); 
+    sel_srv(1,1) = get_sel(srv1_slope_f1,srv1_sel50_f1,srv1_slope_f2,srv1_sel50_f2);  
+      // sel_srv(1,1) = get_sel(srv_aslope_f(1),srv_asel50_f(1),srv_dslope_f(1),srv_dsel50_f(1));  
+    sel_srv(1,2) = get_sel(srv2_slope_f,srv2_sel50_f);
+    // sel_srv(1,2) = get_sel(srv_aslope_f(2),srv_asel50_f(2));
+    sel_srv(1,3) = get_sel(srv3_slope_f,srv3_sel50_f); 
+    sel_srv(2,1) = get_sel(srv1_slope_m1,srv1_sel50_m1,srv1_slope_m2,srv1_sel50_m2);
+    sel_srv(2,2) = get_sel(srv2_slope_m,srv2_sel50_m); 
+    sel_srv(2,3) = get_sel(srv3_slope_m,srv3_sel50_m); 
 }
 
 dvar_vector model_parameters::get_sel(const dvariable& slp, const dvariable& a50)
@@ -572,9 +592,11 @@ dvar_vector model_parameters::get_sel(const dvariable& slp, const dvariable& a50
   ofstream& evalout= *pad_evalout;
    {
 	dvar_vector sel_tmp(1,nages);
-   for (j=1;j<=nages;j++)  //this is selectivity for the surveys
- 		sel_tmp(j)=1./(1.+mfexp(-slp*(double(j)-a50)));           
-   return(sel_tmp);
+    for (j=1;j<=nages;j++)  //this is selectivity for the surveys
+    {  
+    sel_tmp(j)=1./(1.+mfexp(-1.*slp*(double(j)-a50))); 
+    }          
+    return(sel_tmp);
    }
 }
 
@@ -585,7 +607,7 @@ dvar_vector model_parameters::get_sel(const dvariable& slp, const dvariable& a50
 	dvar_vector sel_tmp(1,nages);
    for (j=1;j<=nages;j++)  //this is selectivity for the surveys         
    {
-	  sel_tmp(j) = 1./(1.+mfexp(-slp*(double(j)-a50)));           
+	  sel_tmp(j) = 1./(1.+mfexp(-1.*slp*(double(j)-a50)));           
       sel_tmp(j) *= 1./(1.+mfexp(dslp*(double(j)-d50)));
    }
  	return(sel_tmp);
@@ -618,15 +640,11 @@ void model_parameters::get_numbers_at_age(void)
   if(maxsel_fish<max(sel(2)))//if females greater than males, then set the max to the females.
     maxsel_fish=max(sel(2)); //set max to whichever sex is larger
   for(i=1;i<=nsurv;i++)
-    for (k=1;k<2;k++)  //sex
   {
-   {
-   maxsel_srv(i)=max(sel_srv(k,i));
-   if(maxsel_srv(i)<max(sel_srv(k,i)))
-   maxsel_srv(i)=max(sel_srv(k,i));
-   } 
- }     
-  
+   maxsel_srv(i)=max(sel_srv(1,i));
+   if(maxsel_srv(i)<max(sel_srv(2,i)))
+   maxsel_srv(i)=max(sel_srv(2,i));
+  }     
   int itmp;
  //calc initial population  
   for (j=1;j<nages;j++)
@@ -668,6 +686,10 @@ void model_parameters::get_numbers_at_age(void)
     }
     popn(k,endyr)=natage(k,endyr)*sel(k);
   }
+  for (i=styr;i<=endyr;i++)
+  {
+      pred_sexr(i)=sum(natage(2,i))/(sum((natage(1,i)+natage(2,i))));  //calculation of prop. of males in pred. population 
+  }
   //predicted survey values
   fspbio.initialize(); 
   qtime=q_surv(1);
@@ -682,16 +704,16 @@ void model_parameters::get_numbers_at_age(void)
   pred_srv(j,i)=0.;
   //catchability calculation for survey years
   if (i>=1982 && i-1981 <= nobs_srv(1) && assess==1)      //JNI catchability calculation for survey years    
-  {qtime(i)=q1*mfexp(-alpha+beta*bottom_temps(i-1981));}
+  {qtime(i)=q_surv(1)*mfexp(-alpha+beta*bottom_temps(i-1981));}
   for(k=1;k<=2;k++)
     {
     if (j==1 && assess==1)
       {             
-    pred_srv(j,i) += qtime(i)*(natage(k,i)*elem_prod(sel_srv(k,j)/maxsel_srv(j),wt(k)));   //shelf survey, dividing by the maxsel constrains female selectivity to be 1.0
+    pred_srv(j,i) += qtime(i)*(natage(k,i)*elem_prod(sel_srv(k,j)/maxsel_srv(j),wt(k)));maxsel_srv(j);   //shelf survey, dividing by the maxsel constrains female selectivity to be 1.0
       } 
     else 
       {
-    pred_srv(j,i) += q_surv(j)*(natage(k,i)*elem_prod(sel_srv(k,j),wt(k)))/maxsel_srv(j);         //slope survey JNI  do not need to divide by maxsel_srv if it is logistic but does not hurt
+    pred_srv(j,i) += q_surv(j)*(natage(k,i)*elem_prod(sel_srv(k,j),wt(k)));///maxsel_srv(j);         //slope survey JNI  do not need to divide by maxsel_srv if it is logistic but does not hurt
       }        
        //Aleutian Islands survey JNI
     //next line used to fix q1 to 1.0 - problem is if you start from a bin file, even if the bounds
@@ -700,11 +722,7 @@ void model_parameters::get_numbers_at_age(void)
     pred_bio(i)+=natage(k,i)*wt(k);
       }
    }  
- }
-    //don't need to divide by max_sel because totn_srv1 is calculated using selectivities and the
-    //max_sel would cancel out.
-    // Fitting the survey length compositions
-   
+ }     
   //Fit survey length compositions
   for (i=1;i<=nsurv;i++)
   {
@@ -718,7 +736,6 @@ void model_parameters::get_numbers_at_age(void)
 			pred_p_srv_len_mal(i,j)/=sum_tot;
 	 }
    }
-    //Calculation of survey age composition
      
   //Fit survey age composition
    for (i=1;i<=nsurv_aged;i++)
@@ -883,8 +900,8 @@ void model_parameters::evaluate_the_objective_function(void)
   obj_fun.initialize();
   if (active(rec_dev))
   {
- //   length_like2.initialize();
-    int ii;
+  length_like2.initialize();
+  int ii;
     //recruitment likelihood - norm2 is sum of square values   
     rec_like = norm2(rec_dev);
     for(k=1;k<=2;k++)
@@ -903,12 +920,15 @@ void model_parameters::evaluate_the_objective_function(void)
    {
      for (j=1;j<=nobs_srv_length(i);j++) 
      {    
-	   length_like2(i+1)-=((nsamples_srv_length_fem(i,j)*(offset_const+obs_p_srv_length_fem(i,j))*log(pred_p_srv_len_fem(i,j)+offset_const))
-	                      +(nsamples_srv_length_mal(i,j)*(offset_const+obs_p_srv_length_mal(i,j))*log(pred_p_srv_len_mal(i,j)+offset_const)));
-	} 
+	   length_like2(i+1)-=((nsamples_srv_length_fem(i,j)*(1e-3+obs_p_srv_length_fem(i,j))*log(pred_p_srv_len_fem(i,j)+1e-3))
+	                      +(nsamples_srv_length_mal(i,j)*(1e-3+obs_p_srv_length_mal(i,j))*log(pred_p_srv_len_mal(i,j)+1e-3)));
+	 } 
 	  length_like2(i+1)-=offset(i+1); 
-     
-   } 
+    } 
+    //cout<<"length_like2(1)"<<length_like2(1)<<std::endl;
+    //cout<<"length_like2(2)"<<length_like2(2)<<std::endl;
+    //cout<<"length_like2(3)"<<length_like2(3)<<std::endl;
+    //cout<<"length_like2(4)"<<length_like2(4)<<std::endl;    
   for (i=1;i<=nsurv_aged;i++)
   {
 	for (j=1;j<=nobs_srv_age(i);j++)
@@ -925,7 +945,9 @@ void model_parameters::evaluate_the_objective_function(void)
   for (i=1;i<=nsurv;i++)
   {   
   surv_like(i) = norm2(elem_div(log(obs_srv(i))-log(pred_srv(i)(yrs_srv(i))),sqrt(2)*cv_srv(i)));
-  } 
+  }  
+  double var_tmp; for (i=1;i<=nobs_srv(3);i++) { var_tmp = 2.*square(log(obs_srv(3,i))*cv_srv(3,i)); surv_like(3) += square(log(obs_srv(3,i)+.01)-log(pred_srv(3,yrs_srv(3,i))+.01))/var_tmp; }
+  
    
    catch_like=norm2(log(catch_bio+.000001)-log(pred_catch+.000001));
    // sex ratio likelihood
@@ -946,9 +968,9 @@ void model_parameters::evaluate_the_objective_function(void)
         sel_like(3)+=wt_like(6)*square(log_sel_fish(2,j)-log_sel_fish(2,j+1));  //monotonicity constraing fishery males
     }
    } 
-    obj_fun+=1.*sum(sel_like); 
+    obj_fun+=1.*sum(sel_like);    
     obj_fun+=1.*square(avgsel_fish(1));
-    obj_fun+=1.*square(avgsel_fish(2));
+    obj_fun+=1.*square(avgsel_fish(2));  
   } //end if active(log_selcoffs_fish)
   // Phases less than 3, penalize High F's
     if (current_phase()<2)
@@ -968,10 +990,10 @@ void model_parameters::evaluate_the_objective_function(void)
   obj_fun += rec_like;
   obj_fun += 1.*sum(length_like2);  
   obj_fun+= 1.*sum(age_like); 
-  obj_fun += 1.*sum(surv_like);
+  obj_fun += 1.*sum(surv_like);    
   obj_fun += 300*catch_like;        // large emphasis to fit observed catch
-  obj_fun += fpen;
-  obj_fun += sprpen;
+  obj_fun += fpen; 
+  obj_fun += sprpen;    
 }
 
 void model_parameters::report(const dvector& gradients)
@@ -1152,11 +1174,11 @@ void model_parameters::report(const dvector& gradients)
   report << "Future yield " << endl;
   report << catch_future << endl;
   report << "shelf survey q =" << endl;
-  report << q1 << endl;
+  report << q_surv(1) << endl;
   report << "slope survey q = " << endl;
-  report << q2 << endl;
+  report << q_surv(2) << endl;
   report << "Aleutian Islands survey q = " << endl;
-  report << q3 << endl;
+  report << q_surv(3) << endl;
   report << " female natural mortality for this run" << endl;
   report << M(1) << endl;
   report << " male natural mortality for this run" << endl;

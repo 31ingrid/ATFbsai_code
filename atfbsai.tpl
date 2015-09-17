@@ -203,9 +203,9 @@ INITIALIZATION_SECTION
   mean_log_rec 10.
   log_avg_fmort -5.  
   //proportion in each region constrained with catchability so it does not add to 1. Expect to add to less than 1?
-//  q1 .75   // shelf
-//  q2 .10   // slope
-//  q3 .14   // Aleutian Islands
+  q1 .75   // shelf
+  q2 .10   // slope
+  q3 .14   // Aleutian Islands
   fmort_dev 0.00001
 //note: you can initialize things you do not use.
   fish_slope_f .4
