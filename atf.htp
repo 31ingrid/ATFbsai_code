@@ -144,6 +144,8 @@ private:
   param_vector avgsel_fish;
   param_matrix popn;
   param_3array totn_srv;
+  param_vector temp1;
+  param_vector temp2;
   param_vector explbiom;
   param_vector pred_bio;
   param_vector fspbio;
