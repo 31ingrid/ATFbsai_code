@@ -16,52 +16,68 @@ DATA_SECTION
   init_number median_rec  //(6) median recruit value to use for the last 3 years
   init_int nages          //(7) # of ages in the model 
   init_int nsurv   //(7.3)
-  init_int nsurv_aged //(7.4)     
+  init_int nsurv_aged //(7.4) 
+  !!cout<<"nsurv_aged"<<nsurv_aged<<std::endl;    
  //selectivity is set to the selectivity at nselages-1 after age nselages 
   init_int nselages       //(8) fishery (for asymptotic selectivity) set to 19
   init_ivector nselages_srv(1,nsurv) //(11.5)
   init_int phase_logistic_sel //(12)
+  !!cout<<"phase_logistic_sel"<<phase_logistic_sel<<std::endl;       
  //sample size for length comps for weighting likelihoods  
   init_int nlen             //(13) # of length bins
   init_int nobs_fish          //(14) # of years of fishery data
-  init_ivector yrs_fish(1,nobs_fish)   //(15) years with fishery data
+  init_ivector yrs_fish(1,nobs_fish)   //(15) years with fishery data 
+  !!cout<<"yrs_fish"<<yrs_fish<<std::endl; 
   init_matrix nsamples_fish(1,2,1,nobs_fish)  //(16) sample size (weights) for each sex and yr of fishery data
   init_ivector nobs_srv(1,nsurv) //(19.5) # yrs of shelf, slope, AI data
   init_imatrix yrs_srv(1,nsurv,1,nobs_srv) //(22.5) yrs with shelf, slope, AI survey data
-  init_ivector nobs_srv_length(1,nsurv) //(25.5)
+  init_ivector nobs_srv_length(1,nsurv) //(25.5) 
+  !!cout<<"nobs_srv_length"<<nobs_srv_length<<std::endl; 
   init_imatrix yrs_srv_length(1,nsurv,1,nobs_srv_length) //(28.5) yrs with shelf, slope, AI length data
   init_imatrix nsamples_srv_length_fem(1,nsurv,1,nobs_srv_length)   //(31.5) sample sizes for each length comp by sex and year for shelf, slope, AI survey  
   init_imatrix nsamples_srv_length_mal(1,nsurv,1,nobs_srv_length)   //(31.6)
  //delete this one later
-  init_3darray nsamples_srv_length(1,nsurv,1,2,1,nobs_srv_length) //(31.7)     
-  init_3darray obs_p_fish(1,2,1,nobs_fish,1,nlen)  //(35) fishery length comps
+  init_3darray nsamples_srv_length(1,nsurv,1,2,1,nobs_srv_length) //(31.7) 
+  !!cout<<"nsamples_srv_length"<<nsamples_srv_length<<std::endl;     
+  init_3darray obs_p_fish(1,2,1,nobs_fish,1,nlen)  //(35) fishery length comps 
+  !!cout<<"obs_p_fish(1)"<<obs_p_fish(1)<<std::endl;  
   init_3darray obs_p_srv_length_fem(1,nsurv,1,nobs_srv_length,1,nlen)  //(35.5) survey length comps by survey (shelf, slope, AI, bin, sex and yr)
   init_3darray obs_p_srv_length_mal(1,nsurv,1,nobs_srv_length,1,nlen)  //(35.6)
   init_vector catch_bio(styr,endyr)    //(36) catch by year
   init_imatrix obs_srv(1,nsurv,1,nobs_srv) //(41.5) survey biomass by year (shelf, slope, AI)
   init_imatrix obs_srv_sd(1,nsurv,1,nobs_srv) //(42.5) survey SE by year    
-  init_matrix wt(1,2,1,nages)          //(43) weight-at-age by sex 
+  init_matrix wt(1,2,1,nages)          //(43) weight-at-age by sex   
+  !!cout<<"wt"<<wt<<std::endl;  
   init_vector maturity(1,nages)        //(44) female prop. mature-at-age
-  //length age transition matrix
+  !!cout<<"maturity"<<maturity<<std::endl;
+  //length age transition matrix 
+  //goa: need length age transition matrix with 21 ages and 21 length bins
   init_3darray lenage(1,2,1,nages,1,nlen)  //(45) length-age transition matrix
-  int nyrs_temps;
-  !! nyrs_temps = nobs_srv(1);
+  !!cout<<"lenage"<<lenage<<std::endl; 
+  int nyrs_temps;   
+  !! nyrs_temps = 33;//nobs_srv(1); change back for BSAI assessment
+  !!cout<<"nyrs_temps"<<nyrs_temps<<std::endl; 
   init_vector bottom_temps(1,nyrs_temps); //nobs_srv(1))    //(46) shelf survey bottom temperatures
+  !!cout<<"nyrs_temps"<<nyrs_temps<<std::endl;
   init_int monot_sel     //(51) selectivity smoothing function for fishery 
   init_int phase_selcoffs      //(52) generally set to phase 4 phase for smooth selectivity curve fishery
-  init_vector wt_like(1,8)    //(53)            
+  init_vector wt_like(1,8)    //(53)  
+  !!cout<<"wt_like"<<wt_like<<std::endl;               
   init_ivector nobs_srv_age(1,nsurv_aged) //(54.5) # yrs with survey ages 
   init_imatrix yrs_srv_age(1,nsurv_aged,1,nobs_srv_age) //(55.5) yrs of shelf, ai survey ages
   init_3darray nsamples_srv_age(1,nsurv_aged,1,2,1,nobs_srv_age) //(56.5) sample sizes of ages read each year by sex and survey
   init_3darray obs_p_srv_age_fem(1,nsurv_aged,1,nobs_srv_age,1,nages) //(57.5) survey age comps by sex and year females  
   init_3darray obs_p_srv_age_mal(1,nsurv_aged,1,nobs_srv_age,1,nages) //(57.6) survey age comps by sex and year males   
-  init_vector M(1,2) //(58) female then male natural mortality            
+  init_vector M(1,2) //(58) female then male natural mortality
+  !!cout<<"M"<<M<<std::endl;            
   init_number offset_const //(59) a constant to offset zero values
   init_vector Lower_bound(1,nsurv); //(60)
   init_vector Upper_bound(1,nsurv); //(61)
   init_vector Phase(1,nsurv); //(62)  
-  init_vector q_surv_prior_mean(1,nsurv);
+  init_vector q_surv_prior_mean(1,nsurv);   
+  !!cout<<"q_surv_prior_mean"<<q_surv_prior_mean<<std::endl;
   init_int assess;  //(63)  
+  !!cout<<"assess"<<assess<<std::endl;  
   int styr_rec;   
   matrix cv_srv(1,nsurv,1,nobs_srv);  //matrix to hold CVs for surveys
 //not all consistent throughout - could work on.
@@ -87,7 +103,7 @@ DATA_SECTION
    for (int j=1;j<=nsurv;j++){
    for (i=1;i<=nobs_srv(j);i++){ 
    cv_srv(j,i)=obs_srv_sd(j,i)/(double)obs_srv(j,i); }}
-  cout<<96<<std::endl;   
+//  <<96<<std::endl;   
    //change weights to tons
    wt=wt*.001;
 
@@ -150,9 +166,10 @@ PARAMETER_SECTION
 	  upper_bound(i)=Upper_bound(i);
 	  phase(i)=Phase(i); 
   }          
-  cout<<111<<std::endl; 
- END_CALCS 
-  init_bounded_number_vector q_surv(1,nsurv,lower_bound,upper_bound,phase)    
+
+ END_CALCS  
+ 
+  init_bounded_number_vector q_surv(1,nsurv,lower_bound,upper_bound,phase) 
   init_number alpha(4)       // used to estimate temperature effect on shelf survey catchability
   init_number beta(4)  // used to estimate temperature effect on shelf survey catchability
  //phase of -1 means M is fixed   
@@ -285,6 +302,11 @@ PRELIMINARY_CALCS_SECTION
 
   obs_mean_sexr=mean(obs_sexr_srv_2(1)); //previously was just estimated from shelf survey data so kept that here.
   obs_SD_sexr=std_dev(obs_sexr_srv_2(1));
+  
+  //cout<<"obs_sexr_srv_2(1)"<< obs_sexr_srv_2(1)<<std::endl;  
+  //cout<<"obs_p_srv_length_mal(1,1)"<< obs_p_srv_length_mal(1,1)<<std::endl;  
+  //cout<<"obs_mean_sexr"<<obs_mean_sexr<<std::endl;   
+  //exit(1);
 
  //Compute offset for multinomial and length bin proportions
  // offset is a constant nplog(p) is added to the likelihood     
@@ -441,14 +463,14 @@ FUNCTION get_selectivity
           } 
      }
 
-    sel_srv(1,1) = get_sel(srv1_slope_f1,srv1_sel50_f1,srv1_slope_f2,srv1_sel50_f2); 
+    sel_srv(1,1) = get_sel(srv1_slope_f1,srv1_sel50_f1);//,srv1_slope_f2,srv1_sel50_f2); 
 
       // do this**sel_srv(1,1) = get_sel(srv_aslope_f(1),srv_asel50_f(1),srv_dslope_f(1),srv_dsel50_f(1));  
 //    sel_srv(1,2) = get_sel(srv2_slope_f,srv2_sel50_f);
     // do this*** sel_srv(1,2) = get_sel(srv_aslope_f(2),srv_asel50_f(2));
 
 //    sel_srv(1,3) = get_sel(srv3_slope_f,srv3_sel50_f); 
-   sel_srv(2,1) = get_sel(srv1_slope_m1,srv1_sel50_m1,srv1_slope_m2,srv1_sel50_m2);
+   sel_srv(2,1) = get_sel(srv1_slope_m1,srv1_sel50_m1);//,srv1_slope_m2,srv1_sel50_m2);
 //    sel_srv(2,2) = get_sel(srv2_slope_m,srv2_sel50_m); 
 //    sel_srv(2,3) = get_sel(srv3_slope_m,srv3_sel50_m); 
 
@@ -860,7 +882,11 @@ FUNCTION evaluate_the_objective_function
     {
       fpen+=.01*norm2(fmort_dev);
     }
-
+ 
+//  <<"rec_like"<<rec_like<<std::endl;
+//  <<"length_like2"<<length_like2<<std::endl;
+//  <<"surv_like"<<surv_like<<std::endl;
+//  <<"catch_like"<<catch_like<<std::endl; 
   obj_fun += rec_like;
   obj_fun += 1.*sum(length_like2);  
   obj_fun+= 1.*sum(age_like); 

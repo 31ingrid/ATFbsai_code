@@ -18,46 +18,61 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   nages.allocate("nages");
   nsurv.allocate("nsurv");
   nsurv_aged.allocate("nsurv_aged");
+cout<<"nsurv_aged"<<nsurv_aged<<std::endl;    
   nselages.allocate("nselages");
   nselages_srv.allocate(1,nsurv,"nselages_srv");
   phase_logistic_sel.allocate("phase_logistic_sel");
+cout<<"phase_logistic_sel"<<phase_logistic_sel<<std::endl;       
   nlen.allocate("nlen");
   nobs_fish.allocate("nobs_fish");
   yrs_fish.allocate(1,nobs_fish,"yrs_fish");
+cout<<"yrs_fish"<<yrs_fish<<std::endl; 
   nsamples_fish.allocate(1,2,1,nobs_fish,"nsamples_fish");
   nobs_srv.allocate(1,nsurv,"nobs_srv");
   yrs_srv.allocate(1,nsurv,1,nobs_srv,"yrs_srv");
   nobs_srv_length.allocate(1,nsurv,"nobs_srv_length");
+cout<<"nobs_srv_length"<<nobs_srv_length<<std::endl; 
   yrs_srv_length.allocate(1,nsurv,1,nobs_srv_length,"yrs_srv_length");
   nsamples_srv_length_fem.allocate(1,nsurv,1,nobs_srv_length,"nsamples_srv_length_fem");
   nsamples_srv_length_mal.allocate(1,nsurv,1,nobs_srv_length,"nsamples_srv_length_mal");
   nsamples_srv_length.allocate(1,nsurv,1,2,1,nobs_srv_length,"nsamples_srv_length");
+cout<<"nsamples_srv_length"<<nsamples_srv_length<<std::endl;     
   obs_p_fish.allocate(1,2,1,nobs_fish,1,nlen,"obs_p_fish");
+cout<<"obs_p_fish(1)"<<obs_p_fish(1)<<std::endl;  
   obs_p_srv_length_fem.allocate(1,nsurv,1,nobs_srv_length,1,nlen,"obs_p_srv_length_fem");
   obs_p_srv_length_mal.allocate(1,nsurv,1,nobs_srv_length,1,nlen,"obs_p_srv_length_mal");
   catch_bio.allocate(styr,endyr,"catch_bio");
   obs_srv.allocate(1,nsurv,1,nobs_srv,"obs_srv");
   obs_srv_sd.allocate(1,nsurv,1,nobs_srv,"obs_srv_sd");
   wt.allocate(1,2,1,nages,"wt");
+cout<<"wt"<<wt<<std::endl;  
   maturity.allocate(1,nages,"maturity");
+cout<<"maturity"<<maturity<<std::endl;
   lenage.allocate(1,2,1,nages,1,nlen,"lenage");
- nyrs_temps = nobs_srv(1);
+cout<<"lenage"<<lenage<<std::endl; 
+ nyrs_temps = 33;//nobs_srv(1); change back for BSAI assessment
+cout<<"nyrs_temps"<<nyrs_temps<<std::endl; 
   bottom_temps.allocate(1,nyrs_temps,"bottom_temps");
+cout<<"nyrs_temps"<<nyrs_temps<<std::endl;
   monot_sel.allocate("monot_sel");
   phase_selcoffs.allocate("phase_selcoffs");
   wt_like.allocate(1,8,"wt_like");
+cout<<"wt_like"<<wt_like<<std::endl;               
   nobs_srv_age.allocate(1,nsurv_aged,"nobs_srv_age");
   yrs_srv_age.allocate(1,nsurv_aged,1,nobs_srv_age,"yrs_srv_age");
   nsamples_srv_age.allocate(1,nsurv_aged,1,2,1,nobs_srv_age,"nsamples_srv_age");
   obs_p_srv_age_fem.allocate(1,nsurv_aged,1,nobs_srv_age,1,nages,"obs_p_srv_age_fem");
   obs_p_srv_age_mal.allocate(1,nsurv_aged,1,nobs_srv_age,1,nages,"obs_p_srv_age_mal");
   M.allocate(1,2,"M");
+cout<<"M"<<M<<std::endl;            
   offset_const.allocate("offset_const");
   Lower_bound.allocate(1,nsurv,"Lower_bound");
   Upper_bound.allocate(1,nsurv,"Upper_bound");
   Phase.allocate(1,nsurv,"Phase");
   q_surv_prior_mean.allocate(1,nsurv,"q_surv_prior_mean");
+cout<<"q_surv_prior_mean"<<q_surv_prior_mean<<std::endl;
   assess.allocate("assess");
+cout<<"assess"<<assess<<std::endl;  
   cv_srv.allocate(1,nsurv,1,nobs_srv);
   test.allocate(1,4);
    styr_rec=styr-nages+1;
@@ -69,7 +84,6 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
    for (int j=1;j<=nsurv;j++){
    for (i=1;i<=nobs_srv(j);i++){ 
    cv_srv(j,i)=obs_srv_sd(j,i)/(double)obs_srv(j,i); }}
-  cout<<96<<std::endl;   
    //change weights to tons
    wt=wt*.001;
   obs_sexr.allocate(1,nobs_fish);
@@ -123,7 +137,6 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
 	  upper_bound(i)=Upper_bound(i);
 	  phase(i)=Phase(i); 
   }          
-  cout<<111<<std::endl; 
   q_surv.allocate(1,nsurv,lower_bound,upper_bound,phase,"q_surv");
   alpha.allocate(4,"alpha");
   beta.allocate(4,"beta");
@@ -425,6 +438,11 @@ void model_parameters::preliminary_calculations(void)
   }
   obs_mean_sexr=mean(obs_sexr_srv_2(1)); //previously was just estimated from shelf survey data so kept that here.
   obs_SD_sexr=std_dev(obs_sexr_srv_2(1));
+  
+  //cout<<"obs_sexr_srv_2(1)"<< obs_sexr_srv_2(1)<<std::endl;  
+  //cout<<"obs_p_srv_length_mal(1,1)"<< obs_p_srv_length_mal(1,1)<<std::endl;  
+  //cout<<"obs_mean_sexr"<<obs_mean_sexr<<std::endl;   
+  //exit(1);
  //Compute offset for multinomial and length bin proportions
  // offset is a constant nplog(p) is added to the likelihood     
  // magnitude depends on nsamples(sample size) and p's_
@@ -572,10 +590,10 @@ void model_parameters::get_selectivity(void)
 	  //  	sel_srv(2,1,j)=sel_srv(2,1,j)*temp2(j);     				
           } 
      }
-    sel_srv(1,1) = get_sel(srv1_slope_f1,srv1_sel50_f1,srv1_slope_f2,srv1_sel50_f2); 
+    sel_srv(1,1) = get_sel(srv1_slope_f1,srv1_sel50_f1);//,srv1_slope_f2,srv1_sel50_f2); 
       // do this**sel_srv(1,1) = get_sel(srv_aslope_f(1),srv_asel50_f(1),srv_dslope_f(1),srv_dsel50_f(1));  
     // do this*** sel_srv(1,2) = get_sel(srv_aslope_f(2),srv_asel50_f(2));
-   sel_srv(2,1) = get_sel(srv1_slope_m1,srv1_sel50_m1,srv1_slope_m2,srv1_sel50_m2);
+   sel_srv(2,1) = get_sel(srv1_slope_m1,srv1_sel50_m1);//,srv1_slope_m2,srv1_sel50_m2);
   
 }
 
@@ -975,6 +993,7 @@ void model_parameters::evaluate_the_objective_function(void)
     {
       fpen+=.01*norm2(fmort_dev);
     }
+ 
   obj_fun += rec_like;
   obj_fun += 1.*sum(length_like2);  
   obj_fun+= 1.*sum(age_like); 
