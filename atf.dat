@@ -9,7 +9,13 @@
 #median recruits to use for the last year (end year) (6)   mean(recruits[1:34,2]) until 5 yrs before present
 409222235#25200000        
 # nages for number of ages in the model  (7)   
+#21 
+#(7.1) first_age
+1
+#(7.2) last_age
 21  
+#(7.25) nages_read
+21
 # nsurv - number of surveys (7.3)
 3
 # nsurv_aged - number of surveys with age data   (7.4)
@@ -393,6 +399,16 @@
 #(62.5) q_surv init
 0.75 0.10 0.14
 #(63) assessment (1 for Bering Sea assessment)
-1       
+1    
+#(64) mean_log_rec_prior
+10.                     
+#(65) log_avg_fmort_prior
+-5.    
+#(66) fish_sel50_f_bounds(2)
+15.
+#(67) fish_slope_m_bounds(2)
+.8
+#(68) srv1_sel50_m_bounds(2)
+12.
 
 

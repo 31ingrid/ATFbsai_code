@@ -675,13 +675,13 @@ F35=
 F30=  
 0.23
 spawning biomass per recruit at F40 harvest rate 
-0
+0.000291108
 spawning biomass per recruit at F35 harvest rate 
-0
+0.000264326
 spawning biomass per recruit at F30 harvest rate 
 0
 spawning biomass per recruit with no fishing 
-0
+0.00272742
 Likelihood components
 Survey likelihood component 
 survey1
@@ -699,19 +699,19 @@ shelf survey age composition
 survey1
  nan
 Projected biomass
- 6.93799e-310 0 0 0 0
- 6.93799e-310 0 0 0 0
- 6.93799e-310 0 0 0 0
- 6.93799e-310 0 0 0 0
+ 3283.99 5434.18 22501 42365.5 66609
+ 3283.99 5412.65 22140.8 41417.4 64709.2
+ 3283.99 5370.22 21441 39593.4 61092.6
+ 3283.99 5913.34 31394 67618 121614
 projected future female spawning biomass 
- 6.93799e-310 0 0 0 0
- 6.93799e-310 0 0 0 0
- 6.93799e-310 0 0 0 0
- 6.93799e-310 0 0 0 0
+ 0.0189445 0.128668 16.8705 96.4917 528.887
+ 0.0189445 0.127388 16.5364 93.7992 509.217
+ 0.0189445 0.124865 15.888 88.6413 472.076
+ 0.0189445 0.157155 25.1678 170.426 1133.73
 Future yield 
- 6.93799e-310 0 0 0 0
- 6.93799e-310 0 0 0 0
- 6.93799e-310 0 0 0 0
+ 529.309 876.822 3682.13 6951.84 10904.4
+ 553.21 912.776 3786.48 7102.57 11071.4
+ 600.334 982.748 3978.49 7366.94 11342.2
 survey q =
 survey1
 1
