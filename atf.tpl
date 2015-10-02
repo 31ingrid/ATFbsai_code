@@ -11,18 +11,48 @@ DATA_SECTION
   init_int styr         //(1) start year of model
   init_int endyr        //(2) end year
   init_int styr_fut     //(3) start year of projections (endyr+1) 
-  init_int endyr_fut    //(4) end year of projections
-  init_int phase_F40      //(5) phase F40 is estimated     
+  init_int endyr_fut    //(4) end year of projections  
+  init_int nsurv   //(7.3)  
   init_number median_rec  //(6) median recruit value to use for the last 3 years
   init_int nages          //(7) # of ages in the model 
-  init_int nsurv   //(7.3)
+  init_int first_age //(7.1) first age to use
   init_int nsurv_aged //(7.4) 
-  !!cout<<"nsurv_aged"<<nsurv_aged<<std::endl;    
- //selectivity is set to the selectivity at nselages-1 after age nselages 
-  init_int nselages       //(8) fishery (for asymptotic selectivity) set to 19
+  
+ //phases
+  init_int phase_F40      //(5) phase F40 is estimated 
+  init_int phase_logistic_sel //(12)  
+  init_ivector phase_fishery_sel(1,2) //(12.1) phase to do selectivities for fishery  
+  init_int phase_alphabeta //12.5 phase to estimate alpha and beta
+  init_vector q_Phase(1,nsurv); //(62.5)  
+  init_int phase_selcoffs      //(52) generally set to phase 4 phase for smooth selectivity curve fishery
+        
+ //selectivity parameters 
+  init_int nselages       //(8) fishery (for asymptotic selectivity) set to 19 selectivity is set to the selectivity at nselages-1 after age nselages
   init_ivector nselages_srv(1,nsurv) //(11.5)
-  init_int phase_logistic_sel //(12)
-  !!cout<<"phase_logistic_sel"<<phase_logistic_sel<<std::endl;       
+  init_vector fishsel_LB_f(1,2);//(61.1)fishery selectivity lower and upper bounds
+  init_vector fishsel_LB_m(1,2);//(61.2)
+  init_vector fishsel_UB_f(1,2);//(61.3)
+  init_vector fishsel_UB_m(1,2);//(61.4) 
+  init_vector fishsel_prior_f(1,2);//(61.5) fishsel_prior_f 
+  init_vector fishsel_prior_m(1,2);//(61.6) fishsel_prior_m 
+  init_ivector nsel_params(1,nsurv);//(61.9) number of selectivity parameters for each survey (either 2 or 4)
+  !!cout<<"nsel_params"<<nsel_params<<std::endl;
+  init_matrix sel_prior_f(1,nsurv,1,2);//(61.7) sel_prior_f
+  init_matrix sel_prior_m(1,nsurv,1,2);//(61.8) sel_prior_m
+  !!cout<<"sel_prior_f"<<sel_prior_f<<std::endl;
+  init_matrix sel_LB_f(1,nsurv,1,2);//(62.0)   
+  init_matrix sel_LB_m(1,nsurv,1,2);//(62.1)   
+  init_matrix sel_UB_f(1,nsurv,1,2);//(62.2)   
+  init_matrix sel_UB_m(1,nsurv,1,2);//(62.3) 
+  !!cout<<"max(nsel_params)"<<max(nsel_params)<<std::endl;     
+ //parameters below are for the descending logistic of the shelf survey (srv1) for the BSAI survey. I just leave them in for the GOA survey but they are not used.
+  init_vector sel1_desc_prior_f(1,2);
+  init_vector sel1_desc_prior_m(1,2);
+  init_vector sel1_desc_LB_f(1,2);
+  init_vector sel1_desc_LB_m(1,2);
+  init_vector sel1_desc_UB_f(1,2);
+  init_vector sel1_desc_UB_m(1,2);  
+
  //sample size for length comps for weighting likelihoods  
   init_int nlen             //(13) # of length bins
   init_int nobs_fish          //(14) # of years of fishery data
@@ -60,7 +90,6 @@ DATA_SECTION
   init_vector bottom_temps(1,nyrs_temps); //nobs_srv(1))    //(46) shelf survey bottom temperatures
   !!cout<<"nyrs_temps"<<nyrs_temps<<std::endl;
   init_int monot_sel     //(51) selectivity smoothing function for fishery 
-  init_int phase_selcoffs      //(52) generally set to phase 4 phase for smooth selectivity curve fishery
   init_vector wt_like(1,8)    //(53)  
   !!cout<<"wt_like"<<wt_like<<std::endl;               
   init_ivector nobs_srv_age(1,nsurv_aged) //(54.5) # yrs with survey ages 
@@ -71,12 +100,19 @@ DATA_SECTION
   init_vector M(1,2) //(58) female then male natural mortality
   !!cout<<"M"<<M<<std::endl;            
   init_number offset_const //(59) a constant to offset zero values
-  init_vector Lower_bound(1,nsurv); //(60)
-  init_vector Upper_bound(1,nsurv); //(61)
-  init_vector Phase(1,nsurv); //(62)  
-  init_vector q_surv_prior_mean(1,nsurv);   
+  init_vector q_Lower_bound(1,nsurv); //(60)
+  init_vector q_Upper_bound(1,nsurv); //(61)  
+
+  init_vector q_surv_prior_mean(1,nsurv);  //(62.6) 
+  init_ivector nparams_srv(1,nsurv); //(62.7) this tells you whether you have 2 or 4 parameters for each survey
   !!cout<<"q_surv_prior_mean"<<q_surv_prior_mean<<std::endl;
-  init_int assess;  //(63)  
+  init_int assess;  //(63)   
+  init_int mean_log_rec_prior; //(64)  
+  init_int log_avg_fmort_prior; //(65)
+  init_number fish_sel50_f_bound; //(66)
+  init_number fish_slope_m_bound; //(67)
+  init_number srv1_sel50_m_bound; //(68)  
+  !!cout<<"sel_prior_f"<<sel_prior_f<<std::endl; 
   !!cout<<"assess"<<assess<<std::endl;  
   int styr_rec;   
   matrix cv_srv(1,nsurv,1,nobs_srv);  //matrix to hold CVs for surveys
@@ -102,8 +138,7 @@ DATA_SECTION
    //calculate cv for surveys
    for (int j=1;j<=nsurv;j++){
    for (i=1;i<=nobs_srv(j);i++){ 
-   cv_srv(j,i)=obs_srv_sd(j,i)/(double)obs_srv(j,i); }}
-//  <<96<<std::endl;   
+   cv_srv(j,i)=obs_srv_sd(j,i)/(double)obs_srv(j,i); }} 
    //change weights to tons
    wt=wt*.001;
 
@@ -114,22 +149,30 @@ DATA_SECTION
   number obs_mean_sexr    //average proportion of males in shelf survey population estimates
   number obs_SD_sexr      //standard deviation from male prop. in shelf survey population estimates
   vector pred_sexr(styr,endyr)   //proportion of males in num at age matrix to be calculated
-  
+//  vector fishsel_params(1,2)     //so far always 4 params for fishery data
+    
 INITIALIZATION_SECTION
   //can have different mortality for males and females  
   F40 .20
   F35 .21
   F30 .23
-  mean_log_rec 10.
-  log_avg_fmort -5.  
+  mean_log_rec mean_log_rec_prior
+  log_avg_fmort log_avg_fmort_prior  
   //proportion in each region constrained with catchability so it does not add to 1. Expect to add to less than 1?
-  q_surv q_surv_prior_mean
+  q_surv q_surv_prior_mean  
+//  fishsel_params_f fishsel_params_prior 
   fmort_dev 0.00001   
 //note: you can initialize things you do not use.
-  fish_slope_f .4
-  fish_sel50_f  5.
-  fish_slope_m  .1
-  fish_sel50_m  8
+  fishsel_params_f fishsel_prior_f
+  fishsel_params_m fishsel_prior_m
+  //srv_params_f sel_prior_f 
+
+  //srv_params_m sel_prior_m
+  srv1desc_params_f sel1_desc_prior_f 
+  srv1desc_params_m sel1_desc_prior_m  
+  //*srv1_slope_f1,srv1_sel50_f1,srv1_slope_f2,srv1_sel50_f2
+  //*srv2_slope_f srv2_sel50_f
+  //*srv3_slope_f srv3_sel50_f
   srv1_slope_f1  .8
   srv1_slope_f2  .8
   srv1_slope_m1  .4
@@ -147,7 +190,7 @@ INITIALIZATION_SECTION
   srv3_slope_m  .4
   srv3_sel50_m  8.
   alpha 1.
-  beta 0. 
+  beta 0.  
 
 
 PARAMETER_SECTION
@@ -157,21 +200,28 @@ PARAMETER_SECTION
   // init_bounded_number q1(.5,2,8)
  //fix q1 to be 1 otherwise it went to lower bound of .5
  LOCAL_CALCS 
-  dvector lower_bound(1,nsurv);
-  dvector upper_bound(1,nsurv);
-  ivector phase(1,nsurv);
+
+  ivector q_phase(1,nsurv);
   for (i=1;i<=nsurv;i++)
   {
-	  lower_bound(i)=Lower_bound(i); 
-	  upper_bound(i)=Upper_bound(i);
-	  phase(i)=Phase(i); 
+	  q_phase(i)=q_Phase(i); 
   }          
 
  END_CALCS  
+  init_bounded_number_vector q_surv(1,nsurv,q_Lower_bound,q_Upper_bound,q_phase)
+  init_bounded_number_vector fishsel_params_f(1,2,fishsel_LB_f,fishsel_UB_f,phase_fishery_sel)
+  init_bounded_number_vector fishsel_params_m(1,2,fishsel_LB_m,fishsel_UB_m,phase_fishery_sel) 
+  !!cout<<"sel_LB_f"<<sel_LB_f<<std::endl;
+  !!cout<<"sel_LB_m"<<sel_LB_m<<std::endl;
  
-  init_bounded_number_vector q_surv(1,nsurv,lower_bound,upper_bound,phase) 
-  init_number alpha(4)       // used to estimate temperature effect on shelf survey catchability
-  init_number beta(4)  // used to estimate temperature effect on shelf survey catchability
+  init_bounded_number_matrix srv_params_f(1,nsurv,1,2,sel_LB_f,sel_UB_f);
+  init_bounded_number_matrix srv_params_m(1,nsurv,1,2,sel_LB_m,sel_UB_m); 
+  !!cout<<"srv_params_f"<<srv_params_f<<std::endl;    
+  init_bounded_number_vector srv1desc_params_f(1,2,sel1_desc_LB_f,sel1_desc_UB_f);
+  init_bounded_number_vector srv1desc_params_m(1,2,sel1_desc_LB_m,sel1_desc_UB_m);
+//  init_bounded_number_matrix srv_params_m(1,nsurv,1,nsel_params,sel_LB_m,sel_UB_m)   
+  init_number alpha(phase_alphabeta)       // used to estimate temperature effect on shelf survey catchability
+  init_number beta(phase_alphabeta)  // used to estimate temperature effect on shelf survey catchability
  //phase of -1 means M is fixed   
   init_number mean_log_rec(1)
   init_bounded_dev_vector rec_dev(styr_rec,endyr-1,-15,15,2) //JNI
@@ -183,10 +233,10 @@ PARAMETER_SECTION
   init_matrix log_selcoffs_fish(1,2,1,nselages,phase_selcoffs)     
 
 //these are specific to each survey and would need to be changed for each assessment
-  init_bounded_number fish_slope_f(.1,5.,phase_logistic_sel)
-  init_bounded_number fish_sel50_f(1.,15.,phase_logistic_sel)
-  init_bounded_number fish_slope_m(.05,.8,phase_logistic_sel)
-  init_bounded_number fish_sel50_m(1.,25.,phase_logistic_sel)
+//  init_bounded_number fish_slope_f(.1,5.,phase_logistic_sel)
+//  init_bounded_number fish_sel50_f(1.,fish_sel50_f_bound,phase_logistic_sel)
+//  init_bounded_number fish_slope_m(.05,fish_slope_m_bound,phase_logistic_sel)
+//  init_bounded_number fish_sel50_m(1.,25.,phase_logistic_sel)
 
   init_bounded_number srv1_slope_f1(.1,5.,phase_logistic_sel)
   init_bounded_number srv1_sel50_f1(1.,10.,phase_logistic_sel)
@@ -201,7 +251,7 @@ PARAMETER_SECTION
   init_bounded_number srv2_slope_f(.1,5.,phase_logistic_sel)
   init_bounded_number srv2_sel50_f(1.,10.,phase_logistic_sel)
   init_bounded_number srv2_slope_m(.01,.5,phase_logistic_sel)
-  init_bounded_number srv2_sel50_m(1.,12.,phase_logistic_sel)
+  init_bounded_number srv2_sel50_m(1.,srv1_sel50_m_bound,phase_logistic_sel)
 
   init_bounded_number srv3_slope_f(.1,5.,phase_logistic_sel)
   init_bounded_number srv3_sel50_f(1.,10.,phase_logistic_sel)
@@ -445,8 +495,8 @@ FUNCTION get_selectivity
           { 
             if(j<=nselages)
              {
-               sel(1,j)=1./(1.+mfexp(-1.*fish_slope_f*(double(j)-fish_sel50_f)));
-               sel(2,j)=1./(1.+mfexp(-1.*fish_slope_m*(double(j)-fish_sel50_m)));
+               sel(1,j)=1./(1.+mfexp(-1.*fishsel_params_f(1)*(double(j)-fishsel_params_f(2))));
+               sel(2,j)=1./(1.+mfexp(-1.*fishsel_params_m(1)*(double(j)-fishsel_params_m(2))));
              }
             else
             {
@@ -583,7 +633,7 @@ FUNCTION get_numbers_at_age
 
   //predicted survey values
   fspbio.initialize(); 
-  qtime=q_surv(1);
+  qtime=q_surv(1); 
   
   for (j=1;j<=nsurv;j++)
  {
@@ -594,18 +644,21 @@ FUNCTION get_numbers_at_age
   pred_bio(i)=0.; 
   pred_srv(j,i)=0.;
   //catchability calculation for survey years
-  if (i>=1982 && i-1981 <= nobs_srv(1) && assess==1)      //JNI catchability calculation for survey years    
-  {qtime(i)=q_surv(1)*mfexp(-alpha+beta*bottom_temps(i-1981));}
+  if (i>=1982 && (i-1981 <= nobs_srv(1)) && assess==1)      //JNI catchability calculation for survey years    
+   {   
+   qtime(i)=q_surv(1)*mfexp(-alpha+beta*bottom_temps(i-1981));
+   }
   for(k=1;k<=2;k++)
     {
     if (j==1 && assess==1)
       {             
     pred_srv(j,i) += qtime(i)*(natage(k,i)*elem_prod(sel_srv(k,j)/maxsel_srv(j),wt(k)));maxsel_srv(j);   //shelf survey, dividing by the maxsel constrains female selectivity to be 1.0
       } 
-    else 
+    if (assess==0) 
       {
     pred_srv(j,i) += q_surv(j)*(natage(k,i)*elem_prod(sel_srv(k,j),wt(k)));///maxsel_srv(j);         //slope survey JNI  do not need to divide by maxsel_srv if it is logistic but does not hurt
-      }        
+      } 
+     
        //Aleutian Islands survey JNI
 
     //next line used to fix q1 to 1.0 - problem is if you start from a bin file, even if the bounds
@@ -1090,9 +1143,9 @@ REPORT_SECTION
   report << " male natural mortality for this run" << endl;
   report << M(2) << endl;
 
-  report <<endl << "temperature effect (q) for the shelf survey "<< endl;
-   for (i=1;i<=nobs_srv(1);i++)
-     report <<yrs_srv(1,i)<<","<<bottom_temps(i)<<","<<qtime(yrs_srv(1,i))<<endl;
+//  report <<endl << "temperature effect (q) for the shelf survey "<< endl;
+//   for (i=1;i<=nobs_srv(1);i++)
+//     report <<yrs_srv(1,i)<<","<<bottom_temps(i)<<","<<qtime(yrs_srv(1,i))<<endl;
 
   report << "predicted male proportion in population" << endl;
    for (i=styr;i<=endyr;i++)
@@ -1103,10 +1156,10 @@ REPORT_SECTION
   report << "stdev of mean observed prop. male in shelf surveys = " << endl;
   report << obs_SD_sexr << endl;
 
-  report <<"alpha = "<< endl;
-  report <<alpha<<endl;
-  report << "beta= "<< endl;
-  report  << beta << endl;
+//  report <<"alpha = "<< endl;
+//  report <<alpha<<endl;
+//  report << "beta= "<< endl;
+//  report  << beta << endl;
 
   report << "standard error of biomass in surveys = " << endl; 
   for(k=1;k<=nsurv;k++)

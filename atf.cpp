@@ -13,16 +13,41 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   endyr.allocate("endyr");
   styr_fut.allocate("styr_fut");
   endyr_fut.allocate("endyr_fut");
-  phase_F40.allocate("phase_F40");
+  nsurv.allocate("nsurv");
   median_rec.allocate("median_rec");
   nages.allocate("nages");
-  nsurv.allocate("nsurv");
+  first_age.allocate("first_age");
   nsurv_aged.allocate("nsurv_aged");
-cout<<"nsurv_aged"<<nsurv_aged<<std::endl;    
+  phase_F40.allocate("phase_F40");
+  phase_logistic_sel.allocate("phase_logistic_sel");
+  phase_fishery_sel.allocate(1,2,"phase_fishery_sel");
+  phase_alphabeta.allocate("phase_alphabeta");
+  q_Phase.allocate(1,nsurv,"q_Phase");
+  phase_selcoffs.allocate("phase_selcoffs");
   nselages.allocate("nselages");
   nselages_srv.allocate(1,nsurv,"nselages_srv");
-  phase_logistic_sel.allocate("phase_logistic_sel");
-cout<<"phase_logistic_sel"<<phase_logistic_sel<<std::endl;       
+  fishsel_LB_f.allocate(1,2,"fishsel_LB_f");
+  fishsel_LB_m.allocate(1,2,"fishsel_LB_m");
+  fishsel_UB_f.allocate(1,2,"fishsel_UB_f");
+  fishsel_UB_m.allocate(1,2,"fishsel_UB_m");
+  fishsel_prior_f.allocate(1,2,"fishsel_prior_f");
+  fishsel_prior_m.allocate(1,2,"fishsel_prior_m");
+  nsel_params.allocate(1,nsurv,"nsel_params");
+cout<<"nsel_params"<<nsel_params<<std::endl;
+  sel_prior_f.allocate(1,nsurv,1,2,"sel_prior_f");
+  sel_prior_m.allocate(1,nsurv,1,2,"sel_prior_m");
+cout<<"sel_prior_f"<<sel_prior_f<<std::endl;
+  sel_LB_f.allocate(1,nsurv,1,2,"sel_LB_f");
+  sel_LB_m.allocate(1,nsurv,1,2,"sel_LB_m");
+  sel_UB_f.allocate(1,nsurv,1,2,"sel_UB_f");
+  sel_UB_m.allocate(1,nsurv,1,2,"sel_UB_m");
+cout<<"max(nsel_params)"<<max(nsel_params)<<std::endl;     
+  sel1_desc_prior_f.allocate(1,2,"sel1_desc_prior_f");
+  sel1_desc_prior_m.allocate(1,2,"sel1_desc_prior_m");
+  sel1_desc_LB_f.allocate(1,2,"sel1_desc_LB_f");
+  sel1_desc_LB_m.allocate(1,2,"sel1_desc_LB_m");
+  sel1_desc_UB_f.allocate(1,2,"sel1_desc_UB_f");
+  sel1_desc_UB_m.allocate(1,2,"sel1_desc_UB_m");
   nlen.allocate("nlen");
   nobs_fish.allocate("nobs_fish");
   yrs_fish.allocate(1,nobs_fish,"yrs_fish");
@@ -55,7 +80,6 @@ cout<<"nyrs_temps"<<nyrs_temps<<std::endl;
   bottom_temps.allocate(1,nyrs_temps,"bottom_temps");
 cout<<"nyrs_temps"<<nyrs_temps<<std::endl;
   monot_sel.allocate("monot_sel");
-  phase_selcoffs.allocate("phase_selcoffs");
   wt_like.allocate(1,8,"wt_like");
 cout<<"wt_like"<<wt_like<<std::endl;               
   nobs_srv_age.allocate(1,nsurv_aged,"nobs_srv_age");
@@ -66,12 +90,18 @@ cout<<"wt_like"<<wt_like<<std::endl;
   M.allocate(1,2,"M");
 cout<<"M"<<M<<std::endl;            
   offset_const.allocate("offset_const");
-  Lower_bound.allocate(1,nsurv,"Lower_bound");
-  Upper_bound.allocate(1,nsurv,"Upper_bound");
-  Phase.allocate(1,nsurv,"Phase");
+  q_Lower_bound.allocate(1,nsurv,"q_Lower_bound");
+  q_Upper_bound.allocate(1,nsurv,"q_Upper_bound");
   q_surv_prior_mean.allocate(1,nsurv,"q_surv_prior_mean");
+  nparams_srv.allocate(1,nsurv,"nparams_srv");
 cout<<"q_surv_prior_mean"<<q_surv_prior_mean<<std::endl;
   assess.allocate("assess");
+  mean_log_rec_prior.allocate("mean_log_rec_prior");
+  log_avg_fmort_prior.allocate("log_avg_fmort_prior");
+  fish_sel50_f_bound.allocate("fish_sel50_f_bound");
+  fish_slope_m_bound.allocate("fish_slope_m_bound");
+  srv1_sel50_m_bound.allocate("srv1_sel50_m_bound");
+cout<<"sel_prior_f"<<sel_prior_f<<std::endl; 
 cout<<"assess"<<assess<<std::endl;  
   cv_srv.allocate(1,nsurv,1,nobs_srv);
   test.allocate(1,4);
@@ -83,7 +113,7 @@ cout<<"assess"<<assess<<std::endl;
    //calculate cv for surveys
    for (int j=1;j<=nsurv;j++){
    for (i=1;i<=nobs_srv(j);i++){ 
-   cv_srv(j,i)=obs_srv_sd(j,i)/(double)obs_srv(j,i); }}
+   cv_srv(j,i)=obs_srv_sd(j,i)/(double)obs_srv(j,i); }} 
    //change weights to tons
    wt=wt*.001;
   obs_sexr.allocate(1,nobs_fish);
@@ -96,14 +126,14 @@ void model_parameters::initializationfunction(void)
   F40.set_initial_value(.20);
   F35.set_initial_value(.21);
   F30.set_initial_value(.23);
-  mean_log_rec.set_initial_value(10.);
-  log_avg_fmort.set_initial_value(-5.);
+  mean_log_rec.set_initial_value(mean_log_rec_prior);
+  log_avg_fmort.set_initial_value(log_avg_fmort_prior);
   q_surv.set_initial_value(q_surv_prior_mean);
   fmort_dev.set_initial_value(0.00001);
-  fish_slope_f.set_initial_value(.4);
-  fish_sel50_f.set_initial_value(5.);
-  fish_slope_m.set_initial_value(.1);
-  fish_sel50_m.set_initial_value(8);
+  fishsel_params_f.set_initial_value(fishsel_prior_f);
+  fishsel_params_m.set_initial_value(fishsel_prior_m);
+  srv1desc_params_f.set_initial_value(sel1_desc_prior_f);
+  srv1desc_params_m.set_initial_value(sel1_desc_prior_m);
   srv1_slope_f1.set_initial_value(.8);
   srv1_slope_f2.set_initial_value(.8);
   srv1_slope_m1.set_initial_value(.4);
@@ -128,27 +158,28 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
  model_data(argc,argv) , function_minimizer(sz)
 {
   initializationfunction();
-  dvector lower_bound(1,nsurv);
-  dvector upper_bound(1,nsurv);
-  ivector phase(1,nsurv);
+  ivector q_phase(1,nsurv);
   for (i=1;i<=nsurv;i++)
   {
-	  lower_bound(i)=Lower_bound(i); 
-	  upper_bound(i)=Upper_bound(i);
-	  phase(i)=Phase(i); 
+	  q_phase(i)=q_Phase(i); 
   }          
-  q_surv.allocate(1,nsurv,lower_bound,upper_bound,phase,"q_surv");
-  alpha.allocate(4,"alpha");
-  beta.allocate(4,"beta");
+  q_surv.allocate(1,nsurv,q_Lower_bound,q_Upper_bound,q_phase,"q_surv");
+  fishsel_params_f.allocate(1,2,fishsel_LB_f,fishsel_UB_f,phase_fishery_sel,"fishsel_params_f");
+  fishsel_params_m.allocate(1,2,fishsel_LB_m,fishsel_UB_m,phase_fishery_sel,"fishsel_params_m");
+cout<<"sel_LB_f"<<sel_LB_f<<std::endl;
+cout<<"sel_LB_m"<<sel_LB_m<<std::endl;
+  srv_params_f.allocate(1,nsurv,1,2,sel_LB_f,sel_UB_f,"srv_params_f");
+  srv_params_m.allocate(1,nsurv,1,2,sel_LB_m,sel_UB_m,"srv_params_m");
+cout<<"srv_params_f"<<srv_params_f<<std::endl;    
+  srv1desc_params_f.allocate(1,2,sel1_desc_LB_f,sel1_desc_UB_f,"srv1desc_params_f");
+  srv1desc_params_m.allocate(1,2,sel1_desc_LB_m,sel1_desc_UB_m,"srv1desc_params_m");
+  alpha.allocate(phase_alphabeta,"alpha");
+  beta.allocate(phase_alphabeta,"beta");
   mean_log_rec.allocate(1,"mean_log_rec");
   rec_dev.allocate(styr_rec,endyr-1,-15,15,2,"rec_dev");
   log_avg_fmort.allocate(2,"log_avg_fmort");
   fmort_dev.allocate(styr,endyr,-3,3,1,"fmort_dev");
   log_selcoffs_fish.allocate(1,2,1,nselages,phase_selcoffs,"log_selcoffs_fish");
-  fish_slope_f.allocate(.1,5.,phase_logistic_sel,"fish_slope_f");
-  fish_sel50_f.allocate(1.,15.,phase_logistic_sel,"fish_sel50_f");
-  fish_slope_m.allocate(.05,.8,phase_logistic_sel,"fish_slope_m");
-  fish_sel50_m.allocate(1.,25.,phase_logistic_sel,"fish_sel50_m");
   srv1_slope_f1.allocate(.1,5.,phase_logistic_sel,"srv1_slope_f1");
   srv1_sel50_f1.allocate(1.,10.,phase_logistic_sel,"srv1_sel50_f1");
   srv1_slope_f2.allocate(.1,5.,phase_logistic_sel,"srv1_slope_f2");
@@ -160,7 +191,7 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   srv2_slope_f.allocate(.1,5.,phase_logistic_sel,"srv2_slope_f");
   srv2_sel50_f.allocate(1.,10.,phase_logistic_sel,"srv2_sel50_f");
   srv2_slope_m.allocate(.01,.5,phase_logistic_sel,"srv2_slope_m");
-  srv2_sel50_m.allocate(1.,12.,phase_logistic_sel,"srv2_sel50_m");
+  srv2_sel50_m.allocate(1.,srv1_sel50_m_bound,phase_logistic_sel,"srv2_sel50_m");
   srv3_slope_f.allocate(.1,5.,phase_logistic_sel,"srv3_slope_f");
   srv3_sel50_f.allocate(1.,10.,phase_logistic_sel,"srv3_sel50_f");
   srv3_slope_m.allocate(.01,.5,phase_logistic_sel,"srv3_slope_m");
@@ -573,8 +604,8 @@ void model_parameters::get_selectivity(void)
           { 
             if(j<=nselages)
              {
-               sel(1,j)=1./(1.+mfexp(-1.*fish_slope_f*(double(j)-fish_sel50_f)));
-               sel(2,j)=1./(1.+mfexp(-1.*fish_slope_m*(double(j)-fish_sel50_m)));
+               sel(1,j)=1./(1.+mfexp(-1.*fishsel_params_f(1)*(double(j)-fishsel_params_f(2))));
+               sel(2,j)=1./(1.+mfexp(-1.*fishsel_params_m(1)*(double(j)-fishsel_params_m(2))));
              }
             else
             {
@@ -702,7 +733,7 @@ void model_parameters::get_numbers_at_age(void)
   }
   //predicted survey values
   fspbio.initialize(); 
-  qtime=q_surv(1);
+  qtime=q_surv(1); 
   
   for (j=1;j<=nsurv;j++)
  {
@@ -713,18 +744,21 @@ void model_parameters::get_numbers_at_age(void)
   pred_bio(i)=0.; 
   pred_srv(j,i)=0.;
   //catchability calculation for survey years
-  if (i>=1982 && i-1981 <= nobs_srv(1) && assess==1)      //JNI catchability calculation for survey years    
-  {qtime(i)=q_surv(1)*mfexp(-alpha+beta*bottom_temps(i-1981));}
+  if (i>=1982 && (i-1981 <= nobs_srv(1)) && assess==1)      //JNI catchability calculation for survey years    
+   {   
+   qtime(i)=q_surv(1)*mfexp(-alpha+beta*bottom_temps(i-1981));
+   }
   for(k=1;k<=2;k++)
     {
     if (j==1 && assess==1)
       {             
     pred_srv(j,i) += qtime(i)*(natage(k,i)*elem_prod(sel_srv(k,j)/maxsel_srv(j),wt(k)));maxsel_srv(j);   //shelf survey, dividing by the maxsel constrains female selectivity to be 1.0
       } 
-    else 
+    if (assess==0) 
       {
     pred_srv(j,i) += q_surv(j)*(natage(k,i)*elem_prod(sel_srv(k,j),wt(k)));///maxsel_srv(j);         //slope survey JNI  do not need to divide by maxsel_srv if it is logistic but does not hurt
-      }        
+      } 
+     
        //Aleutian Islands survey JNI
     //next line used to fix q1 to 1.0 - problem is if you start from a bin file, even if the bounds
     // are set different in the tpl file the program will take to value from the bin file and use that 
@@ -1186,9 +1220,6 @@ void model_parameters::report(const dvector& gradients)
   report << M(1) << endl;
   report << " male natural mortality for this run" << endl;
   report << M(2) << endl;
-  report <<endl << "temperature effect (q) for the shelf survey "<< endl;
-   for (i=1;i<=nobs_srv(1);i++)
-     report <<yrs_srv(1,i)<<","<<bottom_temps(i)<<","<<qtime(yrs_srv(1,i))<<endl;
   report << "predicted male proportion in population" << endl;
    for (i=styr;i<=endyr;i++)
       report << i << " " << pred_sexr(i) << endl;
@@ -1196,10 +1227,6 @@ void model_parameters::report(const dvector& gradients)
   report << obs_mean_sexr << endl;
   report << "stdev of mean observed prop. male in shelf surveys = " << endl;
   report << obs_SD_sexr << endl;
-  report <<"alpha = "<< endl;
-  report <<alpha<<endl;
-  report << "beta= "<< endl;
-  report  << beta << endl;
   report << "standard error of biomass in surveys = " << endl; 
   for(k=1;k<=nsurv;k++)
   {

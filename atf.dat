@@ -3,23 +3,110 @@
 #start year end year (1,2)         
 1976 2014            
 #start year and end year for future projections (3,4)      
-2015 2019            
-#phase for F40 (5)          
-3            
+2015 2019   
+# nsurv - number of surveys (7.3)
+3  
 #median recruits to use for the last year (end year) (6)   mean(recruits[1:34,2]) until 5 yrs before present
 409222235#25200000        
 # nages for number of ages in the model  (7)   
-21  
-# nsurv - number of surveys (7.3)
-3
+21    
+#first age (7.1)
+1
 # nsurv_aged - number of surveys with age data   (7.4)
 2       
+
+#phases           
+#phase for F40 (5)          
+3  
+#(12) phase to do logistic selectivity              
+2 
+#(12.1) phase_fishery_sel phase to do selectivity for fishery
+2 2     
+#(12.5) phase to estimate alpha and beta (BSAI only)
+6
+#(62.5) q_phase
+-4 -4 -4
+#(52) phase for smooth selectivity curve fishery
+4    
+
+#selectivity parameters     
 # (8) fishery nselages- selectivity after nselages age set equal to selectivity at nselages age
 19            
 #(11.5) nselages_srv
 19 19 19             
-#(12) phase to do logistic selectivity              
-2                   
+#(61.1) fishery female slope and sel50 lower bounds
+.1 1.
+#(61.2) fishery male slope and sel50 lower bounds
+.05 1.
+#(61.3) fishery female slope and sel50 upper bounds
+5. 15.
+#(61.4) fishery male slope and sel50 upper bounds
+.8 25. 
+#(61.5) fishsel_prior_f 
+.4 5. 
+#(61.6) fishsel_prior_m   
+.1 8. 
+#(61.9) number of selectivity parameters for each survey (either 2 or 4) 
+4 2 2    
+
+#(61.7) sel_prior_f (first logistic only)
+#srv1 
+.8 4.
+#srv2
+.4 8.
+#srv3
+.4 8.  
+
+#(61.8) sel_prior_m  
+#srv1
+.4 8.
+#srv2
+.4 8.
+#srv3
+.4 8.
+
+#62.0  sel_LB_f 
+#srv1
+.1 1.
+#srv2
+.1 1.
+#srv3
+.1 1.
+#62.1  sel_LB_m  
+#srv1
+.01 1.
+#srv2
+.01 1.
+#srv3
+.1 1.
+#62.2  sel_UB_f 
+#srv1
+5. 10.
+#srv2
+5. 10.
+#srv3
+5. 10.
+#62.3  sel_UB_m 
+#srv1
+.5 12.
+#srv2
+.5 12.
+#srv3
+.5 12.  
+
+#100 sel1_desc_prior_f   
+.8 4.
+#101 sel1_desc_prior_m 
+.4 8.
+#102 sel1_desc_LB_f
+.1 1.
+#103 sel1_desc_LB_m 
+.01 1.
+#104 sel1_desc_UB_f
+5. 10. 
+#105 sel1_desc_UB_m 
+5. 12.
+           
 #(13) number of length bins                
 25                   
 #(14) number of years of fishery length data              
@@ -342,8 +429,7 @@
 
 #(51)for monotonically increasing fishery selectivties with smoother 0 off 1 on
   1
-#(52) phase for smooth selectivity curve fishery
-  4
+
 #(53) wt_like weights for smooth selectivity likelihoods 1 fishery female, 2 survey female, 3 fishery male, 4 survey male
   10. 120. 40. 1.  
 # weights for constraint on monotonicity 1 fishery female, 2 fishery male, 3 survey female, 4 survey male
@@ -387,12 +473,22 @@
 #(60)
 0.5 0.05 0.05
 #(61)
-2.0 1.5 1.5
-#(62)
--4 -4 -4  
-#(62.5) q_surv init
+2.0 1.5 1.5  
+
+
+#(62.6) q_surv init
 0.75 0.10 0.14
 #(63) assessment (1 for Bering Sea assessment)
-1       
+1  
+#(64) mean_log_rec_prior
+18      
+#(65) log_avg_fmort_prior
+1 
+#(66) fish_sel50_f_bounds(2)
+15.
+#(67) fish_slope_m_bounds(2)
+.8
+#(68) srv1_sel50_m_bounds(2)
+12.     
 
 
