@@ -43,9 +43,9 @@
 5. 8.
 #(61.4) fishery male slope and sel50 upper bounds
 2.0 25. 
-#61.5 fishery sel initial values (female)
+#61.5 fishsel_prior_f fishery sel initial values (female)
 .4 5.
-#61.6 fishery sel initial values (male)
+#61.6 fishsel_prior_m fishery sel initial values (male)
 .1 8.   
 #61.9 nsel_params number of selectivity parameters for each survey
 2
@@ -537,8 +537,8 @@
 1 
 #(62.7) nparams_srv whether there are 2 or 4 selectivity parameters (logistic or dome shaped)
 2
-#(63) assessment (1 for Bering Sea assessment)  this is gulf
-1
+#(63) assessment (1 for Bering Sea assessment)  0 is gulf
+0
 #(64) mean_log_rec_prior
 18      
 #(65) log_avg_fmort_prior

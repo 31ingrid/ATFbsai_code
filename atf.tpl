@@ -23,7 +23,7 @@ DATA_SECTION
   init_int phase_logistic_sel //(12)  
   init_ivector phase_fishery_sel(1,2) //(12.1) phase to do selectivities for fishery  
   init_int phase_alphabeta //12.5 phase to estimate alpha and beta
-  init_vector q_Phase(1,nsurv); //(62.5)  
+  init_ivector q_Phase(1,nsurv); //(62.5)  
   init_int phase_selcoffs      //(52) generally set to phase 4 phase for smooth selectivity curve fishery
         
  //selectivity parameters 
@@ -37,13 +37,13 @@ DATA_SECTION
   init_vector fishsel_prior_m(1,2);//(61.6) fishsel_prior_m 
   init_ivector nsel_params(1,nsurv);//(61.9) number of selectivity parameters for each survey (either 2 or 4)
   !!cout<<"nsel_params"<<nsel_params<<std::endl;
-  init_matrix sel_prior_f(1,nsurv,1,2);//(61.7) sel_prior_f
-  init_matrix sel_prior_m(1,nsurv,1,2);//(61.8) sel_prior_m
+  init_vector sel_prior_f(1,2*nsurv);//(61.7) sel_prior_f
+  init_vector sel_prior_m(1,2*nsurv);//(61.8) sel_prior_m
   !!cout<<"sel_prior_f"<<sel_prior_f<<std::endl;
-  init_matrix sel_LB_f(1,nsurv,1,2);//(62.0)   
-  init_matrix sel_LB_m(1,nsurv,1,2);//(62.1)   
-  init_matrix sel_UB_f(1,nsurv,1,2);//(62.2)   
-  init_matrix sel_UB_m(1,nsurv,1,2);//(62.3) 
+  init_vector sel_LB_f(1,2*nsurv);//(62.0)   
+  init_vector sel_LB_m(1,2*nsurv);//(62.1)   
+  init_vector sel_UB_f(1,2*nsurv);//(62.2)   
+  init_vector sel_UB_m(1,2*nsurv);//(62.3) 
   !!cout<<"max(nsel_params)"<<max(nsel_params)<<std::endl;     
  //parameters below are for the descending logistic of the shelf survey (srv1) for the BSAI survey. I just leave them in for the GOA survey but they are not used.
   init_vector sel1_desc_prior_f(1,2);
@@ -112,7 +112,7 @@ DATA_SECTION
   init_number fish_sel50_f_bound; //(66)
   init_number fish_slope_m_bound; //(67)
   init_number srv1_sel50_m_bound; //(68)  
-  !!cout<<"sel_prior_f"<<sel_prior_f<<std::endl; 
+  !!cout<<"sel_prior_f(1,1)"<<sel_prior_f(1,1)<<std::endl; 
   !!cout<<"assess"<<assess<<std::endl;  
   int styr_rec;   
   matrix cv_srv(1,nsurv,1,nobs_srv);  //matrix to hold CVs for surveys
@@ -127,7 +127,6 @@ DATA_SECTION
   int ii
   int m  
 //delete test below
-  vector test(1,4);
 
  LOCAL_CALCS
    styr_rec=styr-nages+1;
@@ -162,33 +161,14 @@ INITIALIZATION_SECTION
   q_surv q_surv_prior_mean  
 //  fishsel_params_f fishsel_params_prior 
   fmort_dev 0.00001   
-//note: you can initialize things you do not use.
+//note: you can initialize things you do not use. 
+//selectivity parameter vectors initialize
   fishsel_params_f fishsel_prior_f
   fishsel_params_m fishsel_prior_m
-  //srv_params_f sel_prior_f 
-
-  //srv_params_m sel_prior_m
+  srv_params_f sel_prior_f 
+  srv_params_m sel_prior_m
   srv1desc_params_f sel1_desc_prior_f 
   srv1desc_params_m sel1_desc_prior_m  
-  //*srv1_slope_f1,srv1_sel50_f1,srv1_slope_f2,srv1_sel50_f2
-  //*srv2_slope_f srv2_sel50_f
-  //*srv3_slope_f srv3_sel50_f
-  srv1_slope_f1  .8
-  srv1_slope_f2  .8
-  srv1_slope_m1  .4
-  srv1_slope_m2 .4
-  srv1_sel50_f1  4.
-  srv1_sel50_f2  4.
-  srv1_sel50_m1  8.
-  srv1_sel50_m2  8.
-  srv2_slope_f  .4
-  srv2_sel50_f  8.
-  srv2_slope_m  .4
-  srv2_sel50_m  8.
-  srv3_slope_f  .4
-  srv3_sel50_f  8.
-  srv3_slope_m  .4
-  srv3_sel50_m  8.
   alpha 1.
   beta 0.  
 
@@ -199,24 +179,18 @@ PARAMETER_SECTION
  //phase of 8 is greater than last phase so does q1 in last phase  
   // init_bounded_number q1(.5,2,8)
  //fix q1 to be 1 otherwise it went to lower bound of .5
- LOCAL_CALCS 
-
-  ivector q_phase(1,nsurv);
-  for (i=1;i<=nsurv;i++)
-  {
-	  q_phase(i)=q_Phase(i); 
-  }          
+  LOCAL_CALCS        
 
  END_CALCS  
-  init_bounded_number_vector q_surv(1,nsurv,q_Lower_bound,q_Upper_bound,q_phase)
+  init_bounded_number_vector q_surv(1,nsurv,q_Lower_bound,q_Upper_bound,q_Phase)
   init_bounded_number_vector fishsel_params_f(1,2,fishsel_LB_f,fishsel_UB_f,phase_fishery_sel)
   init_bounded_number_vector fishsel_params_m(1,2,fishsel_LB_m,fishsel_UB_m,phase_fishery_sel) 
-  !!cout<<"sel_LB_f"<<sel_LB_f<<std::endl;
+  !!cout<<"sel_prior_f"<<sel_LB_f<<std::endl;
   !!cout<<"sel_LB_m"<<sel_LB_m<<std::endl;
  
-  init_bounded_number_matrix srv_params_f(1,nsurv,1,2,sel_LB_f,sel_UB_f);
-  init_bounded_number_matrix srv_params_m(1,nsurv,1,2,sel_LB_m,sel_UB_m); 
-  !!cout<<"srv_params_f"<<srv_params_f<<std::endl;    
+  init_bounded_number_vector srv_params_f(1,2*nsurv,sel_LB_f,sel_UB_f);
+  init_bounded_number_vector srv_params_m(1,2*nsurv,sel_LB_m,sel_UB_m); 
+  !!cout<<"srv_params_f"<<srv_params_f(1)<<std::endl;    
   init_bounded_number_vector srv1desc_params_f(1,2,sel1_desc_LB_f,sel1_desc_UB_f);
   init_bounded_number_vector srv1desc_params_m(1,2,sel1_desc_LB_m,sel1_desc_UB_m);
 //  init_bounded_number_matrix srv_params_m(1,nsurv,1,nsel_params,sel_LB_m,sel_UB_m)   
@@ -231,33 +205,6 @@ PARAMETER_SECTION
 //  Selectivity parameters from the GOA version of the model
 
   init_matrix log_selcoffs_fish(1,2,1,nselages,phase_selcoffs)     
-
-//these are specific to each survey and would need to be changed for each assessment
-//  init_bounded_number fish_slope_f(.1,5.,phase_logistic_sel)
-//  init_bounded_number fish_sel50_f(1.,fish_sel50_f_bound,phase_logistic_sel)
-//  init_bounded_number fish_slope_m(.05,fish_slope_m_bound,phase_logistic_sel)
-//  init_bounded_number fish_sel50_m(1.,25.,phase_logistic_sel)
-
-  init_bounded_number srv1_slope_f1(.1,5.,phase_logistic_sel)
-  init_bounded_number srv1_sel50_f1(1.,10.,phase_logistic_sel)
-  init_bounded_number srv1_slope_f2(.1,5.,phase_logistic_sel)
-  init_bounded_number srv1_sel50_f2(1.,10.,phase_logistic_sel)
-  
-  init_bounded_number srv1_slope_m1(.01,.5,phase_logistic_sel)
-  init_bounded_number srv1_sel50_m1(1.,12.,phase_logistic_sel)
-  init_bounded_number srv1_slope_m2(.01,.5,phase_logistic_sel)
-  init_bounded_number srv1_sel50_m2(1.,12.,phase_logistic_sel)
-
-  init_bounded_number srv2_slope_f(.1,5.,phase_logistic_sel)
-  init_bounded_number srv2_sel50_f(1.,10.,phase_logistic_sel)
-  init_bounded_number srv2_slope_m(.01,.5,phase_logistic_sel)
-  init_bounded_number srv2_sel50_m(1.,srv1_sel50_m_bound,phase_logistic_sel)
-
-  init_bounded_number srv3_slope_f(.1,5.,phase_logistic_sel)
-  init_bounded_number srv3_sel50_f(1.,10.,phase_logistic_sel)
-  init_bounded_number srv3_slope_m(.01,.5,phase_logistic_sel)
-  init_bounded_number srv3_sel50_m(1.,12.,phase_logistic_sel)
-
   init_bounded_number sexr_param_fish(1.0,1.0,-5)  //this was hitting bound of 1.0 so fixed it - should free up to check
 
 // Parameters for computing SPR rates 
@@ -475,18 +422,7 @@ FUNCTION get_selectivity
          sel(k)=sel(k)*sexr_param_fish; //fixed at 1 in GOA model not BSAI model
        }    
     }     
-      //      for (j=1;j<=nages;j++)  //this is selectivity for the surveys
-	  //  { 
 
-	      //ascending limb of curve for shelf survey
-	  //  	sel_srv(1,1,j)=1./(1.+mfexp(-1.*srv1_slope_f1*(double(j)-srv1_sel50_f1)));
-	  //  	sel_srv(2,1,j)=1./(1.+mfexp(-1.*srv1_slope_m1*(double(j)-srv1_sel50_m1)));
-	  //  	//decending limb of curve for shelf survey 
-	  //  	temp1=1./(1.+mfexp(srv1_slope_f2*(double(j)-srv1_sel50_f2)));
-	  //  	temp2=1./(1.+mfexp(srv1_slope_m2*(double(j)-srv1_sel50_m2)));
-	  //  	sel_srv(1,1,j)=sel_srv(1,1,j)*temp1(j);
-	  //  	sel_srv(2,1,j)=sel_srv(2,1,j)*temp2(j);
- 	  //  }
  }//  end if(active(log_selcoffs_fish))
   else
     {
@@ -502,27 +438,23 @@ FUNCTION get_selectivity
             {
              sel(1,j)=sel(1,j-1);
              sel(2,j)=sel(2,j-1);
-            } 
-	  //  	sel_srv(1,1,j)=1./(1.+mfexp(-1.*srv1_slope_f1*(double(j)-srv1_sel50_f1)));
-	  //  	sel_srv(2,1,j)=1./(1.+mfexp(-1.*srv1_slope_m1*(double(j)-srv1_sel50_m1)));
-	  //  	//decending limb of curve for shelf survey 
-	  //  	temp1=1./(1.+mfexp(srv1_slope_f2*(double(j)-srv1_sel50_f2)));
-	  //  	temp2=1./(1.+mfexp(srv1_slope_m2*(double(j)-srv1_sel50_m2)));
-	  //  	sel_srv(1,1,j)=sel_srv(1,1,j)*temp1(j);
-	  //  	sel_srv(2,1,j)=sel_srv(2,1,j)*temp2(j);     				
+            }    				
           } 
      }
 
-    sel_srv(1,1) = get_sel(srv1_slope_f1,srv1_sel50_f1);//,srv1_slope_f2,srv1_sel50_f2); 
-
-      // do this**sel_srv(1,1) = get_sel(srv_aslope_f(1),srv_asel50_f(1),srv_dslope_f(1),srv_dsel50_f(1));  
-//    sel_srv(1,2) = get_sel(srv2_slope_f,srv2_sel50_f);
-    // do this*** sel_srv(1,2) = get_sel(srv_aslope_f(2),srv_asel50_f(2));
-
-//    sel_srv(1,3) = get_sel(srv3_slope_f,srv3_sel50_f); 
-   sel_srv(2,1) = get_sel(srv1_slope_m1,srv1_sel50_m1);//,srv1_slope_m2,srv1_sel50_m2);
-//    sel_srv(2,2) = get_sel(srv2_slope_m,srv2_sel50_m); 
-//    sel_srv(2,3) = get_sel(srv3_slope_m,srv3_sel50_m); 
+  for(i=1;i<=nsurv;i++)
+  {
+     if((max(nsel_params)==4)&&i==1)
+     {
+	 sel_srv(1,i) = get_sel(srv_params_f(i),srv_params_f(i+1),srv1desc_params_f(1),srv1desc_params_f(2));
+	 sel_srv(2,i) = get_sel(srv_params_m(i),srv_params_m(i+1),srv1desc_params_m(1),srv1desc_params_m(2));         
+     }
+       else
+       {
+       sel_srv(1,i) = get_sel(srv_params_f((2*i)-1),srv_params_f(2*i));
+       sel_srv(2,i) = get_sel(srv_params_m((2*i)-1),srv_params_m(2*i)); 
+       }        
+  }
 
 //     logistic selectivity curves, asymptotic for fishery, slope survey and the Aleutian Islands but domed shape for shelf survey    
   
@@ -624,11 +556,6 @@ FUNCTION get_numbers_at_age
   for (i=styr;i<=endyr;i++)
   {
       pred_sexr(i)=sum(natage(2,i))/(sum((natage(1,i)+natage(2,i))));  //calculation of prop. of males in pred. population 
-//    for(k=1;k<=2;k++)
-//    {
-//      totn_srv1(k,i)=q1*(natage(k,i)*sel_srv1(k)); // not used in further calculations
-//      totn_srv2(k,i)=q2*(natage(k,i)*sel_srv2(k)); // not used in further calculations        
-//    }
   }
 
   //predicted survey values
@@ -644,7 +571,7 @@ FUNCTION get_numbers_at_age
   pred_bio(i)=0.; 
   pred_srv(j,i)=0.;
   //catchability calculation for survey years
-  if (i>=1982 && (i-1981 <= nobs_srv(1)) && assess==1)      //JNI catchability calculation for survey years    
+  if (assess==1 && (i>=1982) && (i-1981 <= nobs_srv(1)))      //JNI catchability calculation for survey years    
    {   
    qtime(i)=q_surv(1)*mfexp(-alpha+beta*bottom_temps(i-1981));
    }
@@ -654,7 +581,7 @@ FUNCTION get_numbers_at_age
       {             
     pred_srv(j,i) += qtime(i)*(natage(k,i)*elem_prod(sel_srv(k,j)/maxsel_srv(j),wt(k)));maxsel_srv(j);   //shelf survey, dividing by the maxsel constrains female selectivity to be 1.0
       } 
-    if (assess==0) 
+    else 
       {
     pred_srv(j,i) += q_surv(j)*(natage(k,i)*elem_prod(sel_srv(k,j),wt(k)));///maxsel_srv(j);         //slope survey JNI  do not need to divide by maxsel_srv if it is logistic but does not hurt
       } 

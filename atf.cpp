@@ -34,13 +34,13 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   fishsel_prior_m.allocate(1,2,"fishsel_prior_m");
   nsel_params.allocate(1,nsurv,"nsel_params");
 cout<<"nsel_params"<<nsel_params<<std::endl;
-  sel_prior_f.allocate(1,nsurv,1,2,"sel_prior_f");
-  sel_prior_m.allocate(1,nsurv,1,2,"sel_prior_m");
+  sel_prior_f.allocate(1,2*nsurv,"sel_prior_f");
+  sel_prior_m.allocate(1,2*nsurv,"sel_prior_m");
 cout<<"sel_prior_f"<<sel_prior_f<<std::endl;
-  sel_LB_f.allocate(1,nsurv,1,2,"sel_LB_f");
-  sel_LB_m.allocate(1,nsurv,1,2,"sel_LB_m");
-  sel_UB_f.allocate(1,nsurv,1,2,"sel_UB_f");
-  sel_UB_m.allocate(1,nsurv,1,2,"sel_UB_m");
+  sel_LB_f.allocate(1,2*nsurv,"sel_LB_f");
+  sel_LB_m.allocate(1,2*nsurv,"sel_LB_m");
+  sel_UB_f.allocate(1,2*nsurv,"sel_UB_f");
+  sel_UB_m.allocate(1,2*nsurv,"sel_UB_m");
 cout<<"max(nsel_params)"<<max(nsel_params)<<std::endl;     
   sel1_desc_prior_f.allocate(1,2,"sel1_desc_prior_f");
   sel1_desc_prior_m.allocate(1,2,"sel1_desc_prior_m");
@@ -101,10 +101,9 @@ cout<<"q_surv_prior_mean"<<q_surv_prior_mean<<std::endl;
   fish_sel50_f_bound.allocate("fish_sel50_f_bound");
   fish_slope_m_bound.allocate("fish_slope_m_bound");
   srv1_sel50_m_bound.allocate("srv1_sel50_m_bound");
-cout<<"sel_prior_f"<<sel_prior_f<<std::endl; 
+cout<<"sel_prior_f(1,1)"<<sel_prior_f(1,1)<<std::endl; 
 cout<<"assess"<<assess<<std::endl;  
   cv_srv.allocate(1,nsurv,1,nobs_srv);
-  test.allocate(1,4);
    styr_rec=styr-nages+1;
    if(nselages>nages) nselages=nages;
    for (i=1; i<= nsurv; i++){
@@ -132,24 +131,10 @@ void model_parameters::initializationfunction(void)
   fmort_dev.set_initial_value(0.00001);
   fishsel_params_f.set_initial_value(fishsel_prior_f);
   fishsel_params_m.set_initial_value(fishsel_prior_m);
+  srv_params_f.set_initial_value(sel_prior_f);
+  srv_params_m.set_initial_value(sel_prior_m);
   srv1desc_params_f.set_initial_value(sel1_desc_prior_f);
   srv1desc_params_m.set_initial_value(sel1_desc_prior_m);
-  srv1_slope_f1.set_initial_value(.8);
-  srv1_slope_f2.set_initial_value(.8);
-  srv1_slope_m1.set_initial_value(.4);
-  srv1_slope_m2.set_initial_value(.4);
-  srv1_sel50_f1.set_initial_value(4.);
-  srv1_sel50_f2.set_initial_value(4.);
-  srv1_sel50_m1.set_initial_value(8.);
-  srv1_sel50_m2.set_initial_value(8.);
-  srv2_slope_f.set_initial_value(.4);
-  srv2_sel50_f.set_initial_value(8.);
-  srv2_slope_m.set_initial_value(.4);
-  srv2_sel50_m.set_initial_value(8.);
-  srv3_slope_f.set_initial_value(.4);
-  srv3_sel50_f.set_initial_value(8.);
-  srv3_slope_m.set_initial_value(.4);
-  srv3_sel50_m.set_initial_value(8.);
   alpha.set_initial_value(1.);
   beta.set_initial_value(0.);
 }
@@ -158,19 +143,14 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
  model_data(argc,argv) , function_minimizer(sz)
 {
   initializationfunction();
-  ivector q_phase(1,nsurv);
-  for (i=1;i<=nsurv;i++)
-  {
-	  q_phase(i)=q_Phase(i); 
-  }          
-  q_surv.allocate(1,nsurv,q_Lower_bound,q_Upper_bound,q_phase,"q_surv");
+  q_surv.allocate(1,nsurv,q_Lower_bound,q_Upper_bound,q_Phase,"q_surv");
   fishsel_params_f.allocate(1,2,fishsel_LB_f,fishsel_UB_f,phase_fishery_sel,"fishsel_params_f");
   fishsel_params_m.allocate(1,2,fishsel_LB_m,fishsel_UB_m,phase_fishery_sel,"fishsel_params_m");
-cout<<"sel_LB_f"<<sel_LB_f<<std::endl;
+cout<<"sel_prior_f"<<sel_LB_f<<std::endl;
 cout<<"sel_LB_m"<<sel_LB_m<<std::endl;
-  srv_params_f.allocate(1,nsurv,1,2,sel_LB_f,sel_UB_f,"srv_params_f");
-  srv_params_m.allocate(1,nsurv,1,2,sel_LB_m,sel_UB_m,"srv_params_m");
-cout<<"srv_params_f"<<srv_params_f<<std::endl;    
+  srv_params_f.allocate(1,2*nsurv,sel_LB_f,sel_UB_f,"srv_params_f");
+  srv_params_m.allocate(1,2*nsurv,sel_LB_m,sel_UB_m,"srv_params_m");
+cout<<"srv_params_f"<<srv_params_f(1)<<std::endl;    
   srv1desc_params_f.allocate(1,2,sel1_desc_LB_f,sel1_desc_UB_f,"srv1desc_params_f");
   srv1desc_params_m.allocate(1,2,sel1_desc_LB_m,sel1_desc_UB_m,"srv1desc_params_m");
   alpha.allocate(phase_alphabeta,"alpha");
@@ -180,22 +160,6 @@ cout<<"srv_params_f"<<srv_params_f<<std::endl;
   log_avg_fmort.allocate(2,"log_avg_fmort");
   fmort_dev.allocate(styr,endyr,-3,3,1,"fmort_dev");
   log_selcoffs_fish.allocate(1,2,1,nselages,phase_selcoffs,"log_selcoffs_fish");
-  srv1_slope_f1.allocate(.1,5.,phase_logistic_sel,"srv1_slope_f1");
-  srv1_sel50_f1.allocate(1.,10.,phase_logistic_sel,"srv1_sel50_f1");
-  srv1_slope_f2.allocate(.1,5.,phase_logistic_sel,"srv1_slope_f2");
-  srv1_sel50_f2.allocate(1.,10.,phase_logistic_sel,"srv1_sel50_f2");
-  srv1_slope_m1.allocate(.01,.5,phase_logistic_sel,"srv1_slope_m1");
-  srv1_sel50_m1.allocate(1.,12.,phase_logistic_sel,"srv1_sel50_m1");
-  srv1_slope_m2.allocate(.01,.5,phase_logistic_sel,"srv1_slope_m2");
-  srv1_sel50_m2.allocate(1.,12.,phase_logistic_sel,"srv1_sel50_m2");
-  srv2_slope_f.allocate(.1,5.,phase_logistic_sel,"srv2_slope_f");
-  srv2_sel50_f.allocate(1.,10.,phase_logistic_sel,"srv2_sel50_f");
-  srv2_slope_m.allocate(.01,.5,phase_logistic_sel,"srv2_slope_m");
-  srv2_sel50_m.allocate(1.,srv1_sel50_m_bound,phase_logistic_sel,"srv2_sel50_m");
-  srv3_slope_f.allocate(.1,5.,phase_logistic_sel,"srv3_slope_f");
-  srv3_sel50_f.allocate(1.,10.,phase_logistic_sel,"srv3_sel50_f");
-  srv3_slope_m.allocate(.01,.5,phase_logistic_sel,"srv3_slope_m");
-  srv3_sel50_m.allocate(1.,12.,phase_logistic_sel,"srv3_sel50_m");
   sexr_param_fish.allocate(1.0,1.0,-5,"sexr_param_fish");
   F40.allocate(0.01,1.,phase_F40,"F40");
   F35.allocate(0.01,1.,phase_F40,"F35");
@@ -585,17 +549,6 @@ void model_parameters::get_selectivity(void)
          sel(k)=sel(k)*sexr_param_fish; //fixed at 1 in GOA model not BSAI model
        }    
     }     
-      //      for (j=1;j<=nages;j++)  //this is selectivity for the surveys
-	  //  { 
-	      //ascending limb of curve for shelf survey
-	  //  	sel_srv(1,1,j)=1./(1.+mfexp(-1.*srv1_slope_f1*(double(j)-srv1_sel50_f1)));
-	  //  	sel_srv(2,1,j)=1./(1.+mfexp(-1.*srv1_slope_m1*(double(j)-srv1_sel50_m1)));
-	  //  	//decending limb of curve for shelf survey 
-	  //  	temp1=1./(1.+mfexp(srv1_slope_f2*(double(j)-srv1_sel50_f2)));
-	  //  	temp2=1./(1.+mfexp(srv1_slope_m2*(double(j)-srv1_sel50_m2)));
-	  //  	sel_srv(1,1,j)=sel_srv(1,1,j)*temp1(j);
-	  //  	sel_srv(2,1,j)=sel_srv(2,1,j)*temp2(j);
- 	  //  }
  }//  end if(active(log_selcoffs_fish))
   else
     {
@@ -611,20 +564,22 @@ void model_parameters::get_selectivity(void)
             {
              sel(1,j)=sel(1,j-1);
              sel(2,j)=sel(2,j-1);
-            } 
-	  //  	sel_srv(1,1,j)=1./(1.+mfexp(-1.*srv1_slope_f1*(double(j)-srv1_sel50_f1)));
-	  //  	sel_srv(2,1,j)=1./(1.+mfexp(-1.*srv1_slope_m1*(double(j)-srv1_sel50_m1)));
-	  //  	//decending limb of curve for shelf survey 
-	  //  	temp1=1./(1.+mfexp(srv1_slope_f2*(double(j)-srv1_sel50_f2)));
-	  //  	temp2=1./(1.+mfexp(srv1_slope_m2*(double(j)-srv1_sel50_m2)));
-	  //  	sel_srv(1,1,j)=sel_srv(1,1,j)*temp1(j);
-	  //  	sel_srv(2,1,j)=sel_srv(2,1,j)*temp2(j);     				
+            }    				
           } 
      }
-    sel_srv(1,1) = get_sel(srv1_slope_f1,srv1_sel50_f1);//,srv1_slope_f2,srv1_sel50_f2); 
-      // do this**sel_srv(1,1) = get_sel(srv_aslope_f(1),srv_asel50_f(1),srv_dslope_f(1),srv_dsel50_f(1));  
-    // do this*** sel_srv(1,2) = get_sel(srv_aslope_f(2),srv_asel50_f(2));
-   sel_srv(2,1) = get_sel(srv1_slope_m1,srv1_sel50_m1);//,srv1_slope_m2,srv1_sel50_m2);
+  for(i=1;i<=nsurv;i++)
+  {
+     if((max(nsel_params)==4)&&i==1)
+     {
+	 sel_srv(1,i) = get_sel(srv_params_f(i),srv_params_f(i+1),srv1desc_params_f(1),srv1desc_params_f(2));
+	 sel_srv(2,i) = get_sel(srv_params_m(i),srv_params_m(i+1),srv1desc_params_m(1),srv1desc_params_m(2));         
+     }
+       else
+       {
+       sel_srv(1,i) = get_sel(srv_params_f((2*i)-1),srv_params_f(2*i));
+       sel_srv(2,i) = get_sel(srv_params_m((2*i)-1),srv_params_m(2*i)); 
+       }        
+  }
   
 }
 
@@ -744,7 +699,7 @@ void model_parameters::get_numbers_at_age(void)
   pred_bio(i)=0.; 
   pred_srv(j,i)=0.;
   //catchability calculation for survey years
-  if (i>=1982 && (i-1981 <= nobs_srv(1)) && assess==1)      //JNI catchability calculation for survey years    
+  if (assess==1 && (i>=1982) && (i-1981 <= nobs_srv(1)))      //JNI catchability calculation for survey years    
    {   
    qtime(i)=q_surv(1)*mfexp(-alpha+beta*bottom_temps(i-1981));
    }
@@ -754,7 +709,7 @@ void model_parameters::get_numbers_at_age(void)
       {             
     pred_srv(j,i) += qtime(i)*(natage(k,i)*elem_prod(sel_srv(k,j)/maxsel_srv(j),wt(k)));maxsel_srv(j);   //shelf survey, dividing by the maxsel constrains female selectivity to be 1.0
       } 
-    if (assess==0) 
+    else 
       {
     pred_srv(j,i) += q_surv(j)*(natage(k,i)*elem_prod(sel_srv(k,j),wt(k)));///maxsel_srv(j);         //slope survey JNI  do not need to divide by maxsel_srv if it is logistic but does not hurt
       } 

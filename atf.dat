@@ -94,6 +94,7 @@
 #srv3
 .5 12.  
 
+#these are for the descending logistic of the shelf survey (srv1) for the BSAI survey. I just leave them in for the GOA survey
 #100 sel1_desc_prior_f   
 .8 4.
 #101 sel1_desc_prior_m 
@@ -477,7 +478,9 @@
 
 
 #(62.6) q_surv init
-0.75 0.10 0.14
+0.75 0.10 0.14    
+#(62.7) nparams_srv whether there are 2 or 4 selectivity parameters (logistic or dome shaped)
+4
 #(63) assessment (1 for Bering Sea assessment)
 1  
 #(64) mean_log_rec_prior
