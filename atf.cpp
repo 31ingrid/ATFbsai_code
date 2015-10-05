@@ -515,7 +515,7 @@ void model_parameters::userfunction(void)
 void model_parameters::get_selectivity(void)
 {
   ofstream& evalout= *pad_evalout;
-  if(active(log_selcoffs_fish))// init_matrix log_selcoffs_fish(1,2,1,nselages,phase_selcoffs) set to phase 4  
+  if(active(log_selcoffs_fish))// 
  {
     for(k=1;k<=2;k++)
     {
@@ -569,7 +569,7 @@ void model_parameters::get_selectivity(void)
      }
   for(i=1;i<=nsurv;i++)
   {
-     if((max(nsel_params)==4)&&i==1)
+     if(nsel_params(i)==4)
      {
 	 sel_srv(1,i) = get_sel(srv_params_f(i),srv_params_f(i+1),srv1desc_params_f(1),srv1desc_params_f(2));
 	 sel_srv(2,i) = get_sel(srv_params_m(i),srv_params_m(i+1),srv1desc_params_m(1),srv1desc_params_m(2));         
