@@ -9,11 +9,14 @@ class model_data : public ad_comm{
   data_int endyr_fut;
   data_int nsurv;
   data_number median_rec;
-  data_int nages;
   data_int first_age;
+  data_int last_age;
+  data_int first_length;
+  data_int last_length;
+  int nages;
   data_int nsurv_aged;
   data_int phase_F40;
-  data_int phase_logistic_sel;
+  data_ivector phase_logistic_sel;
   data_ivector phase_fishery_sel;
   data_int phase_alphabeta;
   data_ivector q_Phase;
@@ -80,6 +83,9 @@ class model_data : public ad_comm{
   data_number fish_sel50_f_bound;
   data_number fish_slope_m_bound;
   data_number srv1_sel50_m_bound;
+  double male_len;
+  double fem_len;
+  d3_array obs_p_fish2;
   int styr_rec;
   dmatrix cv_srv;
   int i;

@@ -12,106 +12,115 @@ DATA_SECTION
   init_int endyr        //(2) end year
   init_int styr_fut     //(3) start year of projections (endyr+1) 
   init_int endyr_fut    //(4) end year of projections  
-  init_int nsurv   //(7.3)  
+  init_int nsurv   //(5)  
   init_number median_rec  //(6) median recruit value to use for the last 3 years
-  init_int nages          //(7) # of ages in the model 
-  init_int first_age //(7.1) first age to use
-  init_int nsurv_aged //(7.4) 
+ 
+  init_int first_age //(7) first age to use 
+  init_int last_age //(8) 
+  init_int first_length//8.1 first length to use
+  init_int last_length//8.2 last length to use (for the GOA there are 21 lengths, for BSAI there are 25) for 3-15+ only first was not used previously
+  int nages; 
+  !! nages=last_age-first_age+1;          // # of ages in the model  
+  !!cout<<"nages"<<nages<<std::endl;
+  init_int nsurv_aged //(9) 
   
  //phases
-  init_int phase_F40      //(5) phase F40 is estimated 
-  init_int phase_logistic_sel //(12)  
-  init_ivector phase_fishery_sel(1,2) //(12.1) phase to do selectivities for fishery  
-  init_int phase_alphabeta //12.5 phase to estimate alpha and beta
-  init_ivector q_Phase(1,nsurv); //(62.5)  
-  init_int phase_selcoffs      //(52) generally set to phase 4 phase for smooth selectivity curve fishery
+  init_int phase_F40      //(10) phase F40 is estimated 
+  init_ivector phase_logistic_sel(1,2*nsurv) //(11)  
+  init_ivector phase_fishery_sel(1,2) //(12) phase to do selectivities for fishery  
+  init_int phase_alphabeta //(13) phase to estimate alpha and beta
+  init_ivector q_Phase(1,nsurv); //(14)  
+  init_int phase_selcoffs      //(15) generally set to phase 4 phase for smooth selectivity curve fishery
         
  //selectivity parameters 
-  init_int nselages       //(8) fishery (for asymptotic selectivity) set to 19 selectivity is set to the selectivity at nselages-1 after age nselages
-  init_ivector nselages_srv(1,nsurv) //(11.5)
-  init_vector fishsel_LB_f(1,2);//(61.1)fishery selectivity lower and upper bounds
-  init_vector fishsel_LB_m(1,2);//(61.2)
-  init_vector fishsel_UB_f(1,2);//(61.3)
-  init_vector fishsel_UB_m(1,2);//(61.4) 
-  init_vector fishsel_prior_f(1,2);//(61.5) fishsel_prior_f 
-  init_vector fishsel_prior_m(1,2);//(61.6) fishsel_prior_m 
-  init_ivector nsel_params(1,nsurv);//(61.9) number of selectivity parameters for each survey (either 2 or 4)
+  init_int nselages       //(16) fishery (for asymptotic selectivity) set to 19 selectivity is set to the selectivity at nselages-1 after age nselages
+  init_ivector nselages_srv(1,nsurv) //(17)
+  init_vector fishsel_LB_f(1,2);//(18)fishery selectivity lower and upper bounds
+  init_vector fishsel_LB_m(1,2);//(19)
+  init_vector fishsel_UB_f(1,2);//(20)
+  init_vector fishsel_UB_m(1,2);//(21) 
+  init_vector fishsel_prior_f(1,2);//(22) fishsel_prior_f 
+  init_vector fishsel_prior_m(1,2);//(23) fishsel_prior_m 
+  init_ivector nsel_params(1,nsurv);//(24) number of selectivity parameters for each survey (either 2 or 4)
   !!cout<<"nsel_params"<<nsel_params<<std::endl;
-  init_vector sel_prior_f(1,2*nsurv);//(61.7) sel_prior_f
-  init_vector sel_prior_m(1,2*nsurv);//(61.8) sel_prior_m
+  init_vector sel_prior_f(1,2*nsurv);//(25) sel_prior_f
+  init_vector sel_prior_m(1,2*nsurv);//(26) sel_prior_m
   !!cout<<"sel_prior_f"<<sel_prior_f<<std::endl;
-  init_vector sel_LB_f(1,2*nsurv);//(62.0)   
-  init_vector sel_LB_m(1,2*nsurv);//(62.1)   
-  init_vector sel_UB_f(1,2*nsurv);//(62.2)   
-  init_vector sel_UB_m(1,2*nsurv);//(62.3) 
+  init_vector sel_LB_f(1,2*nsurv);//(27)   
+  init_vector sel_LB_m(1,2*nsurv);//(28)   
+  init_vector sel_UB_f(1,2*nsurv);//(29)   
+  init_vector sel_UB_m(1,2*nsurv);//(30) 
   !!cout<<"max(nsel_params)"<<max(nsel_params)<<std::endl;     
  //parameters below are for the descending logistic of the shelf survey (srv1) for the BSAI survey. I just leave them in for the GOA survey but they are not used.
-  init_vector sel1_desc_prior_f(1,2);
-  init_vector sel1_desc_prior_m(1,2);
-  init_vector sel1_desc_LB_f(1,2);
-  init_vector sel1_desc_LB_m(1,2);
-  init_vector sel1_desc_UB_f(1,2);
-  init_vector sel1_desc_UB_m(1,2);  
+  init_vector sel1_desc_prior_f(1,2);//(31)
+  init_vector sel1_desc_prior_m(1,2);//(32)
+  init_vector sel1_desc_LB_f(1,2);//(33)
+  init_vector sel1_desc_LB_m(1,2);//(34)
+  init_vector sel1_desc_UB_f(1,2);//(35)
+  init_vector sel1_desc_UB_m(1,2);//(36)  
 
  //sample size for length comps for weighting likelihoods  
-  init_int nlen             //(13) # of length bins
-  init_int nobs_fish          //(14) # of years of fishery data
-  init_ivector yrs_fish(1,nobs_fish)   //(15) years with fishery data 
+  init_int nlen             //(37) # of length bins
+  init_int nobs_fish          //(38) # of years of fishery data
+  init_ivector yrs_fish(1,nobs_fish)   //(39) years with fishery data 
   !!cout<<"yrs_fish"<<yrs_fish<<std::endl; 
-  init_matrix nsamples_fish(1,2,1,nobs_fish)  //(16) sample size (weights) for each sex and yr of fishery data
-  init_ivector nobs_srv(1,nsurv) //(19.5) # yrs of shelf, slope, AI data
-  init_imatrix yrs_srv(1,nsurv,1,nobs_srv) //(22.5) yrs with shelf, slope, AI survey data
-  init_ivector nobs_srv_length(1,nsurv) //(25.5) 
+  init_matrix nsamples_fish(1,2,1,nobs_fish)  //(40) sample size (weights) for each sex and yr of fishery data
+  init_ivector nobs_srv(1,nsurv) //(41) # yrs of shelf, slope, AI data
+  init_imatrix yrs_srv(1,nsurv,1,nobs_srv) //(42) yrs with shelf, slope, AI survey data
+  init_ivector nobs_srv_length(1,nsurv) //(43)  
   !!cout<<"nobs_srv_length"<<nobs_srv_length<<std::endl; 
-  init_imatrix yrs_srv_length(1,nsurv,1,nobs_srv_length) //(28.5) yrs with shelf, slope, AI length data
-  init_imatrix nsamples_srv_length_fem(1,nsurv,1,nobs_srv_length)   //(31.5) sample sizes for each length comp by sex and year for shelf, slope, AI survey  
-  init_imatrix nsamples_srv_length_mal(1,nsurv,1,nobs_srv_length)   //(31.6)
+  init_imatrix yrs_srv_length(1,nsurv,1,nobs_srv_length) //(44) yrs with shelf, slope, AI length data
+  init_imatrix nsamples_srv_length_fem(1,nsurv,1,nobs_srv_length)   //(45) sample sizes for each length comp by sex and year for shelf, slope, AI survey  
+  init_imatrix nsamples_srv_length_mal(1,nsurv,1,nobs_srv_length)   //(46)
  //delete this one later
-  init_3darray nsamples_srv_length(1,nsurv,1,2,1,nobs_srv_length) //(31.7) 
+  init_3darray nsamples_srv_length(1,nsurv,1,2,1,nobs_srv_length) //(47) 
   !!cout<<"nsamples_srv_length"<<nsamples_srv_length<<std::endl;     
-  init_3darray obs_p_fish(1,2,1,nobs_fish,1,nlen)  //(35) fishery length comps 
+  init_3darray obs_p_fish(1,2,1,nobs_fish,1,nlen)  //(48) fishery length comps 
   !!cout<<"obs_p_fish(1)"<<obs_p_fish(1)<<std::endl;  
-  init_3darray obs_p_srv_length_fem(1,nsurv,1,nobs_srv_length,1,nlen)  //(35.5) survey length comps by survey (shelf, slope, AI, bin, sex and yr)
-  init_3darray obs_p_srv_length_mal(1,nsurv,1,nobs_srv_length,1,nlen)  //(35.6)
-  init_vector catch_bio(styr,endyr)    //(36) catch by year
-  init_imatrix obs_srv(1,nsurv,1,nobs_srv) //(41.5) survey biomass by year (shelf, slope, AI)
-  init_imatrix obs_srv_sd(1,nsurv,1,nobs_srv) //(42.5) survey SE by year    
-  init_matrix wt(1,2,1,nages)          //(43) weight-at-age by sex   
+  init_3darray obs_p_srv_length_fem(1,nsurv,1,nobs_srv_length,1,nlen)  //(49) survey length comps by survey (shelf, slope, AI, bin, sex and yr)
+  init_3darray obs_p_srv_length_mal(1,nsurv,1,nobs_srv_length,1,nlen)  //(50)
+  init_vector catch_bio(styr,endyr)    //(51) catch by year
+  init_imatrix obs_srv(1,nsurv,1,nobs_srv) //(52) survey biomass by year (shelf, slope, AI)
+  init_imatrix obs_srv_sd(1,nsurv,1,nobs_srv) //(53) survey SE by year    
+  init_matrix wt(1,2,1,nages)          //(54) weight-at-age by sex   
   !!cout<<"wt"<<wt<<std::endl;  
-  init_vector maturity(1,nages)        //(44) female prop. mature-at-age
+  init_vector maturity(1,nages)        //(55) female prop. mature-at-age
   !!cout<<"maturity"<<maturity<<std::endl;
   //length age transition matrix 
   //goa: need length age transition matrix with 21 ages and 21 length bins
-  init_3darray lenage(1,2,1,nages,1,nlen)  //(45) length-age transition matrix
+  init_3darray lenage(1,2,1,nages,1,nlen)  //(56) length-age transition matrix
   !!cout<<"lenage"<<lenage<<std::endl; 
   int nyrs_temps;   
   !! nyrs_temps = 33;//nobs_srv(1); change back for BSAI assessment
   !!cout<<"nyrs_temps"<<nyrs_temps<<std::endl; 
-  init_vector bottom_temps(1,nyrs_temps); //nobs_srv(1))    //(46) shelf survey bottom temperatures
+  init_vector bottom_temps(1,nyrs_temps); //nobs_srv(1))    //(57) shelf survey bottom temperatures
   !!cout<<"nyrs_temps"<<nyrs_temps<<std::endl;
-  init_int monot_sel     //(51) selectivity smoothing function for fishery 
-  init_vector wt_like(1,8)    //(53)  
+  init_int monot_sel     //(58) selectivity smoothing function for fishery 
+  init_vector wt_like(1,8)    //(59)  
   !!cout<<"wt_like"<<wt_like<<std::endl;               
-  init_ivector nobs_srv_age(1,nsurv_aged) //(54.5) # yrs with survey ages 
-  init_imatrix yrs_srv_age(1,nsurv_aged,1,nobs_srv_age) //(55.5) yrs of shelf, ai survey ages
-  init_3darray nsamples_srv_age(1,nsurv_aged,1,2,1,nobs_srv_age) //(56.5) sample sizes of ages read each year by sex and survey
-  init_3darray obs_p_srv_age_fem(1,nsurv_aged,1,nobs_srv_age,1,nages) //(57.5) survey age comps by sex and year females  
-  init_3darray obs_p_srv_age_mal(1,nsurv_aged,1,nobs_srv_age,1,nages) //(57.6) survey age comps by sex and year males   
-  init_vector M(1,2) //(58) female then male natural mortality
+  init_ivector nobs_srv_age(1,nsurv_aged) //(60) # yrs with survey ages 
+  init_imatrix yrs_srv_age(1,nsurv_aged,1,nobs_srv_age) //(61) yrs of shelf, ai survey ages
+  init_3darray nsamples_srv_age(1,nsurv_aged,1,2,1,nobs_srv_age) //(62) sample sizes of ages read each year by sex and survey
+  init_3darray obs_p_srv_age_fem(1,nsurv_aged,1,nobs_srv_age,1,nages) //(63) survey age comps by sex and year females  
+  init_3darray obs_p_srv_age_mal(1,nsurv_aged,1,nobs_srv_age,1,nages) //(64) survey age comps by sex and year males   
+  init_vector M(1,2) //(65) female then male natural mortality
   !!cout<<"M"<<M<<std::endl;            
-  init_number offset_const //(59) a constant to offset zero values
-  init_vector q_Lower_bound(1,nsurv); //(60)
-  init_vector q_Upper_bound(1,nsurv); //(61)  
+  init_number offset_const //(66) a constant to offset zero values
+  init_vector q_Lower_bound(1,nsurv); //(67)
+  init_vector q_Upper_bound(1,nsurv); //(68)  
 
-  init_vector q_surv_prior_mean(1,nsurv);  //(62.6) 
-  init_ivector nparams_srv(1,nsurv); //(62.7) this tells you whether you have 2 or 4 parameters for each survey
+  init_vector q_surv_prior_mean(1,nsurv);  //(69) 
+  init_ivector nparams_srv(1,nsurv); //(70) this tells you whether you have 2 or 4 parameters for each survey
   !!cout<<"q_surv_prior_mean"<<q_surv_prior_mean<<std::endl;
-  init_int assess;  //(63)   
-  init_int mean_log_rec_prior; //(64)  
-  init_int log_avg_fmort_prior; //(65)
-  init_number fish_sel50_f_bound; //(66)
-  init_number fish_slope_m_bound; //(67)
-  init_number srv1_sel50_m_bound; //(68)  
+  init_int assess;  //(71)   
+  init_int mean_log_rec_prior; //(72)  
+  init_int log_avg_fmort_prior; //(73)
+  init_number fish_sel50_f_bound; //(74)
+  init_number fish_slope_m_bound; //(75)
+  init_number srv1_sel50_m_bound; //(76)   
+  number male_len 
+  number fem_len
+  3darray obs_p_fish2(1,2,1,nobs_fish,first_length,last_length); 
   !!cout<<"sel_prior_f(1,1)"<<sel_prior_f(1,1)<<std::endl; 
   !!cout<<"assess"<<assess<<std::endl;  
   int styr_rec;   
@@ -126,11 +135,13 @@ DATA_SECTION
 //
   int ii
   int m  
-//delete test below
+
 
  LOCAL_CALCS
    styr_rec=styr-nages+1;
-   if(nselages>nages) nselages=nages;
+   if(nselages>nages) 
+   {nselages=nages;  
+   cout<<"Warning selectivity: is set to be estimated on more ages than are in the model."<<std::endl;  }
    for (i=1; i<= nsurv; i++){
    if(nselages_srv(i)>nages) nselages_srv(i)=nages;
    }
@@ -143,7 +154,7 @@ DATA_SECTION
 
  END_CALCS
    
-  vector obs_sexr(1,nobs_fish)  // prop. females in fishery length data
+  vector obs_sexr(1,nobs_fish)  // prop. males in fishery length data
   matrix obs_sexr_srv_2(1,nsurv,1,nobs_srv_length)  //proportion males in survey data 
   number obs_mean_sexr    //average proportion of males in shelf survey population estimates
   number obs_SD_sexr      //standard deviation from male prop. in shelf survey population estimates
@@ -188,11 +199,11 @@ PARAMETER_SECTION
   !!cout<<"sel_prior_f"<<sel_LB_f<<std::endl;
   !!cout<<"sel_LB_m"<<sel_LB_m<<std::endl;
  
-  init_bounded_number_vector srv_params_f(1,2*nsurv,sel_LB_f,sel_UB_f);
-  init_bounded_number_vector srv_params_m(1,2*nsurv,sel_LB_m,sel_UB_m); 
+  init_bounded_number_vector srv_params_f(1,2*nsurv,sel_LB_f,sel_UB_f,phase_logistic_sel);
+  init_bounded_number_vector srv_params_m(1,2*nsurv,sel_LB_m,sel_UB_m,phase_logistic_sel); 
   !!cout<<"srv_params_f"<<srv_params_f(1)<<std::endl;    
-  init_bounded_number_vector srv1desc_params_f(1,2,sel1_desc_LB_f,sel1_desc_UB_f);
-  init_bounded_number_vector srv1desc_params_m(1,2,sel1_desc_LB_m,sel1_desc_UB_m);
+  init_bounded_number_vector srv1desc_params_f(1,2,sel1_desc_LB_f,sel1_desc_UB_f,phase_fishery_sel); //phase is just 2
+  init_bounded_number_vector srv1desc_params_m(1,2,sel1_desc_LB_m,sel1_desc_UB_m,phase_fishery_sel);
 //  init_bounded_number_matrix srv_params_m(1,nsurv,1,nsel_params,sel_LB_m,sel_UB_m)   
   init_number alpha(phase_alphabeta)       // used to estimate temperature effect on shelf survey catchability
   init_number beta(phase_alphabeta)  // used to estimate temperature effect on shelf survey catchability
@@ -277,51 +288,102 @@ PARAMETER_SECTION
   number mlike
   number qlike
   number flike
-  vector qtime(styr,endyr)
+  vector qtime(styr,endyr) 
+ 
+//  vector obs_sexr(1,nobs_fish);  
 
 PRELIMINARY_CALCS_SECTION  
 
   obs_mean_sexr=0.34;  //initial value for avg proportion of male population estimated from shelf surveys; calculated below
   obs_SD_sexr=0.0485;  //initial value for standard deviation of mean male population proportion: calculated below
-//sex ratio in the fishery  
+//sex ratio in the fishery 
+  
   for(i=1; i<=nobs_fish;i++)
-  {
-    obs_sexr(i) = sum(obs_p_fish(1,i))/sum(obs_p_fish(1,i) + obs_p_fish(2,i)); 
-  }
+  {  
+	 male_len=0; fem_len=0; 
+  for(j=first_length;j<=last_length;j++)
+    {
+    male_len+=obs_p_fish(1,i,j); 
+    fem_len+=obs_p_fish(2,i,j); 
+    }  
+  obs_sexr(i)=male_len/(male_len+fem_len);
+  }      
+ 
+//  for(i=1; i<=nobs_fish;i++)
+//  {
+//    obs_sexr(i) = sum(obs_p_fish(1,i))/sum(obs_p_fish(1,i) + obs_p_fish(2,i)); 
+//  }
+//      cout<<"obs_sexr "<<obs_sexr<<std::endl;  
 
 //length obs sex ratio in surveys (all combined); proportion of males     
-  for(i=1;i<=nsurv;i++){
-	for (j=1;j<=nobs_srv_length(i);j++){
-		obs_sexr_srv_2(i,j)=sum(obs_p_srv_length_mal(i,j)/
-		      (sum(obs_p_srv_length_mal(i,j))+sum(obs_p_srv_length_fem(i,j))));
+  for(i=1;i<=nsurv;i++)
+  {
+	for (j=1;j<=nobs_srv_length(i);j++)
+	{    
+	  male_len=0; fem_len=0;
+		for (k=first_length;k<=last_length;k++)
+		{     
+		male_len+=obs_p_srv_length_mal(i,j,k);
+		fem_len+=obs_p_srv_length_fem(i,j,k);	
+		} 
+		obs_sexr_srv_2(i,j)=male_len/(male_len+fem_len);  
+    //	obs_sexr_srv_2(i,j)=sum(obs_p_srv_length_mal(i,j)/
+    //	      (sum(obs_p_srv_length_mal(i,j))+sum(obs_p_srv_length_fem(i,j))));
 	}
   }
 
   obs_mean_sexr=mean(obs_sexr_srv_2(1)); //previously was just estimated from shelf survey data so kept that here.
   obs_SD_sexr=std_dev(obs_sexr_srv_2(1));
-  
-  //cout<<"obs_sexr_srv_2(1)"<< obs_sexr_srv_2(1)<<std::endl;  
-  //cout<<"obs_p_srv_length_mal(1,1)"<< obs_p_srv_length_mal(1,1)<<std::endl;  
-  //cout<<"obs_mean_sexr"<<obs_mean_sexr<<std::endl;   
-  //exit(1);
 
  //Compute offset for multinomial and length bin proportions
  // offset is a constant nplog(p) is added to the likelihood     
  // magnitude depends on nsamples(sample size) and p's_
 
-  offset.initialize(); 
+  offset.initialize();
+  
+  cout<<"obs_p_fish(1,1)"<< obs_p_fish(1,1)<<std::endl; //has 1,nlen entries
+  cout<<"nsamples_fish(1,1)"<< nsamples_fish(1,1)<<std::endl;
+  cout<<"log(obs_p_fish(1,1)+.0001)"<< log(obs_p_fish(1,1)+.0001)<<std::endl;
+ 
+  cout<<"total"<<nsamples_fish(1,1)* obs_p_fish(1,1)*log(obs_p_fish(1,1)+.0001)<<std::endl;
 
 //fishery offset
   for (i=1; i <= nobs_fish; i++)
   {
-    double sumtot ;
-    sumtot = sum(obs_p_fish(1,i)+obs_p_fish(2,i));
+    double sumtot ; 
+    fem_len=0;
+    male_len=0; 
+    for(j=first_length;j<=last_length;j++)
+    {
+    fem_len+=obs_p_fish(1,i,j);
+    male_len+=obs_p_fish(2,i,j);
+    }
+    sumtot=fem_len+male_len;    
+   cout<<"sumtot_sm"<<sumtot<<std::endl;
+    sumtot = sum(obs_p_fish(1,i)+obs_p_fish(2,i));  
+   cout<<"sumtot_reg"<<sumtot<<std::endl;
     obs_p_fish(1,i) = obs_p_fish(1,i) / sumtot; 
     obs_p_fish(2,i) = obs_p_fish(2,i) / sumtot; 
-    for(k=1; k<=2;k++)
-      offset(1) -= nsamples_fish(k,i)*obs_p_fish(k,i) * log(obs_p_fish(k,i)+.0001);
-  }
-
+    for(j=first_length;j<=last_length;j++)
+    {           
+	  for (k=1;k<=2;k++){  
+      obs_p_fish2(k,i,j)=obs_p_fish(k,i,j);
+  //    obs_p_fish2(k,i,j-first_length+1)=value(obs_p_fish(k,i,j)); 
+   // 			cout<<"obs_p_fish2(1,1) "<<obs_p_fish2(1,1)<<std::endl; 
+   // 	cout<<"j "<<j<<std::endl; 
+   // 			cout<<"j-first_length_+1 "<<j-first_length+1<<std::endl;
+      }
+    }
+    for(k=1; k<=2;k++) 
+    {
+      offset(1) -= nsamples_fish(k,i)*obs_p_fish(k,i) * log(obs_p_fish(k,i)+.0001); //this multiplies elements together then sums them up.
+      offset(2) -= nsamples_fish(k,i)*obs_p_fish2(k,i) * log(obs_p_fish2(k,i)+.0001);
+    } 
+  }  
+  cout<<"offset(1)"<<offset(1)<<std::endl;
+  cout<<"offset(2)"<<offset(2)<<std::endl;
+  //   cout<<"offset(1)"<<offset(1)<<std::endl;
+  //   cout<<"offset(2)"<<offset(2)<<std::endl;
 //survey length offset and bin proportions 
   //this loops over all surveys and makes sure all proportions sum to 1.
   for(i=1;i<=nsurv;i++){

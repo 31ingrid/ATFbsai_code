@@ -15,11 +15,15 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   endyr_fut.allocate("endyr_fut");
   nsurv.allocate("nsurv");
   median_rec.allocate("median_rec");
-  nages.allocate("nages");
   first_age.allocate("first_age");
+  last_age.allocate("last_age");
+  first_length.allocate("first_length");
+  last_length.allocate("last_length");
+ nages=last_age-first_age+1;          // # of ages in the model  
+cout<<"nages"<<nages<<std::endl;
   nsurv_aged.allocate("nsurv_aged");
   phase_F40.allocate("phase_F40");
-  phase_logistic_sel.allocate("phase_logistic_sel");
+  phase_logistic_sel.allocate(1,2*nsurv,"phase_logistic_sel");
   phase_fishery_sel.allocate(1,2,"phase_fishery_sel");
   phase_alphabeta.allocate("phase_alphabeta");
   q_Phase.allocate(1,nsurv,"q_Phase");
@@ -101,11 +105,14 @@ cout<<"q_surv_prior_mean"<<q_surv_prior_mean<<std::endl;
   fish_sel50_f_bound.allocate("fish_sel50_f_bound");
   fish_slope_m_bound.allocate("fish_slope_m_bound");
   srv1_sel50_m_bound.allocate("srv1_sel50_m_bound");
+  obs_p_fish2.allocate(1,2,1,nobs_fish,first_length,last_length);
 cout<<"sel_prior_f(1,1)"<<sel_prior_f(1,1)<<std::endl; 
 cout<<"assess"<<assess<<std::endl;  
   cv_srv.allocate(1,nsurv,1,nobs_srv);
    styr_rec=styr-nages+1;
-   if(nselages>nages) nselages=nages;
+   if(nselages>nages) 
+   {nselages=nages;  
+   cout<<"Warning selectivity: is set to be estimated on more ages than are in the model."<<std::endl;  }
    for (i=1; i<= nsurv; i++){
    if(nselages_srv(i)>nages) nselages_srv(i)=nages;
    }
@@ -148,11 +155,11 @@ model_parameters::model_parameters(int sz,int argc,char * argv[]) :
   fishsel_params_m.allocate(1,2,fishsel_LB_m,fishsel_UB_m,phase_fishery_sel,"fishsel_params_m");
 cout<<"sel_prior_f"<<sel_LB_f<<std::endl;
 cout<<"sel_LB_m"<<sel_LB_m<<std::endl;
-  srv_params_f.allocate(1,2*nsurv,sel_LB_f,sel_UB_f,"srv_params_f");
-  srv_params_m.allocate(1,2*nsurv,sel_LB_m,sel_UB_m,"srv_params_m");
+  srv_params_f.allocate(1,2*nsurv,sel_LB_f,sel_UB_f,phase_logistic_sel,"srv_params_f");
+  srv_params_m.allocate(1,2*nsurv,sel_LB_m,sel_UB_m,phase_logistic_sel,"srv_params_m");
 cout<<"srv_params_f"<<srv_params_f(1)<<std::endl;    
-  srv1desc_params_f.allocate(1,2,sel1_desc_LB_f,sel1_desc_UB_f,"srv1desc_params_f");
-  srv1desc_params_m.allocate(1,2,sel1_desc_LB_m,sel1_desc_UB_m,"srv1desc_params_m");
+  srv1desc_params_f.allocate(1,2,sel1_desc_LB_f,sel1_desc_UB_f,phase_fishery_sel,"srv1desc_params_f");
+  srv1desc_params_m.allocate(1,2,sel1_desc_LB_m,sel1_desc_UB_m,phase_fishery_sel,"srv1desc_params_m");
   alpha.allocate(phase_alphabeta,"alpha");
   beta.allocate(phase_alphabeta,"beta");
   mean_log_rec.allocate(1,"mean_log_rec");
@@ -421,36 +428,81 @@ void model_parameters::preliminary_calculations(void)
 #endif
   obs_mean_sexr=0.34;  //initial value for avg proportion of male population estimated from shelf surveys; calculated below
   obs_SD_sexr=0.0485;  //initial value for standard deviation of mean male population proportion: calculated below
+  
   for(i=1; i<=nobs_fish;i++)
+  {  
+	 male_len=0; fem_len=0; 
+  for(j=first_length;j<=last_length;j++)
+    {
+    male_len+=obs_p_fish(1,i,j); 
+    fem_len+=obs_p_fish(2,i,j); 
+    }  
+  obs_sexr(i)=male_len/(male_len+fem_len);
+  }      
+ 
+  for(i=1;i<=nsurv;i++)
   {
-    obs_sexr(i) = sum(obs_p_fish(1,i))/sum(obs_p_fish(1,i) + obs_p_fish(2,i)); 
-  }
-  for(i=1;i<=nsurv;i++){
-	for (j=1;j<=nobs_srv_length(i);j++){
-		obs_sexr_srv_2(i,j)=sum(obs_p_srv_length_mal(i,j)/
-		      (sum(obs_p_srv_length_mal(i,j))+sum(obs_p_srv_length_fem(i,j))));
+	for (j=1;j<=nobs_srv_length(i);j++)
+	{    
+	  male_len=0; fem_len=0;
+		for (k=first_length;k<=last_length;k++)
+		{     
+		male_len+=obs_p_srv_length_mal(i,j,k);
+		fem_len+=obs_p_srv_length_fem(i,j,k);	
+		} 
+		obs_sexr_srv_2(i,j)=male_len/(male_len+fem_len);  
+    //	obs_sexr_srv_2(i,j)=sum(obs_p_srv_length_mal(i,j)/
+    //	      (sum(obs_p_srv_length_mal(i,j))+sum(obs_p_srv_length_fem(i,j))));
 	}
   }
   obs_mean_sexr=mean(obs_sexr_srv_2(1)); //previously was just estimated from shelf survey data so kept that here.
   obs_SD_sexr=std_dev(obs_sexr_srv_2(1));
-  
-  //cout<<"obs_sexr_srv_2(1)"<< obs_sexr_srv_2(1)<<std::endl;  
-  //cout<<"obs_p_srv_length_mal(1,1)"<< obs_p_srv_length_mal(1,1)<<std::endl;  
-  //cout<<"obs_mean_sexr"<<obs_mean_sexr<<std::endl;   
-  //exit(1);
  //Compute offset for multinomial and length bin proportions
  // offset is a constant nplog(p) is added to the likelihood     
  // magnitude depends on nsamples(sample size) and p's_
-  offset.initialize(); 
+  offset.initialize();
+  
+  cout<<"obs_p_fish(1,1)"<< obs_p_fish(1,1)<<std::endl; //has 1,nlen entries
+  cout<<"nsamples_fish(1,1)"<< nsamples_fish(1,1)<<std::endl;
+  cout<<"log(obs_p_fish(1,1)+.0001)"<< log(obs_p_fish(1,1)+.0001)<<std::endl;
+ 
+  cout<<"total"<<nsamples_fish(1,1)* obs_p_fish(1,1)*log(obs_p_fish(1,1)+.0001)<<std::endl;
   for (i=1; i <= nobs_fish; i++)
   {
-    double sumtot ;
-    sumtot = sum(obs_p_fish(1,i)+obs_p_fish(2,i));
+    double sumtot ; 
+    fem_len=0;
+    male_len=0; 
+    for(j=first_length;j<=last_length;j++)
+    {
+    fem_len+=obs_p_fish(1,i,j);
+    male_len+=obs_p_fish(2,i,j);
+    }
+    sumtot=fem_len+male_len;    
+   cout<<"sumtot_sm"<<sumtot<<std::endl;
+    sumtot = sum(obs_p_fish(1,i)+obs_p_fish(2,i));  
+   cout<<"sumtot_reg"<<sumtot<<std::endl;
     obs_p_fish(1,i) = obs_p_fish(1,i) / sumtot; 
     obs_p_fish(2,i) = obs_p_fish(2,i) / sumtot; 
-    for(k=1; k<=2;k++)
-      offset(1) -= nsamples_fish(k,i)*obs_p_fish(k,i) * log(obs_p_fish(k,i)+.0001);
-  }
+    for(j=first_length;j<=last_length;j++)
+    {           
+	  for (k=1;k<=2;k++){  
+      obs_p_fish2(k,i,j)=obs_p_fish(k,i,j);
+  //    obs_p_fish2(k,i,j-first_length+1)=value(obs_p_fish(k,i,j)); 
+   // 			cout<<"obs_p_fish2(1,1) "<<obs_p_fish2(1,1)<<std::endl; 
+   // 	cout<<"j "<<j<<std::endl; 
+   // 			cout<<"j-first_length_+1 "<<j-first_length+1<<std::endl;
+      }
+    }
+    for(k=1; k<=2;k++) 
+    {
+      offset(1) -= nsamples_fish(k,i)*obs_p_fish(k,i) * log(obs_p_fish(k,i)+.0001); //this multiplies elements together then sums them up.
+      offset(2) -= nsamples_fish(k,i)*obs_p_fish2(k,i) * log(obs_p_fish2(k,i)+.0001);
+    } 
+  }  
+  cout<<"offset(1)"<<offset(1)<<std::endl;
+  cout<<"offset(2)"<<offset(2)<<std::endl;
+  //   cout<<"offset(1)"<<offset(1)<<std::endl;
+  //   cout<<"offset(2)"<<offset(2)<<std::endl;
   //this loops over all surveys and makes sure all proportions sum to 1.
   for(i=1;i<=nsurv;i++){
 	for(j=1;j<=nobs_srv_length(i);j++){    
