@@ -11,10 +11,12 @@
 #first_age (7)
 1  
 #last_age (8) 
-21    
-#first_length (8.1)
-1
-#last_length (8.2)  
+21 
+#nages (8.1) 
+21  
+#first_length (8.2)
+2
+#last_length (8.3)  
 21
 # nsurv_aged - number of surveys with age data   (9)
 1

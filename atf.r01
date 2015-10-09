@@ -693,25 +693,25 @@ recruitment likelihood component est.
 catch likelihood component est.  
 82.244
 sex ratio likelihood component 
-121.766
+124.108
 shelf survey age composition  
  0
 survey1
  0
 Projected biomass
- 6.93724e-310 0 0 0 0
- 6.93724e-310 0 0 0 0
- 6.93724e-310 0 0 0 0
- 6.93724e-310 0 0 0 0
+ 6.93661e-310 0 0 0 0
+ 6.93661e-310 0 0 0 0
+ 6.93661e-310 0 0 0 0
+ 6.93661e-310 0 0 0 0
 projected future female spawning biomass 
- 6.93724e-310 0 0 0 0
- 6.93724e-310 0 0 0 0
- 6.93724e-310 0 0 0 0
- 6.93724e-310 0 0 0 0
+ 6.93661e-310 0 0 0 0
+ 6.93661e-310 0 0 0 0
+ 6.93661e-310 0 0 0 0
+ 6.93661e-310 0 0 0 0
 Future yield 
- 6.93724e-310 0 0 0 0
- 6.93724e-310 0 0 0 0
- 6.93724e-310 0 0 0 0
+ 6.93661e-310 0 0 0 0
+ 6.93661e-310 0 0 0 0
+ 6.93661e-310 0 0 0 0
 survey q =
 survey1
 1
@@ -774,9 +774,9 @@ predicted male proportion in population
 2012 0.424125
 2013 0.442573
 mean observed prop. male in shelf surveys = 
-0.364826
+0.363062
 stdev of mean observed prop. male in shelf surveys = 
-0.0335972
+0.0340784
 standard error of biomass in surveys = 
 survey1
  61515 33531 71209 74673 239150 101160 114792 99329 178408 372326 125788 150059 159402 179800 130348
