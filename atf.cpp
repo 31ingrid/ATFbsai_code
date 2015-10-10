@@ -17,9 +17,9 @@ model_data::model_data(int argc,char * argv[]) : ad_comm(argc,argv)
   median_rec.allocate("median_rec");
   first_age.allocate("first_age");
   last_age.allocate("last_age");
-  nages.allocate("nages");
   first_length.allocate("first_length");
   last_length.allocate("last_length");
+ nages=last_age-first_age+1;          // # of ages in the model  
 cout<<"nages"<<nages<<std::endl;
   nsurv_aged.allocate("nsurv_aged");
   phase_F40.allocate("phase_F40");
@@ -74,7 +74,6 @@ cout<<"obs_p_fish(1)"<<obs_p_fish(1)<<std::endl;
   obs_srv.allocate(1,nsurv,1,nobs_srv,"obs_srv");
   obs_srv_sd.allocate(1,nsurv,1,nobs_srv,"obs_srv_sd");
   wt.allocate(1,2,1,nages,"wt");
-cout<<"wt"<<wt<<std::endl;  
   maturity.allocate(1,nages,"maturity");
 cout<<"maturity"<<maturity<<std::endl;
   lenage.allocate(1,2,1,nages,1,nlen,"lenage");
@@ -91,6 +90,10 @@ cout<<"wt_like"<<wt_like<<std::endl;
   nsamples_srv_age.allocate(1,nsurv_aged,1,2,1,nobs_srv_age,"nsamples_srv_age");
   obs_p_srv_age_fem.allocate(1,nsurv_aged,1,nobs_srv_age,1,nages,"obs_p_srv_age_fem");
   obs_p_srv_age_mal.allocate(1,nsurv_aged,1,nobs_srv_age,1,nages,"obs_p_srv_age_mal");
+cout<<"obs_p_srv_age_fem"<<obs_p_srv_age_fem<<std::endl;
+cout<<"obs_p_srv_age_mal"<<obs_p_srv_age_mal<<std::endl;
+cout<<"nobs_srv_age"<<nobs_srv_age<<std::endl;
+cout<<"nages"<<nages<<std::endl; 
   M.allocate(1,2,"M");
 cout<<"M"<<M<<std::endl;            
   offset_const.allocate("offset_const");
@@ -110,12 +113,10 @@ cout<<"q_surv_prior_mean"<<q_surv_prior_mean<<std::endl;
   obs_p_srv_age_mal2.allocate(1,nsurv_aged,1,nobs_srv_age,first_age,last_age);
   obs_p_srv_length_fem2.allocate(1,nsurv,1,nobs_srv_length,first_length,last_length);
   obs_p_srv_length_mal2.allocate(1,nsurv,1,nobs_srv_length,first_length,last_length);
-  wt2.allocate(1,2,first_age,last_age);
-  maturity2.allocate(first_age,last_age);
 cout<<"sel_prior_f(1,1)"<<sel_prior_f(1,1)<<std::endl; 
 cout<<"assess"<<assess<<std::endl;  
   cv_srv.allocate(1,nsurv,1,nobs_srv);
-   styr_rec=styr-(last_age-first_age+1)+1;
+   styr_rec=styr-nages+1;
    if(nselages>nages) 
    {nselages=nages;  
    cout<<"Warning selectivity: is set to be estimated on more ages than are in the model."<<std::endl;  }
@@ -131,17 +132,7 @@ cout<<"assess"<<assess<<std::endl;
      }
    } 
    //change weights to tons  
-   wt=wt*.001;               
-   for (int i=first_age;i<=last_age;i++)
-   {
-	  for(int j=1;j<=2;j++)
-	  {
-      wt2(j,i)=wt(j,i); 
-      }  
-   maturity2(i)=maturity(i);
-   }     
-  cout<<"wt2 "<<wt2<<"wt "<<wt<<std::endl;
-  cout<<"maturity2 "<<maturity2 <<"maturity"<<maturity<<std::endl;
+   wt=wt*.001;            
   obs_sexr.allocate(1,nobs_fish);
   obs_sexr_srv_2.allocate(1,nsurv,1,nobs_srv_length);
   pred_sexr.allocate(styr,endyr);
@@ -448,31 +439,17 @@ void model_parameters::preliminary_calculations(void)
 #endif
   obs_mean_sexr=0.34;  //initial value for avg proportion of male population estimated from shelf surveys; calculated below
   obs_SD_sexr=0.0485;  //initial value for standard deviation of mean male population proportion: calculated below
-  
-  for(i=1; i<=nobs_fish;i++)
-  {  
-	 male_len=0; fem_len=0; 
-  for(j=first_length;j<=last_length;j++)
-    {
-    male_len+=obs_p_fish(1,i,j); 
-    fem_len+=obs_p_fish(2,i,j); 
-    }  
-  obs_sexr(i)=male_len/(male_len+fem_len);
-  }      
- 
+   for(i=1; i<=nobs_fish;i++)
+  {
+    obs_sexr(i) = sum(obs_p_fish(1,i))/sum(obs_p_fish(1,i) + obs_p_fish(2,i)); 
+  }
+      
   for(i=1;i<=nsurv;i++)
   {
 	for (j=1;j<=nobs_srv_length(i);j++)
-	{    
-	  male_len=0; fem_len=0;
-		for (k=first_length;k<=last_length;k++)
-		{     
-		male_len+=obs_p_srv_length_mal(i,j,k);
-		fem_len+=obs_p_srv_length_fem(i,j,k);	
-		} 
-		obs_sexr_srv_2(i,j)=male_len/(male_len+fem_len);  
-    //	obs_sexr_srv_2(i,j)=sum(obs_p_srv_length_mal(i,j)/
-    //	      (sum(obs_p_srv_length_mal(i,j))+sum(obs_p_srv_length_fem(i,j))));
+	{     
+    	obs_sexr_srv_2(i,j)=sum(obs_p_srv_length_mal(i,j)/
+    	 (sum(obs_p_srv_length_mal(i,j))+sum(obs_p_srv_length_fem(i,j))));
 	}
   }
   obs_mean_sexr=mean(obs_sexr_srv_2(1)); //previously was just estimated from shelf survey data so kept that here.
@@ -485,46 +462,17 @@ void model_parameters::preliminary_calculations(void)
   for (i=1; i <= nobs_fish; i++)
   {
     double sumtot ; 
-    fem_len=0;
-    male_len=0; 
-    for(j=first_length;j<=last_length;j++)
-    {
-    fem_len+=obs_p_fish(1,i,j);
-    male_len+=obs_p_fish(2,i,j);
-    }
-    sumtot=fem_len+male_len;    
-  //  sumtot = sum(obs_p_fish(1,i)+obs_p_fish(2,i));  
-     obs_p_fish(1,i) = obs_p_fish(1,i) / sumtot; 
+    obs_p_fish(1,i) = obs_p_fish(1,i) / sumtot; 
     obs_p_fish(2,i) = obs_p_fish(2,i) / sumtot; 
-    for(j=first_length;j<=last_length;j++)
-    {           
-	  for (k=1;k<=2;k++){  
-      obs_p_fish2(k,i,j)=obs_p_fish(k,i,j);
-  //    obs_p_fish2(k,i,j-first_length+1)=value(obs_p_fish(k,i,j)); 
-   // 			cout<<"obs_p_fish2(1,1) "<<obs_p_fish2(1,1)<<std::endl; 
-   // 	cout<<"j "<<j<<std::endl; 
-   // 			cout<<"j-first_length_+1 "<<j-first_length+1<<std::endl;
-      }
-    }
     for(k=1; k<=2;k++) 
     {
-    //  offset(1) -= nsamples_fish(k,i)*obs_p_fish(k,i) * log(obs_p_fish(k,i)+.0001); //this multiplies elements together then sums them up.
-      offset(1) -= nsamples_fish(k,i)*obs_p_fish2(k,i) * log(obs_p_fish2(k,i)+.0001);
+      offset(1) -= nsamples_fish(k,i)*obs_p_fish(k,i) * log(obs_p_fish(k,i)+.0001); //this multiplies elements together then sums them up.
     } 
   }  
   //this loops over all surveys and makes sure all proportions sum to 1.
   for(i=1;i<=nsurv;i++){
 	for(j=1;j<=nobs_srv_length(i);j++){    
 		double sumtot;   
-		
-		fem_len=0;
-	    male_len=0; 
-	    for(k=first_length;k<=last_length;k++)
-	    {
-	    fem_len+=obs_p_srv_length_fem(i,j,k);
-	    male_len+=obs_p_srv_length_mal(i,j,k);
-	    }
-	    sumtot=fem_len+male_len;
 		sumtot=sum(obs_p_srv_length_fem(i,j)+obs_p_srv_length_mal(i,j));
     obs_p_srv_length_mal(i,j)=obs_p_srv_length_mal(i,j)/sumtot;  //changing these to proportions rather than numbers
     obs_p_srv_length_fem(i,j)=obs_p_srv_length_fem(i,j)/sumtot; 
@@ -533,13 +481,10 @@ void model_parameters::preliminary_calculations(void)
        obs_p_srv_length_fem2(i,j,k)= obs_p_srv_length_fem(i,j,k);
        obs_p_srv_length_mal2(i,j,k)= obs_p_srv_length_mal(i,j,k);
        }
-  //      offset(i+1)-= nsamples_srv_length_fem(i,j)*obs_p_srv_length_fem(i,j)*log(obs_p_srv_length_fem(i,j)+.0001)
-  //                 +nsamples_srv_length_mal(i,j)*obs_p_srv_length_mal(i,j)*log(obs_p_srv_length_mal(i,j)+.0001); 
-	    offset(i+1)-= nsamples_srv_length_fem(i,j)*obs_p_srv_length_fem2(i,j)*log(obs_p_srv_length_fem2(i,j)+.0001)
-		           +nsamples_srv_length_mal(i,j)*obs_p_srv_length_mal2(i,j)*log(obs_p_srv_length_mal2(i,j)+.0001); 
+        offset(i+1)-= nsamples_srv_length_fem(i,j)*obs_p_srv_length_fem(i,j)*log(obs_p_srv_length_fem(i,j)+.0001)
+                   +nsamples_srv_length_mal(i,j)*obs_p_srv_length_mal(i,j)*log(obs_p_srv_length_mal(i,j)+.0001); 
 	}
   } 
- 
   //survey age offsets
   //survey age offsets
   for (i=1;i<=nsurv_aged;i++)
@@ -547,27 +492,9 @@ void model_parameters::preliminary_calculations(void)
     for (j=1;j<=nobs_srv_age(i);j++)
     {
 	double sumtot; 
-    fem_len=0;
-    male_len=0; 
-    for(k=first_age;k<=last_age;k++)
-    {
-    fem_len+=obs_p_srv_age_fem(i,j,k);
-    male_len+=obs_p_srv_age_mal(i,j,k);
-    }
-    sumtot=fem_len+male_len;
-   //cout<<"sumtot1 "<<sumtot<<std::endl;
-  //  sumtot=sum(obs_p_srv_age_fem(i,j)+obs_p_srv_age_mal(i,j));   
-   //    cout<<"sumtot2 "<<sumtot<<std::endl;  
+	sumtot=sum(obs_p_srv_age_fem(i,j)+obs_p_srv_age_mal(i,j));
     obs_p_srv_age_fem(i,j)=obs_p_srv_age_fem(i,j)/sumtot;
     obs_p_srv_age_mal(i,j)=obs_p_srv_age_mal(i,j)/sumtot; 
-    for (k=first_age;k<=last_age;k++)
-    {
-       obs_p_srv_age_fem2(i,j,k)= obs_p_srv_age_fem(i,j,k);
-       obs_p_srv_age_mal2(i,j,k)= obs_p_srv_age_mal(i,j,k);
-    }   
-  //  offset(i+nsurv+1)-=nsamples_srv_age(i,1,j)*obs_p_srv_age_fem(i,j)*log(obs_p_srv_age_fem(i,j)+.0001)+
-  //               nsamples_srv_age(i,2,j)*obs_p_srv_age_mal(i,j)*log(obs_p_srv_age_mal(i,j)+.0001);
- //   cout<<"offset1 "<<offset<<std::endl;
     offset(i+nsurv+1)-=nsamples_srv_age(i,1,j)*obs_p_srv_age_fem2(i,j)*log(obs_p_srv_age_fem2(i,j)+.0001)+
     			             nsamples_srv_age(i,2,j)*obs_p_srv_age_mal2(i,j)*log(obs_p_srv_age_mal2(i,j)+.0001);
     }  
@@ -599,13 +526,14 @@ void model_parameters::userfunction(void)
       for (i=styr;i<=endyr;i++)
       evalout<<  fspbio(i) << " ";
       for (i=styr;i<=endyr;i++)    
-      evalout<< natage(1,i)*wt(1) + natage(2,i)*wt(2) <<" ";
+      evalout<< natage(1,i)*wt(1) + natage(2,i)*wt(2) <<" "; 
       for (i=styr;i<=endyr;i++)
       evalout << 2*natage(1,i,1) <<" ";
       evalout <<  endl;
     }
   }
     evaluate_the_objective_function();  
+    
 }
 
 void model_parameters::get_selectivity(void)
@@ -676,7 +604,7 @@ void model_parameters::get_selectivity(void)
        sel_srv(2,i) = get_sel(srv_params_m((2*i)-1),srv_params_m(2*i)); 
        }        
   }
-  
+ 
 }
 
 dvar_vector model_parameters::get_sel(const dvariable& slp, const dvariable& a50)
@@ -690,7 +618,7 @@ dvar_vector model_parameters::get_sel(const dvariable& slp, const dvariable& a50
     }          
     return(sel_tmp);
    }          
-         
+   exit(1);      
 }
 
 dvar_vector model_parameters::get_sel(const dvariable& slp, const dvariable& a50, const dvariable& dslp, const dvariable& d50)
@@ -713,7 +641,7 @@ void model_parameters::get_mortality(void)
   maxsel_fish=max(sel(1));     //1 is females
   if(maxsel_fish<max(sel(2)))  //if highest female selectivity is > male selectivity, make maxsel_fish=male high selectivity
       maxsel_fish=max(sel(2));
-  fmort = mfexp(log_avg_fmort+fmort_dev); 
+  fmort = mfexp(log_avg_fmort+fmort_dev);  
   for(k=1;k<=2;k++)
   {
     for (i=styr;i<=endyr;i++)
@@ -722,7 +650,8 @@ void model_parameters::get_mortality(void)
       Z(k,i)=F(k,i) + M(k); 
     }
   } 
-  S = mfexp(-1.*Z); 
+  S = mfexp(-1.*Z);
+   
 }
 
 void model_parameters::get_numbers_at_age(void)
@@ -818,6 +747,7 @@ void model_parameters::get_numbers_at_age(void)
       }
    }  
  }     
+  
   //Fit survey length compositions
   for (i=1;i<=nsurv;i++)
   {
@@ -1097,6 +1027,7 @@ void model_parameters::report(const dvector& gradients)
     cerr << "error trying to open report file"  << adprogram_name << ".rep";
     return;
   }
+  /*  
   report << "Estimated numbers of female fish at age " << endl;
     for (i=styr; i<=endyr;i++)
       report << i <<natage(1,i)<< endl;
@@ -1291,7 +1222,7 @@ void model_parameters::report(const dvector& gradients)
 		report<<"mean_log_rec"<<mean_log_rec<<std::endl;
 	
   report << " Go drink coffee " << endl; 
-  
+  */  
 }
 
 void model_parameters::set_runtime(void)

@@ -11,7 +11,7 @@ class model_data : public ad_comm{
   data_number median_rec;
   data_int first_age;
   data_int last_age;
-  data_int nages;
+  int nages;
   data_int first_length;
   data_int last_length;
   data_int nsurv_aged;
@@ -90,8 +90,6 @@ class model_data : public ad_comm{
   d3_array obs_p_srv_age_mal2;
   d3_array obs_p_srv_length_fem2;
   d3_array obs_p_srv_length_mal2;
-  dmatrix wt2;
-  dvector maturity2;
   int styr_rec;
   dmatrix cv_srv;
   int i;
