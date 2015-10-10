@@ -120,7 +120,7 @@ cout<<"assess"<<assess<<std::endl;
    {nselages=nages;  
    cout<<"Warning selectivity: is set to be estimated on more ages than are in the model."<<std::endl;  }
    for (i=1; i<= nsurv; i++){
-   if(nselages_srv(i)>nages) nselages_srv(i)=nages;
+   if(nselages_srv(i)>last_age) nselages_srv(i)=last_age;
    }
    //calculate cv for surveys
    for (int j=1;j<=nsurv;j++)
