@@ -469,8 +469,8 @@ void model_parameters::preliminary_calculations(void)
 		sumtot=sum(obs_p_srv_length_fem(i,j)+obs_p_srv_length_mal(i,j));
         obs_p_srv_length_mal(i,j)=obs_p_srv_length_mal(i,j)/sumtot;  //changing these to proportions rather than numbers
         obs_p_srv_length_fem(i,j)=obs_p_srv_length_fem(i,j)/sumtot;
-        offset(i+1)-= nsamples_srv_length_fem(i,j)*obs_p_srv_length_fem(i,j)*log(obs_p_srv_length_fem(i,j)+.0001)
-                   +nsamples_srv_length_mal(i,j)*obs_p_srv_length_mal(i,j)*log(obs_p_srv_length_mal(i,j)+.0001); 
+        offset(i+1)-= nsamples_srv_length_fem(i,j)*obs_p_srv_length_fem(i,j)*log(obs_p_srv_length_fem(i,j)+offset_const)
+                   +nsamples_srv_length_mal(i,j)*obs_p_srv_length_mal(i,j)*log(obs_p_srv_length_mal(i,j)+offset_const); 
 	}
   } 
  
@@ -483,8 +483,8 @@ void model_parameters::preliminary_calculations(void)
 	sumtot=sum(obs_p_srv_age_fem(i,j)+obs_p_srv_age_mal(i,j));
 	obs_p_srv_age_fem(i,j)=obs_p_srv_age_fem(i,j)/sumtot;
 	obs_p_srv_age_mal(i,j)=obs_p_srv_age_mal(i,j)/sumtot;
-	offset(i+nsurv+1)-=nsamples_srv_age(i,1,j)*obs_p_srv_age_fem(i,j)*log(obs_p_srv_age_fem(i,j)+.0001)+
-	             nsamples_srv_age(i,2,j)*obs_p_srv_age_mal(i,j)*log(obs_p_srv_age_mal(i,j)+.0001);
+	offset(i+nsurv+1)-=nsamples_srv_age(i,1,j)*obs_p_srv_age_fem(i,j)*log(obs_p_srv_age_fem(i,j)+offset_const)+
+	             nsamples_srv_age(i,2,j)*obs_p_srv_age_mal(i,j)*log(obs_p_srv_age_mal(i,j)+offset_const);
     }  
   }
 }
@@ -939,7 +939,7 @@ void model_parameters::evaluate_the_objective_function(void)
       {
         ii=yrs_fish(i);
         //fishery length likelihood fitting
-          length_like2(1) -= nsamples_fish(k,i)*(1e-5+obs_p_fish(k,i))*log(pred_p_fish(k,ii)+1e-5);
+          length_like2(1) -= nsamples_fish(k,i)*(offset_const+obs_p_fish(k,i))*log(pred_p_fish(k,ii)+offset_const);
       }
     }
     //add the offset to the likelihood   
@@ -949,8 +949,8 @@ void model_parameters::evaluate_the_objective_function(void)
    {
      for (j=1;j<=nobs_srv_length(i);j++) 
      {    
-	   length_like2(i+1)-=((nsamples_srv_length_fem(i,j)*(1e-3+obs_p_srv_length_fem(i,j))*log(pred_p_srv_len_fem(i,j)+1e-3))
-	                      +(nsamples_srv_length_mal(i,j)*(1e-3+obs_p_srv_length_mal(i,j))*log(pred_p_srv_len_mal(i,j)+1e-3)));
+	   length_like2(i+1)-=((nsamples_srv_length_fem(i,j)*(offset_const+obs_p_srv_length_fem(i,j))*log(pred_p_srv_len_fem(i,j)+offset_const))
+	                      +(nsamples_srv_length_mal(i,j)*(offset_const+obs_p_srv_length_mal(i,j))*log(pred_p_srv_len_mal(i,j)+offset_const)));
 	 } 
 	  length_like2(i+1)-=offset(i+1); 
     } 
@@ -959,8 +959,8 @@ void model_parameters::evaluate_the_objective_function(void)
   {
 	for (j=1;j<=nobs_srv_age(i);j++)
 	{
-   age_like(i)-=nsamples_srv_age(i,1,j)*(1e-3+obs_p_srv_age_fem(i,j))*log(pred_p_srv_age_fem(i,j)+1e-3)+
-                  nsamples_srv_age(i,2,j)*(1e-3+obs_p_srv_age_mal(i,j))*log(pred_p_srv_age_mal(i,j)+1e-3); 	
+   age_like(i)-=nsamples_srv_age(i,1,j)*(offset_const+obs_p_srv_age_fem(i,j))*log(pred_p_srv_age_fem(i,j)+offset_const)+
+                  nsamples_srv_age(i,2,j)*(offset_const+obs_p_srv_age_mal(i,j))*log(pred_p_srv_age_mal(i,j)+offset_const); 	
 	}	
 	age_like(i)-=offset(i+nsurv+1);
   }
@@ -973,7 +973,7 @@ void model_parameters::evaluate_the_objective_function(void)
   surv_like(i) = norm2(elem_div(log(obs_srv(i))-log(pred_srv(i)(yrs_srv(i))),sqrt(2)*cv_srv(i)));
   }  
    
-   catch_like=norm2(log(catch_bio+.000001)-log(pred_catch+.000001));
+   catch_like=norm2(log(catch_bio+offset_const)-log(pred_catch+offset_const));
    // sex ratio likelihood
    sexr_like=0.5*norm2((obs_mean_sexr-pred_sexr)/obs_SD_sexr); 
  //selectivity likelihood is penalty on how smooth selectivities are   
@@ -1001,11 +1001,11 @@ void model_parameters::evaluate_the_objective_function(void)
     {
        //F's are low for arrowtooth changed the value to compare from .2 to .001
        //don't know if makes any difference since the penalty is reduced at the end
-       fpen=10.*norm2(mfexp(fmort_dev+log_avg_fmort)-.01);
+       fpen=10.*norm2(mfexp(fmort_dev+log_avg_fmort)-offset_const);
     }
     else
     {
-      fpen=.001*norm2(mfexp(fmort_dev+log_avg_fmort)-.01);
+      fpen=.001*norm2(mfexp(fmort_dev+log_avg_fmort)-offset_const);
     }
     if (active(fmort_dev))
     {
