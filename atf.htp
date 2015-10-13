@@ -13,6 +13,7 @@ class model_data : public ad_comm{
   data_int last_age;
   data_int first_length;
   data_int last_length;
+  data_int nages_read;
   int nages;
   data_int nsurv_aged;
   data_int phase_F40;
@@ -80,12 +81,7 @@ class model_data : public ad_comm{
   data_int assess;
   data_int mean_log_rec_prior;
   data_int log_avg_fmort_prior;
-  data_number fish_sel50_f_bound;
-  data_number fish_slope_m_bound;
-  data_number srv1_sel50_m_bound;
-  double male_len;
-  double fem_len;
-  d3_array obs_p_fish2;
+  data_vector like_wght;
   int styr_rec;
   dmatrix cv_srv;
   int i;
